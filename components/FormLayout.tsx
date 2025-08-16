@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet,TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import {
   useForm,
@@ -43,8 +43,13 @@ export default function FormLayout<T extends FieldValues>({
   return (
     <View>
       <View>
-        <Text style={shapes.title} className="font-bold">{title}</Text>
-        <Text style={shapes.description} className="text-formTextLight font-semibold">
+        <Text style={shapes.title} className="font-semibold dark:text-white">
+          {title}
+        </Text>
+        <Text
+          style={shapes.description}
+          className="text-formTextLight dark:text-formTextDark font-semibold"
+        >
           {description}
         </Text>
       </View>
@@ -62,20 +67,24 @@ export default function FormLayout<T extends FieldValues>({
       </View>
       <SubmitButton buttonText={buttonText} onSubmit={handleSubmit(onSubmit)} />
       {forgotPassWord && (
-        <TouchableOpacity activeOpacity={5}>
-        <Link className="mt-6" href="/(auth)">
-          <Text className="text-blue-900 text-center">{forgotPassWord}</Text>
-        </Link>
+        <TouchableOpacity>
+          <Link className="mt-6" href="/(auth)">
+            <Text className="text-blue-900 underline dark:text-white font-medium text-center">
+              {forgotPassWord}
+            </Text>
+          </Link>
         </TouchableOpacity>
       )}
-      <Link className={forgotPassWord ? "mt-4" : "mt-6"} href="/(auth)/sign-in">
-        <Text className="text-formTextLight font-medium text-center">
+      <View className={forgotPassWord ? "mt-4" : "mt-6"}>
+        <Text className="text-formTextLight dark:text-formTextDark font-medium text-center">
           {userFormPromptText + " "}
-          <Text className="text-lg underline font-semibold text-blue-900">
-            {formActionText}
-          </Text>
+          <Link href="/(auth)/sign-in">
+            <Text className="text-lg underline font-semibold text-blue-900 dark:text-white">
+              {formActionText}
+            </Text>
+          </Link>
         </Text>
-      </Link>
+      </View>
     </View>
   );
 }
@@ -89,7 +98,7 @@ const shapes = StyleSheet.create({
     fontSize: sc(11),
   },
   fieldSpace: {
-    gap: vs(19),
+    gap: vs(20),
     marginTop: vs(20),
     marginBottom: vs(22),
   },

@@ -4,19 +4,21 @@ import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SplashScreen from ".";
+
 export default function RootLayout() {
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        "Noto-Sans-Syriac-Eastern": require("../assets/fonts/NotoSansSyriacEastern-VariableFont.ttf"),
-        "Space-Mono": require("../assets/fonts/SpaceMono-Regular.ttf"),
+        "Nata-Sans-Bold" :require("../assets/fonts/static/NataSans-Bold.ttf"),
+         "Nata-Sans-Medium" :require("../assets/fonts/static/NataSans-Medium.ttf")
       });
       setFontsLoaded(true);
     }
     loadFonts();
   }, []);
+
   //if fonts have not loaded yet, stay on SplashScreen
   if (!fontsLoaded) {
     return <SplashScreen />;
@@ -25,8 +27,8 @@ export default function RootLayout() {
   return (
     <SafeAreaView
       style={{ flex: 1 }}
-      edges={["top", "bottom"]}
-      className="bg-brandLight"
+      edges={["top", "bottom", "left", "right"]}
+      className="bg-brandLight dark:bg-brandDark"
     >
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />

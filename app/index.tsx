@@ -2,7 +2,10 @@ import { View, Text } from "react-native";
 import { Link } from "expo-router";
 export default function SplashScreen() {
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+    <View
+      className="bg-brandLight dark:bg-brandDark
+    justify-center items-center flex-1"
+    >
       <Link href="/(auth)">
         <Text>Splash Screen</Text>
       </Link>

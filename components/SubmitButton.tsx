@@ -16,9 +16,9 @@ export default function SubmitButton({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={shapes.button}
-        className="bg-white elevation-lg"
+        className="bg-white elevation-lg dark:elevation:none"
       >
-        <Text style={shapes.buttonText} className="text-white">
+        <Text style={shapes.buttonText} className="text-white dark:text-[#0D0707]">
           {buttonText}
         </Text>
       </LinearGradient>

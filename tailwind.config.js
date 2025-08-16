@@ -7,10 +7,15 @@ module.exports = {
     extend: {
       colors: {
         formTextLight: "#6b7280",
-        formTextDark: "#9ca3af",
+        formTextDark: "#C7C7C7",
         brandLight: "#ffffff",
-        brandDark: "#020817",
-      }
+        brandDark: "#060C1C",
+        formContainer: "#141433",
+      },
+      fontFamily: {
+        "nata-sans-bold": ["Nata-Sans-Bold"],
+        "nata-sans-medium" : ["Nata-Sans-Medium"]
+      },
     },
   },
   plugins: [],

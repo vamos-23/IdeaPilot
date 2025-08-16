@@ -14,10 +14,10 @@ import {
   Path,
 } from "react-hook-form";
 import { Eye, EyeClosed } from "lucide-react-native";
+import { clsx } from "clsx";
 import { sc, vs, ms } from "../constants/responsive";
+import useThemeStore from "@/stores/useThemeStore";
 
-/*type FieldValues = Record<string,any>
-FieldValues is required for Control<T> and Path<T> for ensuring correct form data handling with base constraint as : form data should be of the form key:value */
 type InputFieldProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
@@ -33,11 +33,16 @@ export default function InputField<T extends FieldValues>({
   secureTextEntry = false,
   rules,
 }: InputFieldProps<T>) {
-  const [showPassword, setshowPassword] = useState<boolean>(false);
-  const [isFocus, setIsFocus] = useState<boolean>(false);
+  const [showPassword, setshowPassword] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+  const { theme } = useThemeStore();
+
   const handlePasswordIcon = () => setshowPassword((prev) => !prev);
   const handleFocus = () => setIsFocus(true);
   const handleBlur = () => setIsFocus(false);
+
+  const passwordIconColor = theme === "light" ? "#374151" : "#E5E7EB";
+
   return (
     <Controller
       control={control}
@@ -51,14 +56,20 @@ export default function InputField<T extends FieldValues>({
           <View
             style={[
               shapes.inputWrapper,
-              shapes.shadow,
               isFocus && shapes.focusInput,
               error && shapes.errorInput,
             ]}
+            className={clsx(
+              "border-gray-300 dark:border-slate-400 bg-[#F8F9FA] dark:bg-[#2A2A2A]",
+              error && "border-red-600 dark:border-red-500"
+            )}
           >
             <TextInput
+              key={theme}
               style={shapes.input}
+              className="text-black dark:text-white"
               placeholder={placeholder}
+              placeholderTextColor={theme === "light" ? "#6B7280" : "#9CA3AF"}
               secureTextEntry={secureTextEntry && !showPassword}
               onChangeText={onChange}
               onFocus={handleFocus}
@@ -74,15 +85,18 @@ export default function InputField<T extends FieldValues>({
                 style={shapes.iconContainer}
               >
                 {showPassword ? (
-                  <Eye size={sc(20)} color="#1e293b" />
+                  <Eye size={sc(21)} color={passwordIconColor} />
                 ) : (
-                  <EyeClosed size={sc(20)} color="#1e293b" />
+                  <EyeClosed size={sc(21)} color={passwordIconColor} />
                 )}
               </TouchableOpacity>
             )}
           </View>
           {error && (
-            <Text style={shapes.errorMessage} className="text-red-600">
+            <Text
+              style={shapes.errorMessage}
+              className="text-red-600 dark:text-red-500 font-nata-sans-medium"
+            >
               {error.message}
             </Text>
           )}
@@ -91,6 +105,7 @@ export default function InputField<T extends FieldValues>({
     />
   );
 }
+
 const shapes = StyleSheet.create({
   inputBox: {
     margin: ms(1),
@@ -103,11 +118,6 @@ const shapes = StyleSheet.create({
     fontSize: sc(13),
     height: 52,
     paddingLeft: sc(5),
-    borderColor: "#e2e8f0",
-  },
-  shadow: {
-    backgroundColor: "#fff",
-    elevation: 2,
   },
   input: {
     flex: 1,
@@ -118,13 +128,11 @@ const shapes = StyleSheet.create({
     paddingHorizontal: sc(12),
   },
   focusInput: {
-    borderColor: "#708090",
-    borderWidth: ms(2.5),
+    borderWidth: ms(2),
     borderRadius: ms(7),
   },
   errorInput: {
-    borderColor: "red",
-    borderWidth: ms(2.5),
+    borderWidth: ms(2),
     borderRadius: ms(7),
   },
   errorMessage: {

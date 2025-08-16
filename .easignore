@@ -1,0 +1,14 @@
+# Native build caches
+android/.gradle
+android/build
+ios/build
+
+# Existing ignores
+node_modules
+.expo
+.git
+.gitignore
+*.log
+*.bak
+*.tmp
+.env

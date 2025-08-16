@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export default ({ config }) => ({
   ...config,
@@ -29,6 +29,7 @@ export default ({ config }) => ({
   },
   plugins: [
     "expo-router",
+    "expo-firebase-core",
     [
       "expo-splash-screen",
       {
@@ -50,8 +51,14 @@ export default ({ config }) => ({
     FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
     FIREBASE_APP_ID: process.env.FIREBASE_APP_ID,
     FIREBASE_MEASUREMENT_ID: process.env.FIREBASE_MEASUREMENT_ID,
-
-    // Example private keys (add later)
-    // OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    eas: {
+      projectId: "025069cc-e654-4e40-96e4-6f7bb6618160",
+    },
+  },
+  updates: {
+    url: "https://u.expo.dev/025069cc-e654-4e40-96e4-6f7bb6618160",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
   },
 });

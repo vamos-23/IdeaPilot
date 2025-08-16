@@ -40,6 +40,9 @@ yarn-error.*
 #env
 .env
 
+#Windows system files
+desktop.ini
+
 #google-services.json file
 google-services.json
 

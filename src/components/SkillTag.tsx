@@ -1,0 +1,34 @@
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { X, Code } from "lucide-react-native";
+import { vs, sc } from "../constants/responsive";
+import Skill from "../constants/types";
+type SkillTagProps = {
+  skill: Skill;
+  onRemove: (id: string) => void;
+};
+export default function SkillTag({ skill, onRemove }: SkillTagProps) {
+  return (
+    <TouchableOpacity
+      key={skill.id}
+      style={shapes.skillTag}
+      className="bg-[#e5e2e2] dark:bg-[#2a2a6ce4]"
+      onPress={() => onRemove(skill.id)}
+      activeOpacity={0.7}
+    >
+      <View className="justify-center items-center flex-row gap-3">
+        <Code size={sc(16)} color="#48C9B0" />
+        <Text className="text-black dark:text-white font-nata-sans-bold">
+          {skill.stackName}
+        </Text>
+        <X size={sc(15)} stroke="red" />
+      </View>
+    </TouchableOpacity>
+  );
+}
+const shapes = StyleSheet.create({
+  skillTag: {
+    borderRadius: sc(15),
+    paddingVertical: vs(5),
+    padding: sc(10),
+  },
+});

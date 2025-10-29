@@ -1,9 +1,14 @@
 import { View, ActivityIndicator } from "react-native";
+import useThemeStore from "../store/useThemeStore";
 import { ms, vs } from "../constants/responsive";
 export default function LoadingScreen() {
+  const { theme } = useThemeStore();
   return (
-    <View className="justify-center items-center">
-      <ActivityIndicator size="large" className="bg-white dark:bg-blue-600" />
+    <View className="bg-brandLight dark:bg-brandDark flex-1 justify-center items-center">
+      <ActivityIndicator
+        size="large"
+        color={theme === "light" ? "mediumblue" : "white"}
+      />
     </View>
   );
 }

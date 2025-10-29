@@ -70,6 +70,7 @@ export default function InputField<T extends FieldValues>({
             <TextInput
               key={theme}
               style={shapes.input}
+              selectTextOnFocus
               className="text-black dark:text-white"
               placeholder={placeholder}
               placeholderTextColor={theme === "light" ? "#6B7280" : "#9CA3AF"}

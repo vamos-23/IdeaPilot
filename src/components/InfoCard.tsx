@@ -9,7 +9,7 @@ export default function InfoCard({ icon, title, description }: InfoCardProps) {
   return (
     <View
       style={shapes.infoCardContainer}
-      className="bg-[#e5e2e2] dark:bg-[#232348e4] justify-center items-center mb-5 mt-1.5 elevation-md dark:elevation-none"
+      className="bg-[#e5e8ee] dark:bg-[#232348e4] justify-center items-center mb-5 mt-1.5 elevation-md dark:elevation-none"
     >
       <View className="mb-2">{icon}</View>
       <Text

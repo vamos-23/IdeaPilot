@@ -10,7 +10,7 @@ type ThemeState = {
   setTheme: (theme: "light" | "dark") => void;
 };
 
- const useThemeStore = create<ThemeState>()(
+const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
       theme: Appearance.getColorScheme() || "light", // system default or fallback to light mode

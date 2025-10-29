@@ -21,6 +21,7 @@ import AddButton from "@/src/components/AddButton";
 import { clsx } from "clsx";
 import * as Crypto from "expo-crypto";
 import { popularTechStacks } from "../../constants/popularTechStacks";
+import useSkillStore from "@/src/store/useSkillStore";
 import SkillTag from "@/src/components/SkillTag";
 import Skill from "../../constants/types";
 
@@ -31,7 +32,7 @@ export default function WelcomeScreen() {
   //to handle the state for name of skill typed in text input bar
   const [newSkill, setNewSkill] = useState<string>("");
   //to handle the state of the array (list) containing each selected skill
-  const [userSkill, setUserSkill] = useState<Skill[]>([]);
+  const { skills, addSkill, removeSkill } = useSkillStore();
   //functions to handle focus and de-focus effects of text input bar
   const handleFocus = () => setIsFocus(true);
   const handleBlur = () => setIsFocus(false);
@@ -40,7 +41,7 @@ export default function WelcomeScreen() {
     const trimmedSkill = newSkill.trim();
     if (!trimmedSkill) return;
     if (
-      userSkill.some(
+      skills.some(
         (skill) => skill.stackName.toLowerCase() === trimmedSkill.toLowerCase()
       )
     ) {
@@ -56,27 +57,31 @@ export default function WelcomeScreen() {
       id: Crypto.randomUUID(),
       stackName: trimmedSkill,
     };
-    setUserSkill((prevSkills) => [...prevSkills, newSkillItem]);
+    addSkill(newSkillItem);
     setNewSkill("");
     Keyboard.dismiss();
   };
   //Add skill item from popular skill list
   const handleSelectedSkill = (selectedSkill: Skill) => {
-    if (userSkill.some((skill) => skill.stackName.toLowerCase() === selectedSkill.stackName.toLowerCase())) {
+    if (
+      skills.some(
+        (skill) =>
+          skill.stackName.toLowerCase() ===
+          selectedSkill.stackName.toLowerCase()
+      )
+    ) {
       Alert.alert(
         "Duplicate Skill Name",
         `${selectedSkill.stackName} has already been added!`
       );
       return;
     }
-    setUserSkill((prevSkills) => [...prevSkills, selectedSkill]);
+    addSkill(selectedSkill);
   };
 
-  //Deselect or remove skill item from userSkill list
+  //Deselect or remove skill item from skills list
   const handleRemoveSkillItem = (skill_idToBeRemoved: string) => {
-    setUserSkill((prevSkills) =>
-      prevSkills.filter((skill) => skill.id !== skill_idToBeRemoved)
-    );
+    removeSkill(skill_idToBeRemoved);
   };
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -123,8 +128,8 @@ export default function WelcomeScreen() {
           >
             you&apos;re comfortable with
           </Text>
-          {userSkill.length > 0 && (
-            <View style={shapes.userSkillContainer} className="self-start">
+          {skills.length > 0 && (
+            <View style={shapes.skillsContainer} className="self-start">
               <Text
                 style={{ fontSize: ms(16) }}
                 className="text-textLight dark:text-textDark mb-3 font-medium"
@@ -135,7 +140,7 @@ export default function WelcomeScreen() {
                 style={shapes.addStack}
                 className="flex-row justify-evenly flex-wrap"
               >
-                {userSkill.map((item) => (
+                {skills.map((item) => (
                   <SkillTag
                     key={item.id}
                     skill={item}
@@ -152,13 +157,13 @@ export default function WelcomeScreen() {
                 "bg-slate-300 dark:bg-[#293253] mb-5",
                 isFocus
                   ? "border-blue-600 dark:border-blue-600"
-                  : "border-[#5c89dcb5] dark:border-blue-900"
+                  : "border-[#307ae8b5] dark:border-blue-800"
               )}
             >
               <TextInput
                 className="text-black dark:text-textDark font-semibold justify-center"
                 cursorColor={theme === "light" ? "black" : "tomato"}
-                placeholder="e.g. GraphQL, KuberNetes"
+                placeholder="e.g. GraphQL, Kubernetes"
                 placeholderTextColor={theme === "light" ? "dimgrey" : "silver"}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
@@ -176,9 +181,7 @@ export default function WelcomeScreen() {
           </Text>
           <View style={shapes.stackContainer}>
             {popularTechStacks.map((item) => {
-              const isSelected = userSkill.some(
-                (skill) => skill.id === item.id
-              );
+              const isSelected = skills.some((skill) => skill.id === item.id);
               return (
                 <TouchableOpacity
                   key={item.id}
@@ -251,7 +254,7 @@ const shapes = StyleSheet.create({
     justifyContent: "flex-start",
     gap: sc(10),
   },
-  userSkillContainer: {
+  skillsContainer: {
     padding: sc(3),
     marginBottom: vs(12),
   },

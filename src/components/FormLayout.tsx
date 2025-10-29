@@ -1,10 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Keyboard,
+} from "react-native";
 import { Link } from "expo-router";
 import { useForm, RegisterOptions, Path, FieldValues } from "react-hook-form";
 import { useCallback, useState } from "react";
 import { sc, vs, ms } from "@/src/constants/responsive";
 import InputField from "@/src/components/InputField";
 import SubmitButton from "@/src/components/SubmitButton";
+import { auth } from "../../config/FirebaseConfig";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 type Fields<T extends FieldValues> = {
   name: Path<T>;
@@ -18,7 +27,9 @@ type AuthFormProps<T extends FieldValues> = {
   description: string;
   fields: Fields<T>[];
   buttonText: string;
-  onSubmit: (data: any) => Promise<void>;
+  asyncButtonText: string;
+  isButtonLoading: boolean;
+  onSubmit: (data: T) => Promise<void>;
   userFormPromptText?: string;
   forgotPassWord?: string;
   formActionText?: string;
@@ -29,6 +40,8 @@ export default function FormLayout<T extends FieldValues>({
   description,
   fields,
   buttonText,
+  isButtonLoading,
+  asyncButtonText,
   userFormPromptText,
   forgotPassWord,
   formActionText,
@@ -37,9 +50,30 @@ export default function FormLayout<T extends FieldValues>({
   const { control, handleSubmit } = useForm<T>();
   const [isResetPasswordView, setIsResetPasswordView] =
     useState<boolean>(false);
-  const handlePasswordReset = useCallback((status : boolean) =>
-    setIsResetPasswordView(status),[]
+  const handlePasswordReset = useCallback(
+    (status: boolean) => setIsResetPasswordView(status),
+    []
   );
+  const handleSendPasswordResetEmail = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        "Check Your Email",
+        "If an account with that email exists, a link will be sent into your inbox or spam section."
+      );
+      Keyboard.dismiss();
+    } catch (e) {
+      console.error("Password Reset Link error!", e);
+      Alert.alert(
+        "Check Your Email",
+        "If an account with that email exists, a link will be sent into your inbox or spam section."
+      );
+      Keyboard.dismiss();
+    }
+  };
+  const onReset = (data: T) => {
+    handleSendPasswordResetEmail(data.email);
+  };
   return (
     <View>
       <View>
@@ -85,7 +119,12 @@ export default function FormLayout<T extends FieldValues>({
 
       <SubmitButton
         buttonText={isResetPasswordView ? "Send Reset Link" : buttonText}
-        onSubmit={handleSubmit(onSubmit)}
+        loadingText={asyncButtonText}
+        isLoading={isButtonLoading}
+        isDisabled={false}
+        onSubmit={
+          isResetPasswordView ? handleSubmit(onReset) : handleSubmit(onSubmit)
+        }
       />
 
       {!isResetPasswordView && forgotPassWord && (

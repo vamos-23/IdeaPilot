@@ -1,4 +1,3 @@
-// RootLayout.tsx
 import "../../global.css";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
@@ -14,16 +13,14 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
-  const { isLoading, isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const { isLoading, user, hasCompletedOnboarding } = useAuthStore();
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
-  const [redirected, setRedirected] = useState<boolean>(false);
+  const isAuthenticated = user !== null;
 
-  // Initialize auth/session state
   useAuthInitializer();
 
-  // Load fonts
   useEffect(() => {
-    async function prepareApp() {
+    async function loadFonts() {
       try {
         await Font.loadAsync({
           "Nata-Sans-Bold": require("../../assets/fonts/static/NataSans-Bold.ttf"),
@@ -33,29 +30,41 @@ export default function RootLayout() {
         console.warn(e);
       } finally {
         setFontsLoaded(true);
-        await SplashScreen.hideAsync();
       }
     }
-    prepareApp();
+    loadFonts();
   }, []);
 
-  // Redirect logic
   useEffect(() => {
-    if (isLoading || !fontsLoaded || redirected) return;
-
-    const group = segments[0];
-
-    if (!hasCompletedOnboarding && group !== "(onboarding)") {
+    if (isLoading || !fontsLoaded) return;
+    const inAuthGroup = segments[0] === "(auth)";
+    const inOnboardingGroup = segments[0] === "(onboarding)";
+    if (!hasCompletedOnboarding && !inOnboardingGroup) {
       router.replace("/(onboarding)/welcome");
-      setRedirected(true);
-    } else if (!isAuthenticated && group !== "(auth)") {
-      router.replace("/(auth)/signIn");
-      setRedirected(true);
-    } else if (isAuthenticated && group === "(auth)") {
+      return;
+    } else if (
+      isAuthenticated &&
+      hasCompletedOnboarding &&
+      (inAuthGroup || inOnboardingGroup)
+    ) {
       router.replace("/(main)/(tabs)/dashboard");
-      setRedirected(true);
+      return;
+    } else if (!isAuthenticated && hasCompletedOnboarding && !inAuthGroup) {
+      router.replace("/(auth)/signUp");
+      return;
     }
-  }, [isLoading, isAuthenticated, hasCompletedOnboarding, fontsLoaded, router, segments, redirected]);
+
+    SplashScreen.hideAsync().catch((err) =>
+      console.error("SplashScreen hide error!", err)
+    );
+  }, [
+    fontsLoaded,
+    isLoading,
+    isAuthenticated,
+    hasCompletedOnboarding,
+    segments,
+    router,
+  ]);
 
   if (isLoading || !fontsLoaded) {
     return <LoadingScreen />;
@@ -69,8 +78,8 @@ export default function RootLayout() {
         className="bg-brandLight dark:bg-brandDark"
       >
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" />
           <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
         </Stack>
       </SafeAreaView>

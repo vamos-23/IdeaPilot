@@ -1,36 +1,78 @@
-import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import useThemeStore from "../store/useThemeStore";
 import { ms, vs } from "@/src/constants/responsive";
+
 type GradientButtonProps = {
   buttonText: string;
+  loadingText?: string;
   isDisabled: boolean;
   onSubmit: () => void;
+  isLoading?: boolean;
 };
+
 export default function SubmitButton({
   buttonText,
+  loadingText,
   isDisabled,
-  onSubmit
+  isLoading,
+  onSubmit,
 }: GradientButtonProps) {
+  const { theme } = useThemeStore();
   return (
-    <TouchableOpacity onPress={onSubmit} disabled={isDisabled}>
+    <Pressable
+      onPress={onSubmit}
+      disabled={isDisabled || isLoading}
+      style={({ pressed }) => [
+        { opacity: pressed ? 0.7 : 1 },
+        shapes.pressableContainer,
+      ]}
+    >
       <LinearGradient
         colors={["#3b82f6", "#9333ea"]}
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
-        style={[shapes.button, isDisabled && shapes.disabledButton]}
-        className="elevation-lg dark:elevation-md"
+        style={[
+          shapes.button,
+          (isDisabled || isLoading) && shapes.disabledButton,
+        ]}
       >
-        <Text
-          style={shapes.buttonText}
-          className="text-white dark:text-[#040607]"
-        >
-          {buttonText}
-        </Text>
+        {isLoading ? (
+          <View className="flex-row gap-2">
+            <ActivityIndicator
+              size="small"
+              color={theme === "light" ? "#ffffff" : "#040607"}
+            />
+            <Text
+              style={shapes.buttonText}
+              className="text-white dark:text-[#040607]"
+            >
+              {loadingText}
+            </Text>
+          </View>
+        ) : (
+          <Text
+            style={shapes.buttonText}
+            className="text-white dark:text-[#040607]"
+          >
+            {buttonText}
+          </Text>
+        )}
       </LinearGradient>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
+
 const shapes = StyleSheet.create({
+  pressableContainer: {
+    width: "100%",
+  },
   button: {
     width: "100%",
     height: vs(44),
@@ -40,7 +82,7 @@ const shapes = StyleSheet.create({
     alignItems: "center",
   },
   disabledButton: {
-    opacity: 0.55
+    opacity: 0.55,
   },
   buttonText: {
     fontSize: ms(18),

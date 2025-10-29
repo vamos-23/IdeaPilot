@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, Keyboard } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import ThemeToggleButton from "@/src/components/ThemeToggle";
@@ -8,7 +8,9 @@ import { auth } from "../../../config/FirebaseConfig";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
-import { useCallback, useMemo } from "react";
+import { handleFirebaseAuthError } from "../../constants/authErrorHandler";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 
 type SignInFormFields = {
   email: string;
@@ -16,14 +18,24 @@ type SignInFormFields = {
 };
 
 export default function SignInScreen() {
-  const handleSignIn = useCallback(async (data: SignInFormFields) => {
-    try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
-      console.log("Signed in successfully!");
-    } catch (error: any) {
-      console.log("Error signing in user!", error.message);
-    }
-  }, []);
+  const router = useRouter();
+  const [loading, setButtonLoading] = useState<boolean>(false);
+  const handleSignIn = useCallback(
+    async (data: SignInFormFields) => {
+      setButtonLoading(true);
+      try {
+        await signInWithEmailAndPassword(auth, data.email, data.password);
+        await new Promise((resolve) => setTimeout(resolve, 2300));
+        console.log("Signed in successfully!");
+      } catch (error: any) {
+        handleFirebaseAuthError(error, router);
+        Keyboard.dismiss();
+      } finally {
+        setButtonLoading(false);
+      }
+    },
+    [router]
+  );
   const fields = useMemo(
     () => [
       {
@@ -87,6 +99,8 @@ export default function SignInScreen() {
                 title="Welcome Back!"
                 description="Enter your password to continue"
                 buttonText="Sign In"
+                asyncButtonText="Signing in..."
+                isButtonLoading={loading}
                 onSubmit={handleSignIn}
                 forgotPassWord="Forgot your password?"
                 fields={fields}

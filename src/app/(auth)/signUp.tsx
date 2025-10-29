@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, Keyboard } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
@@ -8,7 +8,9 @@ import { auth } from "@/config/FirebaseConfig";
 import FormLayout from "@/src/components/FormLayout";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
-import { useCallback, useMemo } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { handleFirebaseAuthError } from "@/src/constants/authErrorHandler";
 
 type SignUpFormFields = {
   name: string;
@@ -17,15 +19,30 @@ type SignUpFormFields = {
 };
 
 export default function SignUpScreen() {
-  const handleSignUp = useCallback(async (data: SignUpFormFields) => {
-    try {
-      const userCredentials = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      console.log("User signed up!");
-      console.log(userCredentials.user.email);
-    } catch (error: any) {
-      console.log("Sign Up error!", error.message);
-    }
-  }, []);
+  const router = useRouter();
+  const [loading, setButtonLoading] = useState<boolean>(false);
+  const handleSignUp = useCallback(
+    async (data: SignUpFormFields) => {
+      setButtonLoading(true);
+      try {
+        const userCredentials = await createUserWithEmailAndPassword(
+          auth,
+          data.email,
+          data.password
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2800));
+        console.log("User signed up!");
+        console.log(userCredentials.user.email);
+        console.log(userCredentials.user.uid);
+      } catch (error: any) {
+        handleFirebaseAuthError(error, router);
+        Keyboard.dismiss();
+      } finally {
+        setButtonLoading(false);
+      }
+    },
+    [router]
+  );
   const fields = useMemo(
     () => [
       {
@@ -94,7 +111,9 @@ export default function SignUpScreen() {
                 title="Create Account"
                 description="Get personalized project recommendations"
                 buttonText="Create Account"
+                asyncButtonText="Signing Up..."
                 onSubmit={handleSignUp}
+                isButtonLoading={loading}
                 fields={fields}
                 userFormPromptText="Already have an account?"
                 formActionText="Sign In"

@@ -1,60 +1,51 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User } from "firebase/auth";
 
 interface AuthActions {
   setLoading: (loadingStatus: boolean) => void;
-  // setShouldCreateAccount: (signUpStatus: boolean) => void;
   completeOnboarding: () => Promise<void>;
-  setOnBoardingStatus: (onBoardingStatus: boolean) => void;
-  logIn: (userData: any) => void;
-  logOut: () => void;
+  setOnboardingStatus: (status: boolean) => void;
+  logIn: (userData: User) => void;
+  logOut: () => Promise<void>;
 }
 
 interface AuthState {
-  user: any | null;
-  isAuthenticated: boolean;
-  // shouldCreateAccount: boolean;
+  user: User | null;
   isLoading: boolean;
   hasCompletedOnboarding: boolean;
 }
 
-type User = AuthState & AuthActions;
+type AuthStore = AuthState & AuthActions;
 
-const useAuthStore = create<User>((set) => ({
+const useAuthStore = create<AuthStore>((set) => ({
   user: null,
-  // shouldCreateAccount: false, 
-  isAuthenticated: false,
   isLoading: true,
   hasCompletedOnboarding: false,
-
   // Actions
   setLoading: (loadingStatus) => set({ isLoading: loadingStatus }),
 
-  // setShouldCreateAccount: (signUpStatus) =>
-  //   set({ shouldCreateAccount: signUpStatus }),
+  setOnboardingStatus: (status) => set({ hasCompletedOnboarding: status }),
 
   completeOnboarding: async () => {
     try {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-      set({ hasCompletedOnboarding: true });
+      set({ hasCompletedOnboarding: false });
     } catch (e) {
       console.error("Error saving onboarding status", e);
     }
   },
 
-  setOnBoardingStatus: (onBoardingStatus) =>
-    set({ hasCompletedOnboarding: onBoardingStatus }),
-
   logIn: (userData) =>
-    set(() => ({
+    set({
       user: userData,
-      isAuthenticated: true,
-    })),
+    }),
 
-  logOut: () =>
-    set(() => ({
+  logOut: async () => {
+    await AsyncStorage.removeItem("hasCompletedOnboarding");
+    set({
       user: null,
-      isAuthenticated: false,
-    })),
+    });
+  },
 }));
 export default useAuthStore;

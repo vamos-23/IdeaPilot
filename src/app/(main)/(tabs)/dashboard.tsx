@@ -1,7 +1,7 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 export default function Dashboard() {
   return (
-    <View className="bg-cyan-500">
+    <View className="bg-brandLight dark:bg-brandDark flex-1">
       <Text className="justify-center items-center">Dashboard</Text>
     </View>
   );

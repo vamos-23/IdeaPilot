@@ -12,7 +12,7 @@ export default function TabsMainLayout() {
         headerShown: false,
         tabBarStyle: {
           position: "absolute",
-          elevation: 5,
+          elevation: 0,
           marginHorizontal: sc(30),
           marginBottom: vs(12),
           backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "#F5F5F5",

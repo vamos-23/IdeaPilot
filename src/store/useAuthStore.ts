@@ -1,17 +1,22 @@
-import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { User } from "firebase/auth";
+import { create } from "zustand";
+
+interface AppUser {
+  userId: string;
+  userEmail: string | null;
+  userName: string | null;
+}
 
 interface AuthActions {
   setLoading: (loadingStatus: boolean) => void;
   completeOnboarding: () => Promise<void>;
   setOnboardingStatus: (status: boolean) => void;
-  logIn: (userData: User) => void;
+  logIn: (userData: AppUser | null) => void;
   logOut: () => Promise<void>;
 }
 
 interface AuthState {
-  user: User | null;
+  user: AppUser | null;
   isLoading: boolean;
   hasCompletedOnboarding: boolean;
 }
@@ -30,7 +35,7 @@ const useAuthStore = create<AuthStore>((set) => ({
   completeOnboarding: async () => {
     try {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-      set({ hasCompletedOnboarding: false });
+      set({ hasCompletedOnboarding: true });
     } catch (e) {
       console.error("Error saving onboarding status", e);
     }

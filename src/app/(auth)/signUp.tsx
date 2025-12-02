@@ -1,16 +1,16 @@
-import { Text, View, Keyboard } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/FirebaseConfig";
 import FormLayout from "@/src/components/FormLayout";
+import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
+import ThemeToggleButton from "@/src/components/ThemeToggle";
+import { handleFirebaseAuthError } from "@/src/constants/authErrorHandler";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
-import { handleFirebaseAuthError } from "@/src/constants/authErrorHandler";
+import { Keyboard, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type SignUpFormFields = {
   name: string;
@@ -30,10 +30,13 @@ export default function SignUpScreen() {
           data.email,
           data.password
         );
-        await new Promise((resolve) => setTimeout(resolve, 2800));
+        const authUser = userCredentials.user;
+        await updateProfile(authUser, { displayName: data.name });
+        await new Promise((resolve) => setTimeout(resolve, 2500));
         console.log("User signed up!");
-        console.log(userCredentials.user.email);
-        console.log(userCredentials.user.uid);
+        console.log(authUser.displayName);
+        console.log(authUser.email);
+        console.log(authUser.uid);
       } catch (error: any) {
         handleFirebaseAuthError(error, router);
         Keyboard.dismiss();

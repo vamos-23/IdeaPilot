@@ -1,13 +1,14 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { onAuthStateChanged, signOut, Unsubscribe } from "firebase/auth";
 import { useEffect } from "react";
 import { auth } from "../../config/FirebaseConfig";
-import { onAuthStateChanged, signOut, Unsubscribe } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAuthStore from "./useAuthStore";
 
 export default function useAuthInitializer() {
   const { logIn, logOut, setLoading, setOnboardingStatus } = useAuthStore();
 
   useEffect(() => {
+    const store = useAuthStore.getState();
     let unsubscribe: Unsubscribe | undefined;
 
     const initializeApp = async () => {
@@ -15,7 +16,7 @@ export default function useAuthInitializer() {
         setLoading(true);
         const status = await AsyncStorage.getItem("hasCompletedOnboarding");
         setOnboardingStatus(status === "true");
-        const onboardingStatus = useAuthStore.getState().hasCompletedOnboarding;
+        const onboardingStatus = store.hasCompletedOnboarding;
         console.log("OnboardingStatus:", onboardingStatus);
       } catch (error) {
         console.error("Failed to load onboarding status:", error);
@@ -31,13 +32,18 @@ export default function useAuthInitializer() {
           try {
             //Force refresh the JWT token to see if it exists on server or not
             await user.getIdToken(true);
-            logIn(user);
+            store.logIn({
+              userId: user.uid,
+              userEmail: user.email,
+              userName: user.displayName,
+            });
           } catch (error) {
             console.log("User invalid or token expired!", error);
             await signOut(auth);
             logOut();
           }
         } else {
+          await signOut(auth);
           logOut();
         }
         setLoading(false);

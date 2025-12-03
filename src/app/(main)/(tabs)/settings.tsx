@@ -1,8 +1,27 @@
-import { View, Text } from "react-native";
-export default function Dashboard() {
+//import ThemeToggleButton from "@/src/components/ThemeToggle";
+import ProfileInfo from "@/src/components/ProfileInfo";
+import Notifications from "@/src/components/Notifications";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { sc } from "./../../../constants/responsive";
+export default function Settings() {
   return (
-    <View className="bg-green-500 flex-1">
-      <Text className="justify-center items-center">Settings</Text>
-    </View>
+    <ScrollView className="bg-brandLight dark:bg-brandDark flex-1 px-7"
+    contentContainerStyle={{alignItems: "center"}}>
+      {/* <ThemeToggleButton /> */}
+      <View className="top-5 mb-16 gap-y-1">
+         <Text className="text-black dark:text-white font-nata-sans-bold" style={styles.title}>Settings</Text>
+        <Text className="text-textLight dark:text-textDark font-semibold" style={styles.subtitle}>Manage your account settings and preferences</Text>
+      </View>
+      <ProfileInfo />
+      <Notifications />
+    </ScrollView>
   );
 }
+const styles = StyleSheet.create({
+  title: {
+    fontSize: sc(25)
+  },
+  subtitle: {
+    fontSize: sc(12)
+  }
+})

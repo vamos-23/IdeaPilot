@@ -1,42 +1,45 @@
-import { CodeSquare } from "lucide-react-native";
+import { SunMoon } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
-export default function SkillsInfo() {
-  const { theme } = useThemeStore();
+import ThemeToggleSwitch from "./ThemeToggle";
 
+export default function ThemeSettings() {
+  const { theme } = useThemeStore();
   return (
     <View
       className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
-      style={styles.skillInfo}
+      style={styles.themeToggle}
     >
-      <View className="gap-y-1 mb-5">
+      <View>
         <View className="gap-2 flex-row items-center">
-          <CodeSquare
+          <SunMoon
             stroke={theme === "light" ? "#000000" : "#ffffff"}
-            size={sc(24)}
+            size={sc(26)}
           />
           <Text
             className="text-black dark:text-white font-nata-sans-bold"
             style={styles.heading}
           >
-            Your Skills
+            UI Theme
           </Text>
         </View>
-
-        <Text
-          className="text-textLight dark:text-textDark font-medium"
-          style={{ fontSize: sc(11) }}
-        >
-          Manage your technical skills and expertise
-        </Text>
+        <View className="flex-row justify-between items-center">
+          <Text
+            className="text-textLight dark:text-textDark font-medium"
+            style={{ fontSize: sc(11) }}
+          >
+            Choose your preferred theme
+          </Text>
+          <ThemeToggleSwitch />
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  skillInfo: {
+  themeToggle: {
     flexGrow: 1,
     width: "100%",
     borderWidth: sc(1),

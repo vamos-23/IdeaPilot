@@ -3,9 +3,11 @@ import ProfileInfo from "@/src/components/ProfileInfo";
 import Notifications from "@/src/components/Notifications";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { sc } from "./../../../constants/responsive";
+import ThemeSettings from "@/src/components/ThemeSettings";
+import SkillsInfo from "@/src/components/SkillsInfo";
 export default function Settings() {
   return (
-    <ScrollView className="bg-brandLight dark:bg-brandDark flex-1 px-7"
+    <ScrollView className="bg-brandLight dark:bg-[#011035] flex-1 px-7"
     contentContainerStyle={{alignItems: "center"}}>
       {/* <ThemeToggleButton /> */}
       <View className="top-5 mb-16 gap-y-1">
@@ -13,6 +15,8 @@ export default function Settings() {
         <Text className="text-textLight dark:text-textDark font-semibold" style={styles.subtitle}>Manage your account settings and preferences</Text>
       </View>
       <ProfileInfo />
+      <SkillsInfo />
+      <ThemeSettings />
       <Notifications />
     </ScrollView>
   );

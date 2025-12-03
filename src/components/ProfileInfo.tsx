@@ -1,16 +1,13 @@
-import { getAuth } from "firebase/auth";
 import { User2Icon } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import useThemeStore from "../store/useThemeStore";
+import useAuthStore from "../store/useAuthStore"; 
 import { sc, vs } from "./../constants/responsive";
-// import SubmitButton from "./SubmitButton";
-// import { handleFirebaseAuthError } from "../constants/authErrorHandler";
+
 export default function ProfileInfo() {
   const { theme } = useThemeStore();
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const user_email = user?.email;
- // const username = user?.displayName;
+  const user = useAuthStore((state) => state.user); 
+
   return (
     <View
       className="border-slate-600 dark:border-slate-600 bg-[#d8cece] dark:bg-[#121212]"
@@ -29,6 +26,7 @@ export default function ProfileInfo() {
             Profile
           </Text>
         </View>
+
         <Text
           className="text-textLight dark:text-textDark font-medium"
           style={{ fontSize: sc(11) }}
@@ -36,24 +34,26 @@ export default function ProfileInfo() {
           Your personal information and preferences
         </Text>
       </View>
+
       <View className="gap-y-1 mb-5">
         <Text
           className="text-black dark:text-white font-medium"
           style={{ fontSize: sc(14) }}
         >
-          Demo User
+          {user?.userName ?? "No Name"}
         </Text>
+
         <Text
           className="text-textLight dark:text-textDark font-medium"
           style={{ fontSize: sc(10.5) }}
         >
-          {user_email}
+          {user?.userEmail ?? "--"}
         </Text>
       </View>
-      {/* <SubmitButton buttonText="Edit Profile" isDisabled={false} onSubmit={handleFirebaseAuthError}/> */}
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   profile: {
     height: vs(192),
@@ -61,7 +61,8 @@ const styles = StyleSheet.create({
     borderWidth: sc(1),
     borderRadius: sc(17),
     padding: sc(18),
-    marginTop: vs(45),
+    //marginTop: vs(45),
+    marginBottom: vs(28)
   },
   heading: {
     fontSize: sc(23),

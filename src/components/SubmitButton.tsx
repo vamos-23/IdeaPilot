@@ -1,13 +1,13 @@
+import { ms, vs } from "@/src/constants/responsive";
+import { LinearGradient } from "expo-linear-gradient";
 import {
-  View,
-  Text,
+  ActivityIndicator,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
+  Text,
+  View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import useThemeStore from "../store/useThemeStore";
-import { ms, vs } from "@/src/constants/responsive";
 
 type GradientButtonProps = {
   buttonText: string;

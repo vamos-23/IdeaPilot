@@ -1,12 +1,14 @@
-import "../../global.css";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
 import * as Font from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { useColorScheme } from "nativewind";
+import { useEffect, useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import "../../global.css";
+import LoadingScreen from "../components/LoadingScreen";
 import useAuthInitializer from "../store/useAuthInitializer";
 import useAuthStore from "../store/useAuthStore";
-import LoadingScreen from "../components/LoadingScreen";
+import useThemeStore from "../store/useThemeStore";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +16,8 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { isLoading, user, hasCompletedOnboarding } = useAuthStore();
+  const { theme } = useThemeStore();
+  const { setColorScheme } = useColorScheme();
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
   const isAuthenticated = user !== null;
 
@@ -34,6 +38,10 @@ export default function RootLayout() {
     }
     loadFonts();
   }, []);
+
+  useEffect(() => {
+    setColorScheme(theme);
+  }, [setColorScheme, theme]);
 
   useEffect(() => {
     if (isLoading || !fontsLoaded) return;

@@ -3,11 +3,15 @@ import { StyleSheet, Text, View } from "react-native";
 import useAuthStore from "../store/useAuthStore";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
+import SubmitButton from "./SubmitButton";
 
-export default function ProfileInfo() {
+type ProfileInfoProps = {
+  onEditProfile: () => void;
+};
+
+export default function ProfileInfo({ onEditProfile }: ProfileInfoProps) {
   const { theme } = useThemeStore();
   const user = useAuthStore((state) => state.user);
-
   return (
     <View
       className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
@@ -49,6 +53,14 @@ export default function ProfileInfo() {
         >
           {user?.userEmail ?? "--"}
         </Text>
+      </View>
+
+      <View className="mt-3">
+        <SubmitButton
+          buttonText="Edit Profile"
+          isDisabled={false}
+          onSubmit={onEditProfile}
+        />
       </View>
     </View>
   );

@@ -20,14 +20,9 @@ import SubmitButton from "./SubmitButton";
 
 type NameInputProps = {
   onClose: () => void;
-  showNamePopup: (state: boolean) => void;
-  showEditPopup: (state: boolean) => void;
+  action: () => void;
 };
-export default function NameInputPopup({
-  onClose,
-  showNamePopup,
-  showEditPopup,
-}: NameInputProps) {
+export default function NameInputPopup({ onClose, action }: NameInputProps) {
   const { theme } = useThemeStore();
   const [name, setName] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
@@ -36,7 +31,7 @@ export default function NameInputPopup({
   const handleFocus = () => setFocus(true);
   const handleBlur = () => setFocus(false);
 
-  const updateName = async () => {
+  const updateName = async (newName : string) => {
     setLoading(true);
     try {
       await updateDisplayName(name);
@@ -47,8 +42,7 @@ export default function NameInputPopup({
       );
       setName("");
       Keyboard.dismiss();
-      showNamePopup(false);
-      showEditPopup(false);
+      action();
     } catch (error: any) {
       console.log(error.message);
       Alert.alert("Error!", "Display name could not be updated");
@@ -110,7 +104,7 @@ export default function NameInputPopup({
                 buttonText="Update Display Name"
                 isLoading={isLoading}
                 isDisabled={false}
-                onSubmit={updateName}
+                onSubmit={() => updateName(name)}
                 loadingText="Updating name..."
               />
             </View>

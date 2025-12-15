@@ -8,14 +8,12 @@ type EditProfileProps = {
   onClose: () => void;
   onEditName: () => void;
   onEditEmail: () => void;
-  onChangePassword: () => void;
 };
 
 export default function EditProfilePopup({
   onClose,
   onEditName,
   onEditEmail,
-  onChangePassword,
 }: EditProfileProps) {
   const { theme } = useThemeStore();
   return (
@@ -51,11 +49,6 @@ export default function EditProfilePopup({
             buttonText="Update Email"
             isDisabled={false}
             onSubmit={onEditEmail}
-          />
-          <SubmitButton
-            buttonText="Change Password"
-            isDisabled={false}
-            onSubmit={onChangePassword}
           />
         </View>
       </View>

@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -13,28 +14,47 @@ import {
   View,
 } from "react-native";
 import { sc, vs } from "../constants/responsive";
+import { updateUserEmail } from "../lib/auth/updateUserEmail";
 import useThemeStore from "../store/useThemeStore";
 import SubmitButton from "./SubmitButton";
 
-type EmailInputProps = {
+type PasswordInputProps = {
   onClose: () => void;
-  action: (new_email: string) => void;
+  action: () => void;
+  pendingEmail: string;
 };
-
-export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
+export default function PasswordInputPopup({
+  onClose,
+  action,
+  pendingEmail,
+}: PasswordInputProps) {
   const { theme } = useThemeStore();
-  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   const handleFocus = () => setFocus(true);
   const handleBlur = () => setFocus(false);
 
-  const storeNewEmail = (new_email: string) => {
-    setEmail("");
-    Keyboard.dismiss();
-    action(new_email);
+  const updateEmailWithPassword = async (currentPassword: string) => {
+    setLoading(true);
+    try {
+      await updateUserEmail(pendingEmail, currentPassword);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      Alert.alert(
+        "Email Status",
+        "Your email has been updated successfully!"
+      );
+      setPassword("");
+      Keyboard.dismiss();
+      action();
+    } catch (error: any) {
+      console.log(error.message);
+      Alert.alert("Error!", "Email could not be updated");
+    } finally {
+      setLoading(false);
+    }
   };
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.overlay}>
@@ -46,15 +66,14 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
           <TouchableWithoutFeedback onPress={() => {}}>
             <View
               style={styles.popup}
-              className="bg-[#F5F5F5] dark:bg-[#03154c] border-blue-500 
-              dark:border-gray-500"
+              className="bg-[#F5F5F5] dark:bg-[#03154c] border-blue-500 dark:border-gray-500"
             >
               <View className="flex-row justify-between">
                 <Text
                   className="text-black dark:text-white font-nata-sans-bold"
                   style={styles.title}
                 >
-                  Enter New Email
+                  Enter Current Password
                 </Text>
                 <TouchableOpacity onPress={onClose}>
                   <X
@@ -75,21 +94,23 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
               >
                 <TextInput
                   className="text-black dark:text-textDark font-semibold"
-                  cursorColor={theme === "light" ? "black" : "tomato"}
+                  cursorColor={theme === "light" ? "green" : "tomato"}
                   placeholder="Enter new display name"
                   placeholderTextColor={
                     theme === "light" ? "dimgrey" : "silver"
                   }
                   onFocus={handleFocus}
                   onBlur={handleBlur}
-                  value={email}
-                  onChangeText={setEmail}
+                  value={password}
+                  onChangeText={setPassword}
                 />
               </View>
               <SubmitButton
-                buttonText="Update Display Name"
+                buttonText="Proceed"
                 isDisabled={false}
-                onSubmit={() => storeNewEmail(email)}
+                isLoading={isLoading}
+                loadingText="Updating email..."
+                onSubmit={() => updateEmailWithPassword(password)}
               />
             </View>
           </TouchableWithoutFeedback>

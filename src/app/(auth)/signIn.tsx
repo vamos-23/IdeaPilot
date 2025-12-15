@@ -1,16 +1,16 @@
-import { Text, View, Keyboard } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import ThemeToggleButton from "@/src/components/ThemeToggle";
-import FormLayout from "@/src/components/FormLayout";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../config/FirebaseConfig";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
-import { handleFirebaseAuthError } from "../../constants/authErrorHandler";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
+import { Keyboard, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { auth } from "../../../config/FirebaseConfig";
+import { handleFirebaseAuthError } from "../../lib/auth/authErrorHandler";
 
 type SignInFormFields = {
   email: string;

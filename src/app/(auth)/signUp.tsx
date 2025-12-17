@@ -7,9 +7,13 @@ import { vs } from "@/src/constants/responsive";
 import { handleFirebaseAuthError } from "@/src/lib/auth/authErrorHandler";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+} from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
-import { Keyboard, Text, View } from "react-native";
+import { Keyboard, Text, View, Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type SignUpFormFields = {
@@ -32,6 +36,11 @@ export default function SignUpScreen() {
         );
         const authUser = userCredentials.user;
         await updateProfile(authUser, { displayName: data.name });
+        await sendEmailVerification(userCredentials.user);
+        Alert.alert(
+          "Verify your email",
+          "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) "
+        );
         await new Promise((resolve) => setTimeout(resolve, 2500));
         console.log("User signed up!");
         console.log(authUser.displayName);

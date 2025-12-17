@@ -34,7 +34,7 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
   const updateName = async (newName : string) => {
     setLoading(true);
     try {
-      await updateDisplayName(name);
+      await updateDisplayName(newName);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       Alert.alert(
         "Display Name Status",
@@ -45,7 +45,7 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
       action();
     } catch (error: any) {
       console.log(error.message);
-      Alert.alert("Error!", "Display name could not be updated");
+      Alert.alert("Error!", "Display name could not be updated.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
               >
                 <TextInput
                   className="text-black dark:text-textDark font-semibold"
-                  cursorColor={theme === "light" ? "black" : "tomato"}
+                  cursorColor={theme === "light" ? "green" : "tomato"}
                   placeholder="Enter new display name"
                   placeholderTextColor={
                     theme === "light" ? "dimgrey" : "silver"

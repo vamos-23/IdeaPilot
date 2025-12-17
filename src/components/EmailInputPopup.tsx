@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Alert,
 } from "react-native";
 import { sc, vs } from "../constants/responsive";
 import useThemeStore from "../store/useThemeStore";
@@ -20,7 +21,7 @@ type EmailInputProps = {
   onClose: () => void;
   action: (new_email: string) => void;
 };
-
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
   const { theme } = useThemeStore();
   const [email, setEmail] = useState<string>("");
@@ -30,9 +31,14 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
   const handleBlur = () => setFocus(false);
 
   const storeNewEmail = (new_email: string) => {
+    const email = new_email.trim();
+    if (!EMAIL_REGEX.test(email)) {
+      Alert.alert("Invalid Email!", "Please enter a valid email address.");
+      return;
+    }
+    action(email);
     setEmail("");
     Keyboard.dismiss();
-    action(new_email);
   };
 
   return (
@@ -76,7 +82,7 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
                 <TextInput
                   className="text-black dark:text-textDark font-semibold"
                   cursorColor={theme === "light" ? "black" : "tomato"}
-                  placeholder="Enter new display name"
+                  placeholder="Enter new email"
                   placeholderTextColor={
                     theme === "light" ? "dimgrey" : "silver"
                   }
@@ -87,8 +93,8 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
                 />
               </View>
               <SubmitButton
-                buttonText="Update Display Name"
-                isDisabled={false}
+                buttonText="Proceed"
+                isDisabled={!email.trim()}
                 onSubmit={() => storeNewEmail(email)}
               />
             </View>
@@ -127,8 +133,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: sc(5),
   },
   title: {
-    fontSize: sc(18),
+    fontSize: sc(16),
     textAlign: "center",
     marginBottom: sc(16),
+    paddingHorizontal: sc(5),
   },
 });

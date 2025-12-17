@@ -37,20 +37,23 @@ export default function PasswordInputPopup({
   const handleBlur = () => setFocus(false);
 
   const updateEmailWithPassword = async (currentPassword: string) => {
-    setLoading(true);
+    const password = currentPassword.trim();
+    if (!password) {
+      Alert.alert("No Password Entered", "Please enter your current password.");
+      Keyboard.dismiss();
+      return;
+    }
     try {
-      await updateUserEmail(pendingEmail, currentPassword);
+      setLoading(true);
+      await updateUserEmail(pendingEmail, password);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Email Status",
-        "Your email has been updated successfully!"
-      );
+      Alert.alert("Email Status", "Your email has been updated successfully!");
+      action();
       setPassword("");
       Keyboard.dismiss();
-      action();
     } catch (error: any) {
       console.log(error.message);
-      Alert.alert("Error!", "Email could not be updated");
+      Alert.alert("Error!", "Email could not be updated.");
     } finally {
       setLoading(false);
     }
@@ -95,7 +98,7 @@ export default function PasswordInputPopup({
                 <TextInput
                   className="text-black dark:text-textDark font-semibold"
                   cursorColor={theme === "light" ? "green" : "tomato"}
-                  placeholder="Enter new display name"
+                  placeholder="Enter current password"
                   placeholderTextColor={
                     theme === "light" ? "dimgrey" : "silver"
                   }
@@ -106,7 +109,7 @@ export default function PasswordInputPopup({
                 />
               </View>
               <SubmitButton
-                buttonText="Proceed"
+                buttonText="Update Email"
                 isDisabled={false}
                 isLoading={isLoading}
                 loadingText="Updating email..."
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: sc(5),
   },
   title: {
-    fontSize: sc(18),
+    fontSize: sc(16),
     textAlign: "center",
     marginBottom: sc(16),
   },

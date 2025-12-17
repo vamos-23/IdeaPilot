@@ -1,4 +1,3 @@
-//import ThemeToggleButton from "@/src/components/ThemeToggle";
 import EditProfilePopup from "@/src/components/EditProfilePopup";
 import EmailInputPopup from "@/src/components/EmailInputPopup";
 import NameInputPopup from "@/src/components/NameInputPopup";
@@ -10,12 +9,13 @@ import ThemeSettings from "@/src/components/ThemeSettings";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { sc, vs } from "./../../../constants/responsive";
+
 export default function Settings() {
-  const [showPopup, setShowPopup] = useState<boolean>(false);
-  const [showNamePopup, setShowNamePopup] = useState<boolean>(false);
-  const [showEmailPopup, setShowEmailPopup] = useState<boolean>(false);
-  const [showPasswordPopup, setShowPasswordPopup] = useState<boolean>(false);
-  const [pendingEmail, setPendingEmail] = useState<string>("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [showNamePopup, setShowNamePopup] = useState(false);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
 
   const handleOpen = (popup: string) => {
     switch (popup) {
@@ -29,6 +29,10 @@ export default function Settings() {
       case "Email Popup":
         setShowPopup(false);
         setShowEmailPopup(true);
+        break;
+      case "Password Popup":
+        setShowPopup(false);
+        setShowPasswordPopup(true);
         break;
       default:
         return;
@@ -57,25 +61,28 @@ export default function Settings() {
     }
   };
 
-  /*Function to handle and store pending email for reauthentication purposes when updating email*/
-  const handlePendingEmail = (new_email: string) => {
-    setShowEmailPopup(false);
-    setPendingEmail(new_email);
-    setShowPasswordPopup(true);
-  };
-
   const handleCloseAfterAction = (popup: string) => {
     switch (popup) {
       case "Close Name Popup":
         setShowNamePopup(false);
+        setShowPopup(true);
         break;
       case "Close Email Update Popup":
         setShowPasswordPopup(false);
+        setShowPopup(true);
         break;
       default:
         return;
     }
   };
+
+  // Email → Password re-auth flow
+  const handlePendingEmail = (newEmail: string) => {
+    setShowEmailPopup(false);
+    setPendingEmail(newEmail);
+    setShowPasswordPopup(true);
+  };
+
   return (
     <View className="flex-1">
       <ScrollView
@@ -97,11 +104,13 @@ export default function Settings() {
             Manage your account settings and preferences
           </Text>
         </View>
+
         <ProfileInfo onEditProfile={() => handleOpen("Edit Popup")} />
         <SkillsInfo />
         <ThemeSettings />
         <Notifications />
       </ScrollView>
+
       {showPopup && (
         <EditProfilePopup
           onClose={() => handleClose("Edit Profile Popup")}
@@ -109,28 +118,32 @@ export default function Settings() {
           onEditEmail={() => handleOpen("Email Popup")}
         />
       )}
+
       {showNamePopup && (
         <NameInputPopup
           onClose={() => handleClose("Name Popup")}
           action={() => handleCloseAfterAction("Close Name Popup")}
         />
       )}
+
       {showEmailPopup && (
         <EmailInputPopup
           onClose={() => handleClose("Email Popup")}
-          action={(pending_newEmail) => handlePendingEmail(pending_newEmail)}
+          action={handlePendingEmail}
         />
       )}
+
       {showPasswordPopup && (
         <PasswordInputPopup
           onClose={() => handleClose("Password Popup")}
-          action={() => handleCloseAfterAction("Close Password Popup")}
+          action={() => handleCloseAfterAction("Close Email Update Popup")}
           pendingEmail={pendingEmail}
         />
       )}
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   title: {
     fontSize: sc(25),

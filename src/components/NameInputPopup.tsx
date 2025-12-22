@@ -13,9 +13,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { sc, vs } from "../constants/responsive";
 import { updateDisplayName } from "../lib/auth/updateDisplayName";
 import useThemeStore from "../store/useThemeStore";
+import useAuthStore from "../store/useAuthStore";
 import SubmitButton from "./SubmitButton";
 
 type NameInputProps = {
@@ -24,6 +26,7 @@ type NameInputProps = {
 };
 export default function NameInputPopup({ onClose, action }: NameInputProps) {
   const { theme } = useThemeStore();
+  const { user } = useAuthStore();
   const [name, setName] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -31,21 +34,57 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
   const handleFocus = () => setFocus(true);
   const handleBlur = () => setFocus(false);
 
-  const updateName = async (newName : string) => {
-    setLoading(true);
+  const updateName = async (newName: string) => {
+    const normalizedNewName = newName.trim();
+    const currentName = user?.userName?.trim();
+
+    if (!normalizedNewName) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid name",
+        text2: "Display name cannot be empty.",
+        topOffset: sc(45),
+      });
+      return;
+    }
+
+    if (
+      currentName &&
+      normalizedNewName.toLowerCase() === currentName.toLowerCase()
+    ) {
+      Toast.show({
+        type: "info",
+        text1: "No changes detected",
+        text2: "This is already your current display name.",
+        topOffset: sc(45),
+      });
+      setName("");
+      Keyboard.dismiss();
+      return;
+    }
+
     try {
-      await updateDisplayName(newName);
+      setLoading(true);
+      await updateDisplayName(normalizedNewName);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      Alert.alert(
-        "Display Name Status",
-        "Your display name has been updated successfully!"
-      );
+      Toast.show({
+        type: "success",
+        text1: "Display name updated",
+        text2: "Your display name was updated successfully.",
+        topOffset: sc(45),
+      });
+
       setName("");
       Keyboard.dismiss();
       action();
     } catch (error: any) {
-      console.log(error.message);
-      Alert.alert("Error!", "Display name could not be updated.");
+      console.error(error.message);
+      Toast.show({
+        type: "error",
+        text1: "Update failed",
+        text2: "Please try again.",
+        topOffset: sc(45),
+      });
     } finally {
       setLoading(false);
     }

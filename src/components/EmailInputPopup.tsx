@@ -15,7 +15,9 @@ import {
 } from "react-native";
 import { sc, vs } from "../constants/responsive";
 import useThemeStore from "../store/useThemeStore";
+import useAuthStore from "../store/useAuthStore";
 import SubmitButton from "./SubmitButton";
+import Toast from "react-native-toast-message";
 
 type EmailInputProps = {
   onClose: () => void;
@@ -24,6 +26,7 @@ type EmailInputProps = {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
   const { theme } = useThemeStore();
+  const { user } = useAuthStore();
   const [email, setEmail] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
 
@@ -31,16 +34,29 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
   const handleBlur = () => setFocus(false);
 
   const storeNewEmail = (new_email: string) => {
-    const email = new_email.trim();
+    const email = new_email.toLowerCase().trim();
+    if (email === user?.userEmail?.toLowerCase()) {
+      Toast.show({
+        type: "info",
+        text1: "Email Status",
+        text2: "Email already in use.",
+        topOffset: sc(45),
+      });
+      return;
+    }
     if (!EMAIL_REGEX.test(email)) {
-      Alert.alert("Invalid Email!", "Please enter a valid email address.");
+      Toast.show({
+        type: "error",
+        text1: "Invalid Email!",
+        text2: "Please enter valid email.",
+        topOffset: sc(45),
+      });
       return;
     }
     action(email);
     setEmail("");
     Keyboard.dismiss();
   };
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.overlay}>

@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { sc, vs } from "../constants/responsive";
 import { updateUserEmail } from "../lib/auth/updateUserEmail";
 import useThemeStore from "../store/useThemeStore";
@@ -39,21 +40,37 @@ export default function PasswordInputPopup({
   const updateEmailWithPassword = async (currentPassword: string) => {
     const password = currentPassword.trim();
     if (!password) {
-      Alert.alert("No Password Entered", "Please enter your current password.");
+      Toast.show({
+        type: "error",
+        text1: "Password missing",
+        text2: "Please enter current password",
+        topOffset: sc(45),
+      });
       Keyboard.dismiss();
       return;
     }
     try {
       setLoading(true);
       await updateUserEmail(pendingEmail, password);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      Alert.alert("Email Status", "Your email has been updated successfully!");
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      Toast.show({
+        type: "success",
+        text1: "Email Updated",
+        text2: "Your email has been updated successfully!",
+        topOffset: sc(45),
+      });
       action();
       setPassword("");
       Keyboard.dismiss();
     } catch (error: any) {
       console.log(error.message);
-      Alert.alert("Error!", "Email could not be updated.");
+      Toast.show({
+        type: "error",
+        text1: "Email Update Failed",
+        text2: "Email could not be updated.",
+        topOffset: sc(45),
+      });
     } finally {
       setLoading(false);
     }

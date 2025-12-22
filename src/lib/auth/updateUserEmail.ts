@@ -2,7 +2,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   sendEmailVerification,
-  updateEmail,
+  verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import { auth } from "../../../config/FirebaseConfig";
 import useAuthStore from "../../store/useAuthStore";
@@ -28,7 +28,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
   try {
     const credential = EmailAuthProvider.credential(user.email!, password);
     await reauthenticateWithCredential(user, credential);
-    await updateEmail(user, newEmail);
+    await verifyBeforeUpdateEmail(user, newEmail);
     useAuthStore.getState().logIn({
       userId: user.uid,
       userEmail: newEmail,
@@ -36,7 +36,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
     });
     return true;
   } catch (error) {
-    console.log("Error updating email!",error);
+    console.log("Error updating email!", error);
     throw error;
   }
 };

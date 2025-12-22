@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Alert,
 } from "react-native";
 import { sc, vs } from "../constants/responsive";
 import useThemeStore from "../store/useThemeStore";
@@ -48,7 +47,7 @@ export default function EmailInputPopup({ onClose, action }: EmailInputProps) {
       Toast.show({
         type: "error",
         text1: "Invalid Email!",
-        text2: "Please enter valid email.",
+        text2: "Please enter valid email address.",
         topOffset: sc(45),
       });
       return;

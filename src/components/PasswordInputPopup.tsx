@@ -2,7 +2,6 @@ import { clsx } from "clsx";
 import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -42,7 +41,7 @@ export default function PasswordInputPopup({
     if (!password) {
       Toast.show({
         type: "error",
-        text1: "Password missing",
+        text1: "Password Missing",
         text2: "Please enter current password",
         topOffset: sc(45),
       });

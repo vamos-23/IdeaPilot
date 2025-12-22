@@ -11,6 +11,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
   const user = auth.currentUser;
   if (!user) throw new Error("No user logged in!");
 
+  await user.getIdToken(true);
   await user.reload();
   if (!user.emailVerified) {
     await sendEmailVerification(user);
@@ -23,7 +24,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
     throw new Error("Email cannot be empty!");
   }
   if (!password) throw new Error("Password is needed for security reasons!");
-  
+
   try {
     const credential = EmailAuthProvider.credential(user.email!, password);
     await reauthenticateWithCredential(user, credential);
@@ -35,7 +36,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
     });
     return true;
   } catch (error) {
-    console.log("Error updating email!");
+    console.log("Error updating email!",error);
     throw error;
   }
 };

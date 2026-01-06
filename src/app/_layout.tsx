@@ -21,6 +21,7 @@ export default function RootLayout() {
   const { theme } = useThemeStore();
   const { setColorScheme } = useColorScheme();
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
+  const [navigationReady, setNavigationReady] = useState<boolean>(false);
   const isAuthenticated = user !== null;
 
   useAuthInitializer();
@@ -46,27 +47,29 @@ export default function RootLayout() {
   }, [setColorScheme, theme]);
 
   useEffect(() => {
+    let targetRoute: string | null = null;
     if (isLoading || !fontsLoaded) return;
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
     if (!hasCompletedOnboarding && !inOnboardingGroup) {
-      router.replace("/(onboarding)/welcome");
+      targetRoute = "/(onboarding)/welcome";
       return;
     } else if (
       isAuthenticated &&
       hasCompletedOnboarding &&
       (inAuthGroup || inOnboardingGroup)
     ) {
-      router.replace("/(main)/(tabs)/dashboard");
+      targetRoute = "/(main)/(tabs)/dashboard";
       return;
     } else if (!isAuthenticated && hasCompletedOnboarding && !inAuthGroup) {
-      router.replace("/(auth)/signUp");
+      targetRoute = "/(auth)/signUp";
       return;
     }
 
-    SplashScreen.hideAsync().catch((err) =>
-      console.error("SplashScreen hide error!", err)
-    );
+    if (targetRoute) {
+      router.replace(targetRoute);
+    }
+    setNavigationReady(true);
   }, [
     fontsLoaded,
     isLoading,
@@ -75,6 +78,14 @@ export default function RootLayout() {
     segments,
     router,
   ]);
+
+  useEffect(() => {
+    if (navigationReady) {
+      SplashScreen.hideAsync().catch((err) => {
+        console.error("Splash hide error", err);
+      });
+    }
+  }, [navigationReady]);
 
   if (isLoading || !fontsLoaded) {
     return <LoadingScreen />;
@@ -92,7 +103,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
         </Stack>
-        <Toast config={toastConfig}/>
+        <Toast config={toastConfig} />
       </SafeAreaView>
     </SafeAreaProvider>
   );

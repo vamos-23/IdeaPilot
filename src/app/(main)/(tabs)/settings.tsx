@@ -5,6 +5,7 @@ import Notifications from "@/src/components/Notifications";
 import PasswordInputPopup from "@/src/components/PasswordInputPopup";
 import ProfileInfo from "@/src/components/ProfileInfo";
 import SkillsInfo from "@/src/components/SkillsInfo";
+import SkillsModal from "@/src/components/SkillsModal";
 import ThemeSettings from "@/src/components/ThemeSettings";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -16,6 +17,7 @@ export default function Settings() {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const handleOpen = (popup: string) => {
     switch (popup) {
@@ -106,11 +108,15 @@ export default function Settings() {
         </View>
 
         <ProfileInfo onEditProfile={() => handleOpen("Edit Popup")} />
-        <SkillsInfo />
+        <SkillsInfo onClick={() => setShowModal(true)} />
         <ThemeSettings />
         <Notifications />
       </ScrollView>
 
+      {showModal && (
+        <SkillsModal visible={showModal} onClose={() => setShowModal(false)} />
+      )}
+      
       {showPopup && (
         <EditProfilePopup
           onClose={() => handleClose("Edit Profile Popup")}

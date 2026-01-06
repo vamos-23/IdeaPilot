@@ -1,14 +1,16 @@
 import { CodeSquare } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import useThemeStore from "../store/useThemeStore";
-import { useState } from "react";
 import { sc, vs } from "./../constants/responsive";
 import SubmitButton from "./SubmitButton";
-import SkillsModal from "./SkillsModal";
-export default function SkillsInfo() {
+import SkillTag from "./SkillTag";
+import useSkillStore from "../store/useSkillStore";
+type SkillsInfoProps = {
+  onClick: () => void;
+};
+export default function SkillsInfo({ onClick }: SkillsInfoProps) {
   const { theme } = useThemeStore();
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const closeSkillModal = () => setShowModal(false);
+  const { skills } = useSkillStore();
   return (
     <View
       className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
@@ -33,15 +35,30 @@ export default function SkillsInfo() {
         >
           Manage your technical skills and expertise
         </Text>
-        <View className="mt-6">
-          <SubmitButton
-            buttonText="Add/Remove Skills"
-            isDisabled={false}
-            onSubmit={() => (
-              <SkillsModal visible={showModal} onClose={closeSkillModal} />
-            )}
-          />
+        <View
+          style={styles.addStack}
+          className="flex-row justify-evenly flex-wrap"
+        >
+          {skills.length > 0 ? (
+            skills.map((item) => (
+              <SkillTag key={item.id} skill={item} isCancel={false} />
+            ))
+          ) : (
+            <Text
+              className="text-textLight dark:text-textDark font-medium"
+              style={{ fontSize: sc(11) }}
+            >
+              No skills selected
+            </Text>
+          )}
         </View>
+      </View>
+      <View className="mt-6">
+        <SubmitButton
+          buttonText="Manage Skills"
+          isDisabled={false}
+          onSubmit={onClick}
+        />
       </View>
     </View>
   );
@@ -58,5 +75,11 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: sc(23),
+  },
+  addStack: {
+    width: "100%",
+    justifyContent: "flex-start",
+    gap: sc(10),
+    marginTop: vs(10),
   },
 });

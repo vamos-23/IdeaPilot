@@ -1,32 +1,29 @@
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { sc, ms, vs } from "../../constants/responsive";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import UserIconLogo from "@/src/components/UserIconLogo";
 import { Rocket, Code } from "lucide-react-native";
 import ButtonGroup from "@/src/components/ButtonGroup";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import useSkillStore from "@/src/store/useSkillStore";
 import useThemeStore from "@/src/store/useThemeStore";
-import useAuthStore from "@/src/store/useAuthStore";
+
 export default function CompletionScreen() {
   const { skills } = useSkillStore();
   const { theme } = useThemeStore();
-  const { completeOnboarding } = useAuthStore();
   return (
     <ScrollView
       contentContainerStyle={shapes.main}
       showsVerticalScrollIndicator={false}
       className="bg-brandLight dark:bg-brandDark flex-1"
     >
-      <ThemeToggleButton />
       <View
-        style={shapes.welcomeContainer}
+        style={shapes.container}
         className="border-gray-300 dark:border-blue-600 bg-brandLight
         dark:bg-[#111111de] items-center elevation-lg dark:elevation-none"
       >
         <UserIconLogo icon={<Rocket size={sc(45)} stroke="dodgerblue" />} />
         <Text
-          style={shapes.welcomeMessage}
+          style={shapes.titleMessage}
           className="font-nata-sans-bold dark:text-white mb-1"
         >
           Almost There!
@@ -39,7 +36,7 @@ export default function CompletionScreen() {
         </Text>
         <IdeaPilotLogo />
         <Text
-          style={shapes.welcomeMessage}
+          style={shapes.titleMessage}
           className="font-nata-sans-bold dark:text-white mt-4 mb-1"
         >
           Almost There! 🚀
@@ -84,14 +81,14 @@ const shapes = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  welcomeContainer: {
+  container: {
     width: "100%",
     marginTop: vs(45),
     padding: ms(17),
     borderRadius: sc(17),
     borderWidth: sc(2),
   },
-  welcomeMessage: {
+  titleMessage: {
     fontSize: ms(25),
   },
   subtitleMessage: {

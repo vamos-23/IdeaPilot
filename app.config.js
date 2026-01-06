@@ -3,7 +3,7 @@ import "dotenv/config";
 export default ({ config }) => ({
   ...config,
   name: "IdeaPilot",
-  slug: "IdeaPilot",
+  slug: "ideapilot",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/logo.png",
@@ -32,7 +32,7 @@ export default ({ config }) => ({
       backgroundColor: "#ffffff",
       // Dark mode configuration
       dark: {
-        foregroundImage: "./assets/images/android-icon-background.png",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
         backgroundColor: "#060C1C",
       },
     },

@@ -3,7 +3,6 @@ import { sc, ms, vs } from "../../constants/responsive";
 import { Code, Sparkles, Target, User } from "lucide-react-native";
 import UserIconLogo from "@/src/components/UserIconLogo";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import InfoCard from "@/src/components/InfoCard";
 import ButtonGroup from "@/src/components/ButtonGroup";
 
@@ -28,7 +27,6 @@ export default function WelcomeScreen() {
       contentContainerStyle={shapes.main}
       className="bg-brandLight dark:bg-brandDark flex-1"
     >
-      <ThemeToggleButton />
       <View
         style={shapes.welcomeContainer}
         className="border-gray-300 dark:border-blue-600 bg-brandLight

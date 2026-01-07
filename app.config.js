@@ -75,9 +75,9 @@ export default ({ config }) => ({
     policy: "appVersion",
   },
   extra: {
-    // eas: {
-    //   projectId: "d2314c7c-0cb1-4d1b-81af-dbe2fbd05019",
-    // },
+    eas: {
+      projectId: "db0b000c-65ec-4946-8933-f6ae4d36aed6",
+    },
     FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
     FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
     FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,

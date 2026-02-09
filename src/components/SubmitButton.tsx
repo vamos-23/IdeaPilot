@@ -13,8 +13,9 @@ type GradientButtonProps = {
   buttonText: string;
   loadingText?: string;
   isDisabled: boolean;
-  onSubmit: () => void;
   isLoading?: boolean;
+  isDelete?: boolean;
+  onSubmit: () => void;
 };
 
 export default function SubmitButton({
@@ -22,6 +23,7 @@ export default function SubmitButton({
   loadingText,
   isDisabled,
   isLoading,
+  isDelete,
   onSubmit,
 }: GradientButtonProps) {
   const { theme } = useThemeStore();
@@ -35,7 +37,13 @@ export default function SubmitButton({
       ]}
     >
       <LinearGradient
-        colors={["#3b82f6", "#9333ea"]}
+        colors={
+          isDelete
+            ? theme === "light"
+              ? ["#dc2626", "#dc2626"]
+              : ["#ef4444", "#ef4444"]
+            : ["#3b82f6", "#9333ea"]
+        }
         start={{ x: 0, y: 1 }}
         end={{ x: 1, y: 1 }}
         style={[

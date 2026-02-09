@@ -1,18 +1,21 @@
 import { Bell } from "lucide-react-native";
+import { useColorScheme } from "nativewind";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import { sc, vs } from "../constants/responsive";
-import useThemeStore from "../store/useThemeStore";
 import useNotificationStore from "../store/useNotificationStore";
+import useThemeStore from "../store/useThemeStore";
 
 export default function Notifications() {
   const { theme } = useThemeStore();
-  const { pushEnabled, emailEnabled, togglePush, toggleEmail} = useNotificationStore();
+  const { colorScheme } = useColorScheme();
+  const { pushEnabled, emailEnabled, togglePush, toggleEmail } =
+    useNotificationStore();
   return (
     <View
-      className="border-slate-600 dark:border-slate-600 bg-[#d8cece] dark:bg-[#121212]"
+      className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
       style={styles.notification}
     >
-      <View className="gap-y-1 mb-5">
+      <View className="mb-7">
         <View className="gap-2 flex-row items-center">
           <Bell stroke={theme === "light" ? "#000" : "#fff"} size={sc(24)} />
           <Text
@@ -31,7 +34,7 @@ export default function Notifications() {
         </Text>
       </View>
 
-      <View className="gap-y-5">
+      <View className="gap-y-6">
         <View className="flex-row justify-between items-center">
           <View className="w-[70%]">
             <Text
@@ -48,8 +51,9 @@ export default function Notifications() {
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={pushEnabled ? "#f5dd4b" : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: "#4169e1" }}
+            thumbColor={colorScheme === "light" ? "#f5dd4b" : "#f4f3f4"}
+            style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
             onValueChange={togglePush}
             value={pushEnabled}
           />
@@ -70,8 +74,9 @@ export default function Notifications() {
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={emailEnabled ? "#f5dd4b" : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: "#4169e1" }}
+            thumbColor={colorScheme === "light" ? "#f5dd4b" : "#f4f3f4"}
+            style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
             onValueChange={toggleEmail}
             value={emailEnabled}
           />
@@ -83,11 +88,11 @@ export default function Notifications() {
 
 const styles = StyleSheet.create({
   notification: {
-    height: vs(203),
+    flexGrow: 1,
     width: "100%",
     borderWidth: sc(1),
     borderRadius: sc(17),
-    padding: sc(18),
+    padding: sc(20),
     marginBottom: vs(28),
   },
   heading: {

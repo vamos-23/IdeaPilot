@@ -5,16 +5,17 @@ import Skill from "../constants/types";
 import useThemeStore from "../store/useThemeStore";
 type SkillTagProps = {
   skill: Skill;
-  onRemove: (id: string) => void;
+  isCancel: boolean;
+  onRemove?: (id: string) => void;
 };
-export default function SkillTag({ skill, onRemove }: SkillTagProps) {
+export default function SkillTag({ skill, onRemove, isCancel }: SkillTagProps) {
   const { theme } = useThemeStore();
   return (
     <TouchableOpacity
       key={skill.id}
       style={shapes.skillTag}
       className="bg-[#e5e2e2] dark:bg-[#2a2a6ce4]"
-      onPress={() => onRemove(skill.id)}
+      onPress={() => onRemove?.(skill.id)}
       activeOpacity={0.7}
     >
       <View className="justify-center items-center flex-row gap-3">
@@ -25,7 +26,7 @@ export default function SkillTag({ skill, onRemove }: SkillTagProps) {
         <Text className="text-black dark:text-white font-nata-sans-bold">
           {skill.stackName}
         </Text>
-        <X size={sc(15)} color={theme === "light" ? "crimson" : "red"} />
+        {isCancel && (<X size={sc(15)} color={theme === "light" ? "crimson" : "red"} />)}
       </View>
     </TouchableOpacity>
   );

@@ -13,7 +13,6 @@ import { sc, ms, vs } from "../../constants/responsive";
 import { useState } from "react";
 import { Code } from "lucide-react-native";
 import UserIconLogo from "@/src/components/UserIconLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { Image } from "expo-image";
 import ButtonGroup from "@/src/components/ButtonGroup";
 import useThemeStore from "@/src/store/useThemeStore";
@@ -25,7 +24,7 @@ import useSkillStore from "@/src/store/useSkillStore";
 import SkillTag from "@/src/components/SkillTag";
 import Skill from "../../constants/types";
 
-export default function WelcomeScreen() {
+export default function TechStack() {
   const { theme } = useThemeStore();
   //to handle focus and unfocus effects of text input bar
   const [isFocus, setIsFocus] = useState<boolean>(false);
@@ -91,15 +90,14 @@ export default function WelcomeScreen() {
         showsVerticalScrollIndicator={false}
         className="bg-brandLight dark:bg-brandDark flex-1"
       >
-        <ThemeToggleButton />
         <View
-          style={shapes.welcomeContainer}
+          style={shapes.techStackContainer}
           className="border-gray-300 dark:border-blue-600 bg-[#ffffff]
         dark:bg-[#111111de] items-center elevation-md dark:elevation-none"
         >
           <UserIconLogo icon={<Code size={sc(45)} stroke="dodgerblue" />} />
           <Text
-            style={shapes.welcomeMessage}
+            style={shapes.titleMessage}
             className=" dark:text-white font-semibold mb-2"
           >
             What are your skills?
@@ -111,7 +109,7 @@ export default function WelcomeScreen() {
             Select your current tech stack and skills
           </Text>
           <Text
-            style={shapes.welcomeMessage}
+            style={shapes.titleMessage}
             className="font-nata-sans-bold dark:text-white mt-4 mb-2"
           >
             Select Your Skills
@@ -145,6 +143,7 @@ export default function WelcomeScreen() {
                     key={item.id}
                     skill={item}
                     onRemove={handleRemoveSkillItem}
+                    isCancel
                   />
                 ))}
               </View>
@@ -231,7 +230,7 @@ const shapes = StyleSheet.create({
     paddingBottom: vs(15),
     flexGrow: 1,
   },
-  welcomeContainer: {
+  techStackContainer: {
     width: "100%",
     justifyContent: "flex-start",
     alignItems: "center",
@@ -240,7 +239,7 @@ const shapes = StyleSheet.create({
     borderRadius: sc(17),
     borderWidth: sc(2),
   },
-  welcomeMessage: {
+  titleMessage: {
     fontSize: ms(19),
   },
   subtitleMessage: {

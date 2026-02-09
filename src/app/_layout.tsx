@@ -3,6 +3,8 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "@/src/components/ToastConfig";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import "../../global.css";
 import LoadingScreen from "../components/LoadingScreen";
@@ -90,6 +92,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(main)" />
         </Stack>
+        <Toast config={toastConfig}/>
       </SafeAreaView>
     </SafeAreaProvider>
   );

@@ -2,6 +2,7 @@ import EditProfilePopup from "@/src/components/EditProfilePopup";
 import EmailInputPopup from "@/src/components/EmailInputPopup";
 import NameInputPopup from "@/src/components/NameInputPopup";
 import Notifications from "@/src/components/Notifications";
+import AccountSettings from "@/src/components/AccountSettings";
 import PasswordInputPopup from "@/src/components/PasswordInputPopup";
 import ProfileInfo from "@/src/components/ProfileInfo";
 import SkillsInfo from "@/src/components/SkillsInfo";
@@ -111,12 +112,13 @@ export default function Settings() {
         <SkillsInfo onClick={() => setShowModal(true)} />
         <ThemeSettings />
         <Notifications />
+        <AccountSettings />
       </ScrollView>
 
       {showModal && (
         <SkillsModal visible={showModal} onClose={() => setShowModal(false)} />
       )}
-      
+
       {showPopup && (
         <EditProfilePopup
           onClose={() => handleClose("Edit Profile Popup")}

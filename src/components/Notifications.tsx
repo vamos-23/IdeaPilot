@@ -8,8 +8,7 @@ import useThemeStore from "../store/useThemeStore";
 export default function Notifications() {
   const { theme } = useThemeStore();
   const { colorScheme } = useColorScheme();
-  const { pushEnabled, emailEnabled, togglePush, toggleEmail } =
-    useNotificationStore();
+  const { pushEnabled, togglePush } = useNotificationStore();
   return (
     <View
       className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
@@ -56,29 +55,6 @@ export default function Notifications() {
             style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
             onValueChange={togglePush}
             value={pushEnabled}
-          />
-        </View>
-        <View className="flex-row justify-between items-center">
-          <View className="w-[70%]">
-            <Text
-              className="text-black dark:text-white font-medium"
-              style={{ fontSize: sc(13) }}
-            >
-              Email Notifications
-            </Text>
-            <Text
-              className="text-textLight dark:text-textDark font-medium"
-              style={{ fontSize: sc(10.5) }}
-            >
-              Get weekly project updates via email
-            </Text>
-          </View>
-          <Switch
-            trackColor={{ false: "#767577", true: "#4169e1" }}
-            thumbColor={colorScheme === "light" ? "#f5dd4b" : "#f4f3f4"}
-            style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
-            onValueChange={toggleEmail}
-            value={emailEnabled}
           />
         </View>
       </View>

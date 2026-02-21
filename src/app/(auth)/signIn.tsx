@@ -3,7 +3,8 @@ import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import deleteFromBackend from "@/src/lib/account/deleteFromBackend";
 import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
@@ -19,6 +20,7 @@ type SignInFormFields = {
 
 export default function SignInScreen() {
   const router = useRouter();
+  const { afterReauth } = useLocalSearchParams();
   const [loading, setButtonLoading] = useState<boolean>(false);
   const handleSignIn = useCallback(
     async (data: SignInFormFields) => {
@@ -27,6 +29,9 @@ export default function SignInScreen() {
         await signInWithEmailAndPassword(auth, data.email, data.password);
         await new Promise((resolve) => setTimeout(resolve, 2300));
         console.log("Signed in successfully!");
+        if (afterReauth === "delete") {
+          await deleteFromBackend();
+        }
       } catch (error: any) {
         handleFirebaseAuthError(error, router);
         Keyboard.dismiss();
@@ -34,7 +39,7 @@ export default function SignInScreen() {
         setButtonLoading(false);
       }
     },
-    [router]
+    [router, afterReauth],
   );
   const fields = useMemo(
     () => [
@@ -63,7 +68,7 @@ export default function SignInScreen() {
         },
       },
     ],
-    []
+    [],
   );
   return (
     <>

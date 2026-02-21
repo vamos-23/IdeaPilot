@@ -1,10 +1,11 @@
+import AccountSettings from "@/src/components/AccountSettings";
 import EditProfilePopup from "@/src/components/EditProfilePopup";
 import EmailInputPopup from "@/src/components/EmailInputPopup";
 import NameInputPopup from "@/src/components/NameInputPopup";
 import Notifications from "@/src/components/Notifications";
-import AccountSettings from "@/src/components/AccountSettings";
 import PasswordInputPopup from "@/src/components/PasswordInputPopup";
 import ProfileInfo from "@/src/components/ProfileInfo";
+import PushTestButton from "@/src/components/PushButton";
 import SkillsInfo from "@/src/components/SkillsInfo";
 import SkillsModal from "@/src/components/SkillsModal";
 import ThemeSettings from "@/src/components/ThemeSettings";
@@ -110,6 +111,7 @@ export default function Settings() {
 
         <ProfileInfo onEditProfile={() => handleOpen("Edit Popup")} />
         <SkillsInfo onClick={() => setShowModal(true)} />
+        <PushTestButton />
         <ThemeSettings />
         <Notifications />
         <AccountSettings />

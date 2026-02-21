@@ -27,6 +27,7 @@ export default ({ config }) => ({
   */
   android: {
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
+    googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundColor: "#ffffff",
@@ -69,14 +70,13 @@ export default ({ config }) => ({
   updates: {
     enabled: true,
     fallbackToCacheTimeout: 0,
-    // url: "https://u.expo.dev/d2314c7c-0cb1-4d1b-81af-dbe2fbd05019",
   },
   runtimeVersion: {
     policy: "appVersion",
   },
   extra: {
     eas: {
-      projectId: "db0b000c-65ec-4946-8933-f6ae4d36aed6",
+      projectId: "37955152-0da1-41b9-a735-dfc819e7f784",
     },
     FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
     FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,

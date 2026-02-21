@@ -1,14 +1,31 @@
 import { Bell } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
+import { useState } from "react";
 import { StyleSheet, Switch, Text, View } from "react-native";
 import { sc, vs } from "../constants/responsive";
-import useNotificationStore from "../store/useNotificationStore";
+import { usePushNotifications } from "../services/notifications/hook/usePushNotification";
+import { useNotificationStore } from "../store/useNotificationStore";
 import useThemeStore from "../store/useThemeStore";
 
 export default function Notifications() {
   const { theme } = useThemeStore();
   const { colorScheme } = useColorScheme();
-  const { pushEnabled, togglePush } = useNotificationStore();
+  const { pushEnabled } = useNotificationStore();
+  const { enablePush, disablePush } = usePushNotifications();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleToggle = async () => {
+    setLoading(true);
+    try {
+      if (pushEnabled) {
+        await disablePush();
+      } else {
+        await enablePush();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View
       className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
@@ -46,14 +63,15 @@ export default function Notifications() {
               className="text-textLight dark:text-textDark font-medium"
               style={{ fontSize: sc(10.5) }}
             >
-              Receive push notifications for updates
+              Receive push notifications for reminders and new updates
             </Text>
           </View>
           <Switch
             trackColor={{ false: "#767577", true: "#4169e1" }}
             thumbColor={colorScheme === "light" ? "#f5dd4b" : "#f4f3f4"}
             style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
-            onValueChange={togglePush}
+            disabled={loading}
+            onValueChange={handleToggle}
             value={pushEnabled}
           />
         </View>

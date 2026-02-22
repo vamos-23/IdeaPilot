@@ -5,33 +5,29 @@ import { auth } from "../../config/FirebaseConfig";
 import useAuthStore from "./useAuthStore";
 
 export default function useAuthInitializer() {
-  const { logIn, logOut, setLoading, setOnboardingStatus } = useAuthStore();
-
   useEffect(() => {
     const store = useAuthStore.getState();
     let unsubscribe: Unsubscribe | undefined;
 
     const initializeApp = async () => {
       try {
-        setLoading(true);
         const status = await AsyncStorage.getItem("hasCompletedOnboarding");
-        setOnboardingStatus(status === "true");
-        const onboardingStatus = store.hasCompletedOnboarding;
-        console.log("OnboardingStatus:", onboardingStatus);
+        store.setOnboardingStatus(status === "true");
+        console.log("OnboardingStatus:", store.hasCompletedOnboarding);
       } catch (error) {
         console.error("Failed to load onboarding status:", error);
-        setOnboardingStatus(false);
+        store.setOnboardingStatus(false);
       }
 
       unsubscribe = onAuthStateChanged(auth, async (user) => {
         console.log(
           "🔹 Firebase Auth state changed:",
-          user ? "Logged in" : "Logged out"
+          user ? "Logged in" : "Logged out",
         );
         if (user) {
           try {
             //Force refresh the JWT token to see if it exists on server or not
-            await user.getIdToken(true);
+            await user.getIdToken();
             store.logIn({
               userId: user.uid,
               userEmail: user.email,
@@ -40,13 +36,12 @@ export default function useAuthInitializer() {
           } catch (error) {
             console.log("User invalid or token expired!", error);
             await signOut(auth);
-            logOut();
+            store.logOut();
           }
         } else {
-          await signOut(auth);
-          logOut();
+          store.logOut();
         }
-        setLoading(false);
+        store.setAuthInitialized(true);
       });
     };
 
@@ -57,5 +52,5 @@ export default function useAuthInitializer() {
         unsubscribe();
       }
     };
-  }, [logIn, logOut, setLoading, setOnboardingStatus]);
+  }, []);
 }

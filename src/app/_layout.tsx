@@ -31,7 +31,7 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
-  const { isLoading, user, hasCompletedOnboarding } = useAuthStore();
+  const { authInitialized, user, hasCompletedOnboarding } = useAuthStore();
   const { theme } = useThemeStore();
   const { setColorScheme } = useColorScheme();
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
@@ -66,7 +66,7 @@ export default function RootLayout() {
   }, [setColorScheme, theme]);
 
   useEffect(() => {
-    if (isLoading || !fontsLoaded || !handledInitialNotification) return;
+    if (!authInitialized || !fontsLoaded || !handledInitialNotification) return;
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
     if (!hasCompletedOnboarding && !inOnboardingGroup) {
@@ -91,7 +91,7 @@ export default function RootLayout() {
     );
   }, [
     fontsLoaded,
-    isLoading,
+    authInitialized,
     isAuthenticated,
     handledInitialNotification,
     launchedFromNotification,
@@ -102,7 +102,7 @@ export default function RootLayout() {
 
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
   useEffect(() => {
-    if (isLoading || !fontsLoaded) return;
+    if (!authInitialized || !fontsLoaded) return;
 
     async function checkInitialNotification() {
       if (lastNotificationResponse === undefined) return;
@@ -117,7 +117,7 @@ export default function RootLayout() {
     }
 
     checkInitialNotification();
-  }, [isLoading, fontsLoaded, lastNotificationResponse]);
+  }, [authInitialized, fontsLoaded, lastNotificationResponse]);
 
   useEffect(() => {
     const subsription = Notifications.addNotificationResponseReceivedListener(
@@ -131,7 +131,7 @@ export default function RootLayout() {
     return () => subsription.remove();
   }, [router]);
 
-  if (isLoading || !fontsLoaded || !handledInitialNotification) {
+  if (!authInitialized || !fontsLoaded || !handledInitialNotification) {
     return <LoadingScreen />;
   }
 

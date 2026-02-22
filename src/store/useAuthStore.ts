@@ -8,30 +8,30 @@ interface AppUser {
 }
 
 interface AuthActions {
-  setLoading: (loadingStatus: boolean) => void;
   completeOnboarding: () => Promise<void>;
   setOnboardingStatus: (status: boolean) => void;
+  setAuthInitialized: (status: boolean) => void;
   logIn: (userData: AppUser | null) => void;
   logOut: () => Promise<void>;
 }
 
 interface AuthState {
   user: AppUser | null;
-  isLoading: boolean;
   hasCompletedOnboarding: boolean;
+  authInitialized: boolean;
 }
 
 type AuthStore = AuthState & AuthActions;
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
-  isLoading: true,
+  authInitialized: false,
   hasCompletedOnboarding: false,
   // Actions
-  setLoading: (loadingStatus) => set({ isLoading: loadingStatus }),
-
   setOnboardingStatus: (status) => set({ hasCompletedOnboarding: status }),
 
+  setAuthInitialized: (status) => set({ authInitialized: status }),
+  
   completeOnboarding: async () => {
     try {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");

@@ -2,25 +2,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-type Notifications = {
+interface NotificationState {
   pushEnabled: boolean;
-  emailEnabled: boolean;
-  togglePush: () => void;
-  toggleEmail: () => void;
-};
-const useNotificationStore = create<Notifications>()(
+  setEnabled: (value: boolean) => void;
+}
+
+export const useNotificationStore = create<NotificationState>()(
   persist(
     (set) => ({
       pushEnabled: false,
-      emailEnabled: false,
-      togglePush: () => set((state) => ({ pushEnabled: !state.pushEnabled })),
-      toggleEmail: () =>
-        set((state) => ({ emailEnabled: !state.emailEnabled })),
+      setEnabled: (value) => set({ pushEnabled: value }),
     }),
     {
-      name: "notification-preference",
+      name: "notification_storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
-export default useNotificationStore;

@@ -6,7 +6,7 @@ import { useNotificationStore } from "../../../store/useNotificationStore";
 import { TOKEN_KEY, getPushToken, syncPushToken } from "../push/pushServices";
 import configurePushChannel from "./useConfigurePushChannel";
 
-const UI_TEST_MODE = false;
+const UI_TEST_MODE = true;
 
 export default function useCheckPushStatus() {
   const { pushEnabled, setEnabled } = useNotificationStore();
@@ -17,7 +17,7 @@ export default function useCheckPushStatus() {
 
     const checkStateOnBoot = async () => {
       await configurePushChannel();
-      
+
       console.log("Ran checkonBoot");
       const { status } = await Notifications.getPermissionsAsync();
       const storedToken = await AsyncStorage.getItem(TOKEN_KEY);

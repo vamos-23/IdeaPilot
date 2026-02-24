@@ -6,7 +6,7 @@ import { useNotificationStore } from "../../../store/useNotificationStore";
 import { TOKEN_KEY, getPushToken, syncPushToken } from "../push/pushServices";
 import configurePushChannel from "./useConfigurePushChannel";
 
-const UI_TEST_MODE = true;
+const UI_TEST_MODE = false;
 
 export default function useCheckPushStatus() {
   const { pushEnabled, setEnabled } = useNotificationStore();

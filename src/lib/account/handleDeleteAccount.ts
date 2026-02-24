@@ -1,11 +1,9 @@
-import { auth } from "../../../config/FirebaseConfig";
 import { router } from "expo-router";
-import isRecentlyAuthenticated from "./isRecentlyAuthenticated";
 import deleteFromBackend from "./deleteFromBackend";
+import isRecentlyAuthenticated from "./isRecentlyAuthenticated";
 
 export default async function handleDeleteAccount() {
-  const user = auth.currentUser;
-  if (!user || !isRecentlyAuthenticated()) {
+  if (!isRecentlyAuthenticated()) {
     router.replace("/(auth)/signIn?afterReauth=delete");
     return;
   }

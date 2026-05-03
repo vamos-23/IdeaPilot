@@ -1,6 +1,5 @@
 import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -81,7 +80,6 @@ export default function SignInScreen() {
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
         >
-          <ThemeToggleButton />
           <IdeaPilotLogo />
           <Text
             style={styles.title}

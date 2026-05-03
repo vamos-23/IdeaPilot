@@ -48,6 +48,7 @@ export default ({ config }) => ({
     "expo-router",
     "expo-font",
     "expo-asset",
+    "expo-web-browser",
     [
       "expo-splash-screen",
       {

@@ -69,10 +69,7 @@ export default function RootLayout() {
     if (!authInitialized || !fontsLoaded || !handledInitialNotification) return;
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
-    if (!hasCompletedOnboarding && !inOnboardingGroup) {
-      router.replace("/(onboarding)/welcome");
-      return;
-    } else if (
+    if (
       isAuthenticated &&
       hasCompletedOnboarding &&
       (inAuthGroup || inOnboardingGroup)

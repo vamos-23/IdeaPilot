@@ -1,20 +1,23 @@
 import { auth } from "@/config/FirebaseConfig";
 import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { handleFirebaseAuthError } from "@/src/lib/auth/authErrorHandler";
+import useAuthStore from "@/src/store/useAuthStore";
+
+import useSkillStore from "@/src/store/useSkillStore";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
   sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
-import { Keyboard, Text, View, Alert } from "react-native";
+import { Alert, Keyboard, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { syncSkills } from "../../services/users/users.onboarding";
 
 type SignUpFormFields = {
   name: string;
@@ -24,6 +27,8 @@ type SignUpFormFields = {
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { setOnboardingStatus } = useAuthStore();
+  const { skills, markSynced, setSkills } = useSkillStore();
   const [loading, setButtonLoading] = useState<boolean>(false);
   const handleSignUp = useCallback(
     async (data: SignUpFormFields) => {
@@ -32,20 +37,26 @@ export default function SignUpScreen() {
         const userCredentials = await createUserWithEmailAndPassword(
           auth,
           data.email,
-          data.password
+          data.password,
         );
         const authUser = userCredentials.user;
         await updateProfile(authUser, { displayName: data.name });
-        await sendEmailVerification(userCredentials.user);
+        await authUser.reload();
+        await sendEmailVerification(authUser);
+        setOnboardingStatus(true);
         Alert.alert(
           "Verify your email",
-          "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) "
+          "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) ",
         );
         await new Promise((resolve) => setTimeout(resolve, 2500));
         console.log("User signed up!");
         console.log(authUser.displayName);
         console.log(authUser.email);
         console.log(authUser.uid);
+        const result = await syncSkills(skills);
+        setSkills(skills);
+        markSynced();
+        console.log(result.success, result.message);
       } catch (error: any) {
         handleFirebaseAuthError(error, router);
         Keyboard.dismiss();
@@ -53,7 +64,7 @@ export default function SignUpScreen() {
         setButtonLoading(false);
       }
     },
-    [router]
+    [router, skills, markSynced, setOnboardingStatus, setSkills],
   );
   const fields = useMemo(
     () => [
@@ -87,7 +98,7 @@ export default function SignUpScreen() {
         },
       },
     ],
-    []
+    [],
   );
   return (
     <>
@@ -100,7 +111,6 @@ export default function SignUpScreen() {
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
         >
-          <ThemeToggleButton />
           <IdeaPilotLogo />
           <Text
             style={styles.title}

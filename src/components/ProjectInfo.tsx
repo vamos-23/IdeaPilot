@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { sc } from "../constants/responsive";
+import useThemeStore from "@/src/store/useThemeStore";
 
 type ProjectInfoProps = {
   title: string;
@@ -14,37 +15,50 @@ export function ProjectInfo({
   value,
   textColor,
 }: ProjectInfoProps) {
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
+
   return (
     <View
-      className="border-[#02915a] dark:border-[#a1a9b3] bg-[#EEF1F6] dark:bg-[#121720]"
-      style={styles.projectContainer}
+      className="bg-white dark:bg-cardDark border shadow-sm shadow-black/5"
+      style={[
+        styles.projectContainer,
+        {
+          borderColor: isDark ? "rgba(255, 255, 255, 0.1)" : `${textColor}30`,
+        },
+      ]}
     >
       <View className="flex-row items-center justify-between">
         <Text
-          className="text-black dark:text-white font-nata-sans-bold"
+          className="text-slate-900 dark:text-white font-nata-sans-bold"
           style={styles.heading}
         >
           {title}
         </Text>
-        <View>{icon}</View>
+        <View style={styles.iconContainer}>{icon}</View>
       </View>
-      <Text style={[styles.stats && { color: textColor }]}>{value}</Text>
+
+      <Text style={[styles.stats, { color: textColor }]}>{value}</Text>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   projectContainer: {
-    flexGrow: 1,
     width: "100%",
     borderWidth: sc(1.5),
-    borderRadius: sc(17),
-    padding: sc(20),
+    borderRadius: sc(24),
+    padding: sc(18),
   },
   heading: {
-    fontSize: sc(17),
+    fontSize: sc(16),
   },
   stats: {
-    fontSize: sc(15),
-    fontWeight: "bold"
+    fontSize: sc(22),
+    fontFamily: "Nata-Sans-Bold",
+    marginTop: sc(4),
+  },
+  iconContainer: {
+    opacity: 0.9,
   },
 });

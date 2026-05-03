@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { sc, ms, vs } from "../../constants/responsive";
-import { Code, Sparkles, Target, User } from "lucide-react-native";
-import UserIconLogo from "@/src/components/UserIconLogo";
+import ButtonGroup from "@/src/components/ButtonGroup";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import InfoCard from "@/src/components/InfoCard";
-import ButtonGroup from "@/src/components/ButtonGroup";
+import UserIconLogo from "@/src/components/UserIconLogo";
+import { Code, Sparkles, Target, User } from "lucide-react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ms, sc, vs } from "../../constants/responsive";
 
 export default function WelcomeScreen() {
   const inputSkills = {

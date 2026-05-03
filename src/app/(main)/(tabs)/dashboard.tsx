@@ -1,139 +1,102 @@
-import { ProjectInfo } from "@/src/components/ProjectInfo";
+import { SkeletonProjectCard } from "@/src/animations/components/SkeletonProjectCard";
+import { AnimatedProjectCard } from "@/src/animations/components/AnimatedProjectCard";
+import { ProjectIdea, Stats } from "@/src/constants/types";
 import useAuthStore from "@/src/store/useAuthStore";
+import { useIdeas } from "@/src/store/useIdeas";
 import useThemeStore from "@/src/store/useThemeStore";
 import { FlashList } from "@shopify/flash-list";
 import { Bookmark, CircleCheck, CirclePlay, Clock } from "lucide-react-native";
-import { useCallback } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo } from "react";
+import { View } from "react-native";
+import DashboardHeader from "@/src/components/DashboardHeader";
 import { sc, vs } from "../../../constants/responsive";
 
 export default function Dashboard() {
   const { theme } = useThemeStore();
+  const isDark = theme === "dark";
+  const { ideas, fetchInitialIdeas, loading } = useIdeas();
   const { user } = useAuthStore();
-  const userName = user?.userName;
+  const username = user?.userName;
 
-  // Mock data for the list - replace with your actual data source
-  const projectsData = Array.from({ length: 10}, (_, i) => ({
-    id: i,
-    name: `Project ${i + 1}`,
-  }));
+  useEffect(() => {
+    fetchInitialIdeas();
+  }, []);
 
-  const stats = [
-    {
-      title: "Total Projects",
-      value: 1,
-      textColor: theme === "light" ? "#6B7280" : "#9CA3AF",
-      icon: (
-        <Bookmark
-          stroke={theme === "light" ? "#6B7280" : "#9CA3AF"}
-          size={sc(25)}
-          strokeWidth={sc(2)}
-        />
-      ),
-    },
-    {
-      title: "In Progress",
-      value: 1,
-      textColor: "#3B82F6",
-      icon: <CirclePlay stroke="#3B82F6" size={sc(25)} strokeWidth={sc(2)} />,
-    },
-    {
-      title: "Completed",
-      value: 1,
-      textColor: theme === "light" ? "#06991a" : "#22C55E",
-      icon: (
-        <CircleCheck
-          stroke={theme === "light" ? "#06991a" : "#22C55E"}
-          size={sc(25)}
-          strokeWidth={sc(2)}
-        />
-      ),
-    },
-    {
-      title: "Planned",
-      value: 1,
-      textColor: theme === "light" ? "#ed8134" : "#EAB308",
-      icon: (
-        <Clock
-          stroke={theme === "light" ? "#ed8134" : "#EAB308"}
-          size={sc(25)}
-          strokeWidth={sc(2)}
-        />
-      ),
-    },
-  ];
+  const list: ProjectIdea[] = useMemo(() => {
+    if (loading) {
+      return Array.from(
+        { length: 6 },
+        (_, i) => ({ id: `skeleton-${i}` }) as ProjectIdea,
+      );
+    }
+    return ideas || [];
+  }, [loading, ideas]);
 
-  // Everything that was in your ScrollView goes here
-  const DashboardHeader = () => (
-    <View className="pt-5">
-      <View className="mb-2 gap-y-0.5">
-        <Text
-          className="text-black dark:text-white font-nata-sans-bold"
-          style={styles.title}
-        >
-          Dashboard
-        </Text>
-        <Text
-          className="text-textLight dark:text-textDark font-semibold"
-          style={styles.subtitle}
-        >
-          Ready to work on your next project?{"\n"}Here&apos;s what&apos;
-          happening.
-        </Text>
-      </View>
-      <View className="mt-6 mb-7 gap-y-1">
-        <Text
-          className="text-black dark:text-white font-nata-sans-bold"
-          style={styles.title}
-        >
-          Welcome Back, {userName} 👋
-        </Text>
-      </View>
-      <View className="gap-y-5 mb-6">
-        {stats.map((stat, index) => (
-          <ProjectInfo key={index} {...stat} />
-        ))}
-      </View>
-
-      {/* SEARCH BAR & SECTION TITLE */}
-      <View className="mb-4">
-        {/* <YourSearchBar /> */}
-        <Text
-          className="text-black dark:text-white font-nata-sans-bold mt-4"
-          style={{ fontSize: sc(24) }}
-        >
-          Your Projects
-        </Text>
-      </View>
-    </View>
+  const stats: Stats[] = useMemo(
+    () => [
+      {
+        title: "Total Saved",
+        value: 0,
+        textColor: isDark ? "#94a3b8" : "#64748b",
+        icon: (
+          <Bookmark
+            stroke={isDark ? "#94a3b8" : "#64748b"}
+            size={sc(22)}
+            strokeWidth={2.5}
+          />
+        ),
+      },
+      {
+        title: "Building",
+        value: 0,
+        textColor: "#3b82f6",
+        icon: <CirclePlay stroke="#3b82f6" size={sc(22)} strokeWidth={2.5} />,
+      },
+      {
+        title: "Mastered",
+        value: 0,
+        textColor: "#10b981",
+        icon: <CircleCheck stroke="#10b981" size={sc(22)} strokeWidth={2.5} />,
+      },
+      {
+        title: "Next Up",
+        value: 0,
+        textColor: "#f59e0b",
+        icon: <Clock stroke="#f59e0b" size={sc(22)} strokeWidth={2.5} />,
+      },
+    ],
+    [isDark],
   );
 
-  const renderComponent = useCallback(({ item }: { item: any }) => {
-    return (
-      <View className="p-4 mb-3 bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700">
-        <Text className="text-black dark:text-white">{item.name}</Text>
-      </View>
-    );
-  }, []);
+  const renderIdeas = useCallback(
+    ({ item, index }: { item: ProjectIdea; index: number }) => {
+      if (loading || (item.id && item.id.startsWith("skeleton"))) {
+        return <SkeletonProjectCard />;
+      }
+      return <AnimatedProjectCard item={item} index={index} />;
+    },
+    [loading],
+  );
+
   return (
-    <View className="bg-brandLight dark:bg-[#011035] flex-1">
+    <View className="bg-brandLight dark:bg-brandDark flex-1">
       <FlashList
-        data={projectsData}
-        keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={DashboardHeader}
-        renderItem={renderComponent}
+        data={list}
+        keyExtractor={(item, index) =>
+          loading ? `skeleton-${index}` : item.id
+        }
+        renderItem={renderIdeas}
+        ListHeaderComponent={
+          <DashboardHeader username={username} statistics={stats} />
+        }
         contentContainerStyle={{
-          paddingHorizontal: sc(24),
-          paddingBottom: vs(27),
+          backgroundColor: "transparent",
+          paddingHorizontal: sc(20),
+          paddingBottom: vs(70),
+          paddingTop: vs(10),
         }}
-        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: { fontSize: sc(25) },
-  subtitle: { fontSize: sc(12) },
-});

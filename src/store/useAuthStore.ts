@@ -1,5 +1,6 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface AppUser {
   userId: string;
@@ -7,50 +8,51 @@ interface AppUser {
   userName: string | null;
 }
 
-interface AuthActions {
-  completeOnboarding: () => Promise<void>;
-  setOnboardingStatus: (status: boolean) => void;
-  setAuthInitialized: (status: boolean) => void;
-  logIn: (userData: AppUser | null) => void;
-  logOut: () => Promise<void>;
-}
-
 interface AuthState {
   user: AppUser | null;
   hasCompletedOnboarding: boolean;
   authInitialized: boolean;
+
+  setOnboardingStatus: (status: boolean) => void;
+  setAuthInitialized: (status: boolean) => void;
+  logIn: (userData: AppUser) => void;
+  logOut: () => void;
 }
 
-type AuthStore = AuthState & AuthActions;
-
-const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  authInitialized: false,
-  hasCompletedOnboarding: false,
-  // Actions
-  setOnboardingStatus: (status) => set({ hasCompletedOnboarding: status }),
-
-  setAuthInitialized: (status) => set({ authInitialized: status }),
-  
-  completeOnboarding: async () => {
-    try {
-      await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-      set({ hasCompletedOnboarding: true });
-    } catch (e) {
-      console.error("Error saving onboarding status", e);
-    }
-  },
-
-  logIn: (userData) =>
-    set({
-      user: userData,
-    }),
-
-  logOut: async () => {
-    await AsyncStorage.removeItem("hasCompletedOnboarding");
-    set({
+const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
-    });
-  },
-}));
+      hasCompletedOnboarding: false,
+      authInitialized: false,
+
+      setOnboardingStatus: (status) =>
+        set({ hasCompletedOnboarding: status }),
+
+      setAuthInitialized: (status) =>
+        set({ authInitialized: status }),
+
+      logIn: (userData) =>
+        set({
+          user: userData,
+        }),
+
+      logOut: () =>
+        set({
+          user: null,
+          hasCompletedOnboarding: false,
+        }),
+    }),
+    {
+      name: "auth-storage",
+      storage: createJSONStorage(() => AsyncStorage),
+
+      partialize: (state) => ({
+        user: state.user,
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
+      }),
+    }
+  )
+);
+
 export default useAuthStore;

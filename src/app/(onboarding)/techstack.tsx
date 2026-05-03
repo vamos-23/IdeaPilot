@@ -1,27 +1,27 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native";
-import { sc, ms, vs } from "../../constants/responsive";
-import { useState } from "react";
-import { Code } from "lucide-react-native";
-import UserIconLogo from "@/src/components/UserIconLogo";
-import { Image } from "expo-image";
-import ButtonGroup from "@/src/components/ButtonGroup";
-import useThemeStore from "@/src/store/useThemeStore";
 import AddButton from "@/src/components/AddButton";
+import ButtonGroup from "@/src/components/ButtonGroup";
+import SkillTag from "@/src/components/SkillTag";
+import UserIconLogo from "@/src/components/UserIconLogo";
+import useSkillStore from "@/src/store/useSkillStore";
+import useThemeStore from "@/src/store/useThemeStore";
 import { clsx } from "clsx";
 import * as Crypto from "expo-crypto";
+import { Image } from "expo-image";
+import { Code } from "lucide-react-native";
+import { useState } from "react";
+import {
+  Alert,
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { popularTechStacks } from "../../constants/popularTechStacks";
-import useSkillStore from "@/src/store/useSkillStore";
-import SkillTag from "@/src/components/SkillTag";
+import { ms, sc, vs } from "../../constants/responsive";
 import Skill from "../../constants/types";
 
 export default function TechStack() {
@@ -41,12 +41,12 @@ export default function TechStack() {
     if (!trimmedSkill) return;
     if (
       skills.some(
-        (skill) => skill.stackName.toLowerCase() === trimmedSkill.toLowerCase()
+        (skill) => skill.stackName.toLowerCase() === trimmedSkill.toLowerCase(),
       )
     ) {
       Alert.alert(
         "Duplicate Skill Name",
-        `${trimmedSkill} has already been added!`
+        `${trimmedSkill} has already been added!`,
       );
       setNewSkill("");
       Keyboard.dismiss();
@@ -66,12 +66,12 @@ export default function TechStack() {
       skills.some(
         (skill) =>
           skill.stackName.toLowerCase() ===
-          selectedSkill.stackName.toLowerCase()
+          selectedSkill.stackName.toLowerCase(),
       )
     ) {
       Alert.alert(
         "Duplicate Skill Name",
-        `${selectedSkill.stackName} has already been added!`
+        `${selectedSkill.stackName} has already been added!`,
       );
       return;
     }
@@ -156,7 +156,7 @@ export default function TechStack() {
                 "bg-slate-300 dark:bg-[#293253] mb-5",
                 isFocus
                   ? "border-blue-600 dark:border-blue-600"
-                  : "border-[#307ae8b5] dark:border-blue-800"
+                  : "border-[#307ae8b5] dark:border-blue-800",
               )}
             >
               <TextInput

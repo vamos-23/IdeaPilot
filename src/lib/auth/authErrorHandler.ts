@@ -38,6 +38,7 @@ export const handleFirebaseAuthError = (error: any, router: any) => {
       Alert.alert("Weak Password", "Your password is too weak.");
       break;
     default:
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      //Alert.alert("Error", "Something went wrong. Please try again.");
+      console.log("Error :", error);
   }
 };

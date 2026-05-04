@@ -12,7 +12,7 @@ import useThemeStore from "../store/useThemeStore";
 type GradientButtonProps = {
   buttonText: string;
   loadingText?: string;
-  isDisabled: boolean;
+  isDisabled?: boolean;
   isLoading?: boolean;
   isDelete?: boolean;
   onSubmit: () => void;
@@ -21,53 +21,56 @@ type GradientButtonProps = {
 export default function SubmitButton({
   buttonText,
   loadingText,
-  isDisabled,
-  isLoading,
-  isDelete,
+  isDisabled = false,
+  isLoading = false,
+  isDelete = false,
   onSubmit,
 }: GradientButtonProps) {
   const { theme } = useThemeStore();
+  const isDark = theme === "dark";
+
+  const gradientColors: [string, string] = isDelete
+    ? ["#ef4444", "#dc2626"]
+    : ["#f97316", "#ea580c"];
+
+  const activeColors: [string, string] =
+    isDisabled && !isLoading
+      ? isDark
+        ? ["#334155", "#1e293b"]
+        : ["#cbd5e1", "#94a3b8"]
+      : gradientColors;
+
   return (
     <Pressable
       onPress={onSubmit}
       disabled={isDisabled || isLoading}
       style={({ pressed }) => [
-        { opacity: pressed ? 0.7 : 1 },
         shapes.pressableContainer,
+        { transform: [{ scale: pressed ? 0.97 : 1 }] },
+        (isDisabled || isLoading) && shapes.disabledState,
       ]}
     >
       <LinearGradient
-        colors={
-          isDelete
-            ? theme === "light"
-              ? ["#dc2626", "#dc2626"]
-              : ["#ef4444", "#ef4444"]
-            : ["#3b82f6", "#9333ea"]
-        }
-        start={{ x: 0, y: 1 }}
+        colors={activeColors}
+        start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[
-          shapes.button,
-          (isDisabled || isLoading) && shapes.disabledButton,
-        ]}
+        style={shapes.button}
       >
         {isLoading ? (
-          <View className="flex-row gap-2">
-            <ActivityIndicator
-              size="small"
-              color={theme === "light" ? "#ffffff" : "#040607"}
-            />
+          <View className="flex-row items-center gap-x-2">
+            <ActivityIndicator size="small" color="#ffffff" />
             <Text
               style={shapes.buttonText}
-              className="text-white dark:text-[#040607]"
+              // Utilizing your custom font!
+              className="text-white font-nata-sans-bold tracking-wide"
             >
-              {loadingText}
+              {loadingText || "Processing..."}
             </Text>
           </View>
         ) : (
           <Text
             style={shapes.buttonText}
-            className="text-white dark:text-[#040607]"
+            className="text-white font-nata-sans-bold tracking-wide"
           >
             {buttonText}
           </Text>
@@ -80,21 +83,27 @@ export default function SubmitButton({
 const shapes = StyleSheet.create({
   pressableContainer: {
     width: "100%",
+
+    shadowColor: "#ea580c",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
   },
   button: {
     width: "100%",
-    height: vs(44),
-    borderRadius: ms(10),
-    padding: ms(10),
+    height: vs(52),
+    borderRadius: ms(16),
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: ms(20),
   },
-  disabledButton: {
-    opacity: 0.55,
+  disabledState: {
+    opacity: 0.65,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
-    fontSize: ms(18),
-    fontWeight: "500",
-    justifyContent: "center",
+    fontSize: ms(16),
   },
 });

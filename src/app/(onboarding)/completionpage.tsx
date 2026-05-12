@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, StyleSheet } from "react-native";
-import { sc, ms, vs } from "../../constants/responsive";
-import UserIconLogo from "@/src/components/UserIconLogo";
-import { Rocket, Code } from "lucide-react-native";
 import ButtonGroup from "@/src/components/ButtonGroup";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
+import UserIconLogo from "@/src/components/UserIconLogo";
 import useSkillStore from "@/src/store/useSkillStore";
 import useThemeStore from "@/src/store/useThemeStore";
+import { Code, Rocket } from "lucide-react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ms, sc, vs } from "../../constants/responsive";
 
 export default function CompletionScreen() {
   const { skills } = useSkillStore();

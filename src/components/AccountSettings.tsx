@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Alert } from "react-native";
-import { sc, vs } from "./../constants/responsive";
-import useThemeStore from "../store/useThemeStore";
 import { Trash2 } from "lucide-react-native";
-import SubmitButton from "./SubmitButton";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import handleDeleteAccount from "../lib/account/handleDeleteAccount";
+import useThemeStore from "../store/useThemeStore";
+import { sc, vs } from "./../constants/responsive";
+import SubmitButton from "./SubmitButton";
 
 export default function AccountSettings() {
   const { theme } = useThemeStore();

@@ -5,6 +5,7 @@ import { Alert, Platform } from "react-native";
 import { auth } from "../../../../config/FirebaseConfig";
 
 const TOKEN_KEY = "expo_push_token";
+const BASE_URL = "https://ideapilot-api-dev.onrender.com";
 
 async function requestNotificationPermission(): Promise<string | undefined> {
   try {
@@ -34,7 +35,7 @@ async function getPushToken(): Promise<string | void> {
   }
 
   const expoConfig =
-    (Constants as any).default?.expoConfig || (Constants as any).expoConfig; 
+    (Constants as any).default?.expoConfig || (Constants as any).expoConfig;
   const projectId =
     expoConfig?.extra?.eas?.projectId ??
     (Constants as any).easConfig?.projectId;
@@ -68,7 +69,7 @@ async function syncPushToken(
 
     const idToken = await user.getIdToken();
     const response = await fetch(
-      "https://custom-api.com/api/users/push-token",
+      `${BASE_URL}/api/users/push-token`,
       {
         method: "POST",
         headers: {

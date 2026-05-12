@@ -1,10 +1,10 @@
 import { CodeSquare } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
+import useSkillStore from "../store/useSkill";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
-import SubmitButton from "./SubmitButton";
 import SkillTag from "./SkillTag";
-import useSkillStore from "../store/useSkillStore";
+import SubmitButton from "./SubmitButton";
 type SkillsInfoProps = {
   onClick: () => void;
 };

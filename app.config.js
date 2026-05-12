@@ -27,7 +27,7 @@ export default ({ config }) => ({
   */
   android: {
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
-    googleServicesFile: "./google-services.json",
+    googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundColor: "#ffffff",
@@ -48,6 +48,7 @@ export default ({ config }) => ({
     "expo-router",
     "expo-font",
     "expo-asset",
+    "expo-web-browser",
     [
       "expo-splash-screen",
       {

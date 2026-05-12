@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { onAuthStateChanged, signOut, Unsubscribe } from "firebase/auth";
+import { onIdTokenChanged, signOut, Unsubscribe } from "firebase/auth";
 import { useEffect } from "react";
 import { auth } from "../../config/FirebaseConfig";
 import useAuthStore from "./useAuthStore";
@@ -19,7 +19,7 @@ export default function useAuthInitializer() {
         store.setOnboardingStatus(false);
       }
 
-      unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe = onIdTokenChanged(auth, async (user) => {
         console.log(
           "🔹 Firebase Auth state changed:",
           user ? "Logged in" : "Logged out",

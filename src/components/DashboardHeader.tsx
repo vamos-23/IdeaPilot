@@ -1,73 +1,88 @@
-import { View, Text } from "react-native";
-import { ProjectInfo } from "./ProjectInfo";
-import { Stats } from "../constants/types";
-import RefreshButton from "./RefreshButton";
-import { sc } from "../constants/responsive";
 import React from "react";
-import useThemeStore from "../store/useThemeStore";
+import { View, Text } from "react-native";
+import { sc } from "../constants/responsive";
+import { ProjectIdea } from "../constants/types";
+import { AnimatedTabBar } from "../animations/components/ideaTabs/AnimatedTabBar";
 
 type DashboardHeaderProps = {
   username: string | null | undefined;
-  statistics: Stats[];
+  isDark: boolean;
+  userId: string;
+  isBookmarked: boolean;
+  toggleBookmark: (item: ProjectIdea, userId: string) => void;
+  loading: boolean;
 };
 
-const DashboardHeader = ({ username, statistics }: DashboardHeaderProps) => {
-  const { theme } = useThemeStore();
+const DashboardHeader = ({
+  username,
+  isDark,
+  userId,
+  toggleBookmark,
+  loading,
+}: DashboardHeaderProps) => {
   return (
-    <View className="pt-8 mb-6">
-      <View className="flex-row justify-between items-start mb-10">
+    <View className="pt-12 mb-3 px-6">
+      <View className="flex-row justify-between items-start mb-6">
         <View className="flex-1">
           <Text
             className="text-slate-900 dark:text-white font-nata-sans-bold tracking-tight"
-            style={{ fontSize: sc(28) }}
+            style={{
+              fontSize: sc(26),
+            }}
           >
-            Hello, {username || "Guest"} 👋
+            Hello, {username || "Builder"} 👋
           </Text>
+
           <Text
-            className="text-slate-500 dark:text-slate-400 font-nata-sans-medium mt-1.5"
-            style={{ fontSize: sc(15) }}
+            className="text-slate-500 dark:text-slate-400 font-nata-sans-medium mt-2"
+            style={{
+              fontSize: sc(15),
+            }}
           >
             Ready to work on your next project?
           </Text>
         </View>
       </View>
-      <View>
+
+      {/* <View className="mb-5">
         <View className="flex-row items-center mb-5">
           <Text
             className="text-orange-600 dark:text-orange-500 font-nata-sans-bold uppercase tracking-[2px]"
-            style={{ fontSize: sc(11) }}
-          >
-            Your Progress
-          </Text>
-          <View
-            className="flex-1 ml-4"
             style={{
-              height: 2,
-              backgroundColor: theme === "light" ? "#ea580c" : "#f97316",
-              opacity: 0.7,
-              borderRadius: 1,
+              fontSize: sc(11),
             }}
-          />
+          >
+            🔥 Project of the Week
+          </Text>
+
+          <View className="flex-1 ml-4 h-[1px] bg-orange-600/70 dark:bg-orange-500/70 rounded-full" />
         </View>
 
-        <View className="gap-y-4">
-          {statistics.map((stat, index) => (
-            <ProjectInfo key={index} {...stat} />
-          ))}
-        </View>
+        {showSkeleton ? (
+          <SkeletonProjectCard />
+        ) : (
+          <ProjectCard
+            item={featuredProject}
+            isDark={isDark}
+            userId={userId}
+            toggleBookmark={toggleBookmark}
+          />
+        )}
+      </View> */}
+
+      <View className="flex-row items-center h-[40px] mb-5">
+        <Text
+          className="text-orange-600 dark:text-orange-500 font-nata-sans-bold uppercase tracking-[2px]"
+          style={{
+            fontSize: sc(11),
+          }}
+        >
+          💡 Your Projects
+        </Text>
+
+        <View className="flex-1 ml-4 h-[1px] bg-orange-600/70 dark:bg-orange-500/70 rounded-full" />
       </View>
-      <View className="flex-row justify-between items-center pt-6">
-        <View className="flex-1">
-          <Text
-            className="text-slate-900 dark:text-white font-nata-sans-bold"
-            style={{ fontSize: sc(20) }}
-          >
-            Recommended Projects
-          </Text>
-          <View className="h-[1px] w-[280px] bg-orange-600 dark:bg-orange-500/50 rounded-full mt-2" />
-        </View>
-        <RefreshButton />
-      </View>
+      <AnimatedTabBar />
     </View>
   );
 };

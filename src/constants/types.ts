@@ -3,10 +3,13 @@ export default interface Skill {
   stackName: string;
   category?: string;
 }
+
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+export type TabType = "discover" | "bookmarked" | "ai";
 
 export interface ProjectIdea {
   id: string;
+  isAIGenerated?: boolean;
   category: string;
   description: string;
   difficulty: Difficulty;
@@ -20,9 +23,3 @@ export interface ProjectIdea {
   whatYouWillLearn: string[];
 }
 
-export interface Stats {
-  title: string;
-  value: number;
-  textColor: string;
-  icon: React.ReactNode;
-}

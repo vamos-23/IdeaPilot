@@ -61,7 +61,6 @@ export default function SubmitButton({
             <ActivityIndicator size="small" color="#ffffff" />
             <Text
               style={shapes.buttonText}
-              // Utilizing your custom font!
               className="text-white font-nata-sans-bold tracking-wide"
             >
               {loadingText || "Processing..."}

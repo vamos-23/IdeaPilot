@@ -13,8 +13,12 @@ export const toastConfig = {
         style={{
           borderLeftColor: "#22C55E",
           backgroundColor: isDark ? "#052e1a" : "#ECFDF5",
+          height: "auto",
+          paddingVertical: 12,
         }}
         contentContainerStyle={{ paddingHorizontal: 10 }}
+        text1NumberOfLines={0}
+        text2NumberOfLines={0}
         text1Style={{
           fontSize: 15,
           fontWeight: "600",
@@ -23,7 +27,7 @@ export const toastConfig = {
         text2Style={{
           fontSize: 13,
           color: isDark ? "#86efac" : "#047857",
-          flexWrap: 'wrap'
+          flexWrap: "wrap",
         }}
       />
     );
@@ -39,7 +43,11 @@ export const toastConfig = {
         style={{
           borderLeftColor: "#EF4444",
           backgroundColor: isDark ? "#3f0d0d" : "#FEF2F2",
+          height: "auto",
+          paddingVertical: 12,
         }}
+        text1NumberOfLines={0}
+        text2NumberOfLines={0}
         text1Style={{
           fontSize: 15,
           fontWeight: "600",
@@ -48,7 +56,7 @@ export const toastConfig = {
         text2Style={{
           fontSize: 13,
           color: isDark ? "#fca5a5" : "#991B1B",
-          flexWrap: 'wrap'
+          flexWrap: "wrap",
         }}
       />
     );
@@ -64,8 +72,12 @@ export const toastConfig = {
         style={{
           borderLeftColor: "#3B82F6",
           backgroundColor: isDark ? "#0a1e3a" : "#EFF6FF",
+          height: "auto",
+          paddingVertical: 12,
         }}
         contentContainerStyle={{ paddingHorizontal: 14 }}
+        text1NumberOfLines={0}
+        text2NumberOfLines={0}
         text1Style={{
           fontSize: 15,
           fontWeight: "600",
@@ -73,7 +85,38 @@ export const toastConfig = {
         }}
         text2Style={{
           fontSize: 13,
+          flexWrap: "wrap",
           color: isDark ? "#93c5fd" : "#1D4ED8",
+        }}
+      />
+    );
+  },
+
+  warning: (props: BaseToastProps) => {
+    const { theme } = useThemeStore.getState();
+    const isDark = theme === "dark";
+
+    return (
+      <BaseToast
+        {...props}
+        style={{
+          borderLeftColor: "#F59E0B",
+          backgroundColor: isDark ? "#2d1a05" : "#FFFBEB",
+          height: "auto",
+          paddingVertical: 12,
+        }}
+        contentContainerStyle={{ paddingHorizontal: 14 }}
+        text1NumberOfLines={0}
+        text2NumberOfLines={0}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "700",
+          color: isDark ? "#fcd34d" : "#92400E",
+        }}
+        text2Style={{
+          fontSize: 13,
+          color: isDark ? "#fbbf24" : "#B45309",
+          flexWrap: "wrap",
         }}
       />
     );

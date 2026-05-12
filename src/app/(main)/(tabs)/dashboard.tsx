@@ -1,101 +1,168 @@
-import { SkeletonProjectCard } from "@/src/animations/components/SkeletonProjectCard";
-import { AnimatedProjectCard } from "@/src/animations/components/AnimatedProjectCard";
-import { ProjectIdea, Stats } from "@/src/constants/types";
-import useAuthStore from "@/src/store/useAuthStore";
+import { SkeletonProjectCard } from "@/src/animations/components/projectCards/SkeletonProjectCard";
+import { ProjectCard } from "@/src/components/ProjectCard";
+import DashboardHeader from "@/src/components/DashboardHeader";
+import { ProjectIdea } from "@/src/constants/types";
+import { sc, vs } from "@/src/constants/responsive";
 import { useIdeas } from "@/src/store/useIdeas";
 import useThemeStore from "@/src/store/useThemeStore";
-import { FlashList } from "@shopify/flash-list";
-import { Bookmark, CircleCheck, CirclePlay, Clock } from "lucide-react-native";
-import { useCallback, useEffect, useMemo } from "react";
-import { View } from "react-native";
-import DashboardHeader from "@/src/components/DashboardHeader";
-import { sc, vs } from "../../../constants/responsive";
+import useAuthStore from "@/src/store/useAuthStore";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { View, Text } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Toast from "react-native-toast-message";
+
+const SKELETON_DATA = Array.from(
+  { length: 6 },
+  (_, i) =>
+    ({
+      id: `skeleton-${i}`,
+    }) as ProjectIdea,
+);
+
+const EmptyListState = () => (
+  <View
+    className="flex-1 justify-center items-center"
+    style={{ minHeight: vs(300) }}
+  >
+    <View className="items-center gap-3">
+      <Ionicons name="server-outline" size={90} color="#ea580c" />
+
+      <Text className="font-nata-sans-bold text-textLight dark:text-white text-2xl">
+        No items found!
+      </Text>
+    </View>
+  </View>
+);
+
+const renderSeparator = () => <View className="h-4" />;
 
 export default function Dashboard() {
-  const { theme } = useThemeStore();
-  const isDark = theme === "dark";
-  const { ideas, fetchInitialIdeas, loading } = useIdeas();
-  const { user } = useAuthStore();
-  const username = user?.userName;
+  const userId = useAuthStore((state) => state.user?.userId || "");
+  const username = useAuthStore((state) => state.user?.userName || "Builder");
+  const appTheme = useThemeStore((state) => state.theme);
+  const isDark = appTheme === "dark";
+  const flashListRef = useRef<FlashListRef<ProjectIdea>>(null);
+  const fetchInitialIdeas = useIdeas((state) => state.fetchInitialIdeas);
+  const refreshFeedRateLimiter = useIdeas(
+    (state) => state.refreshFeedRateLimiter,
+  );
+  const refreshing = useIdeas((state) => state.refreshing);
+  const bookmarkedIdeas = useIdeas((state) => state.bookmarkedIdeas);
+  const aiIdeas = useIdeas((state) => state.aiIdeas);
+  const activeTab = useIdeas((state) => state.activeTab);
+  const loading = useIdeas((state) => state.loading);
+  const recommendedIdeas = useIdeas((state) => state.recommendedIdeas);
+  const toggleBookmark = useIdeas((state) => state.toggleBookmarkIdea);
+
+  const isDiscover = activeTab === "discover";
+
+  const handleRefresh = async () => {
+    const response = await refreshFeedRateLimiter();
+    if (response.allowed) {
+      Toast.show({
+        type: "success",
+        text1: "Feed Updated 🎉",
+        text2: `Refreshed Discover Feed successfull!!`,
+        topOffset: vs(33),
+      });
+    }
+    if (!response.allowed && response.reason === "cooldown") {
+      Toast.show({
+        type: "warning",
+        text1: "WHOA! Take a breather! 🥵",
+        text2: "You have reached refresh limit. Please wait for 2 minutes.",
+        topOffset: vs(35),
+      });
+    }
+    return;
+  };
+  useEffect(() => {
+    if (!flashListRef.current) return;
+    flashListRef.current.scrollToTop({
+      animated: true,
+    });
+  }, [activeTab]);
 
   useEffect(() => {
-    fetchInitialIdeas();
-  }, []);
-
-  const list: ProjectIdea[] = useMemo(() => {
-    if (loading) {
-      return Array.from(
-        { length: 6 },
-        (_, i) => ({ id: `skeleton-${i}` }) as ProjectIdea,
-      );
+    if (userId) {
+      fetchInitialIdeas(userId);
     }
-    return ideas || [];
-  }, [loading, ideas]);
+  }, [fetchInitialIdeas, userId]);
 
-  const stats: Stats[] = useMemo(
-    () => [
-      {
-        title: "Total Saved",
-        value: 0,
-        textColor: isDark ? "#94a3b8" : "#64748b",
-        icon: (
-          <Bookmark
-            stroke={isDark ? "#94a3b8" : "#64748b"}
-            size={sc(22)}
-            strokeWidth={2.5}
-          />
-        ),
-      },
-      {
-        title: "Building",
-        value: 0,
-        textColor: "#3b82f6",
-        icon: <CirclePlay stroke="#3b82f6" size={sc(22)} strokeWidth={2.5} />,
-      },
-      {
-        title: "Mastered",
-        value: 0,
-        textColor: "#10b981",
-        icon: <CircleCheck stroke="#10b981" size={sc(22)} strokeWidth={2.5} />,
-      },
-      {
-        title: "Next Up",
-        value: 0,
-        textColor: "#f59e0b",
-        icon: <Clock stroke="#f59e0b" size={sc(22)} strokeWidth={2.5} />,
-      },
-    ],
-    [isDark],
-  );
+  const list = useMemo(() => {
+    if (loading) {
+      return SKELETON_DATA;
+    }
+
+    switch (activeTab) {
+      case "discover":
+        return recommendedIdeas;
+
+      case "bookmarked":
+        return bookmarkedIdeas;
+
+      case "ai":
+        return aiIdeas;
+
+      default:
+        return recommendedIdeas;
+    }
+  }, [loading, activeTab, recommendedIdeas, bookmarkedIdeas, aiIdeas]);
 
   const renderIdeas = useCallback(
-    ({ item, index }: { item: ProjectIdea; index: number }) => {
-      if (loading || (item.id && item.id.startsWith("skeleton"))) {
+    ({ item }: { item: ProjectIdea }) => {
+      if (item.id.startsWith("skeleton")) {
         return <SkeletonProjectCard />;
       }
-      return <AnimatedProjectCard item={item} index={index} />;
+
+      return (
+        <ProjectCard
+          item={item}
+          isDark={isDark}
+          userId={userId}
+          toggleBookmark={toggleBookmark}
+        />
+      );
     },
-    [loading],
+    [isDark, userId, toggleBookmark],
   );
+
+  const getItemType = useCallback((item: ProjectIdea) => {
+    return item.id.startsWith("skeleton") ? "skeleton" : "card";
+  }, []);
 
   return (
     <View className="bg-brandLight dark:bg-brandDark flex-1">
+      <DashboardHeader
+        username={username}
+        isDark={isDark}
+        userId={userId}
+        isBookmarked
+        toggleBookmark={toggleBookmark}
+        loading={loading}
+      />
+
       <FlashList
+        ref={flashListRef}
         data={list}
-        keyExtractor={(item, index) =>
-          loading ? `skeleton-${index}` : item.id
-        }
+        keyExtractor={(item) => item.id}
         renderItem={renderIdeas}
-        ListHeaderComponent={
-          <DashboardHeader username={username} statistics={stats} />
-        }
-        contentContainerStyle={{
-          backgroundColor: "transparent",
-          paddingHorizontal: sc(20),
-          paddingBottom: vs(70),
-          paddingTop: vs(10),
-        }}
+        getItemType={getItemType}
+        //@ts-ignore
+        estimatedItemSize={190}
+        drawDistance={400}
+        estimatedFirstItemOffset={0}
+        ListEmptyComponent={loading ? null : EmptyListState}
+        onRefresh={handleRefresh}
+        refreshing={isDiscover && refreshing}
+        ItemSeparatorComponent={renderSeparator}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: sc(20),
+          paddingBottom: vs(80),
+          flexGrow: 1,
+        }}
       />
     </View>
   );

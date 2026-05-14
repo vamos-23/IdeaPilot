@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
@@ -8,8 +7,8 @@ module.exports = {
       colors: {
         brandLight: "#F1F5F9",
         cardLight: "#FFFFFF",
-        brandDark: "#011035",
-        cardDark: "#111E43",
+        brandDark: "#0F1D3A",
+        cardDark: "#1A2E52",
         textLight: "#082F32",
         textDark: "#94a3b8",
       },

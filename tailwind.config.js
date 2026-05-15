@@ -1,3 +1,4 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
@@ -6,11 +7,15 @@ module.exports = {
     extend: {
       colors: {
         brandLight: "#F1F5F9",
+        brandDark: "#0B0F17",
         cardLight: "#FFFFFF",
-        brandDark: "#0F1D3A",
-        cardDark: "#1A2E52",
-        textLight: "#082F32",
-        textDark: "#94a3b8",
+        cardDark: "#131926", 
+        textLight: "#0F172A", 
+        textDark: "#94A3B8", 
+        accent: {
+          light: "#4338CA",
+          dark: "#818CF8", 
+        },
       },
       fontFamily: {
         "nata-sans-bold": ["Nata-Sans-Bold"],
@@ -18,4 +23,5 @@ module.exports = {
       },
     },
   },
+  plugins: [],
 };

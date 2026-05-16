@@ -8,6 +8,7 @@ const THEME_BACKGROUNDS = {
 
 export default function RootLayout() {
   const isDark = useThemeStore((s) => s.theme) === "dark";
+
   const currentBgColor = isDark
     ? THEME_BACKGROUNDS.dark
     : THEME_BACKGROUNDS.light;
@@ -16,25 +17,27 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: "slide_from_bottom",
-        contentStyle: { backgroundColor: currentBgColor },
+        contentStyle: {
+          backgroundColor: currentBgColor,
+        },
       }}
     >
       <Stack.Screen
         name="(tabs)"
         options={{
-          presentation: "card",
+          animation: "slide_from_right",
         }}
       />
+
       <Stack.Screen
         name="aisuggestion"
         options={{
-          presentation: "modal",
-          contentStyle: { backgroundColor: "transparent" },
+          presentation: "transparentModal",
           animation: "slide_from_bottom",
-          animationDuration: 1100,
-          animationTypeForReplace: "push",
-        }}  
+          contentStyle: {
+            backgroundColor: "transparent",
+          },
+        }}
       />
     </Stack>
   );

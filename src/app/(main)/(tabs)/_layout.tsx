@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { sc, vs } from "../../../constants/responsive";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 const DESIGN_TOKENS = {
   dark: {
@@ -49,7 +50,7 @@ export default function TabsMainLayout() {
   const ring2Opacity = useSharedValue(0.1);
   const coreScale = useSharedValue(1);
 
-  const isAiScreenActive = segments[2] === "aisuggestion";
+  const isAiScreenActive = segments[segments.length - 1] === "aisuggestion";
 
   useEffect(() => {
     ring1Scale.value = withRepeat(
@@ -113,7 +114,7 @@ export default function TabsMainLayout() {
         tabBarShowLabel: false,
         sceneStyle: { backgroundColor: t.fabBg },
       }}
-      tabBar={(props) => {
+      tabBar={(props: BottomTabBarProps) => {
         if (isAiScreenActive) return null;
 
         const { state, navigation } = props;
@@ -158,7 +159,7 @@ export default function TabsMainLayout() {
 
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => router.push("/aisuggestion")}
+                onPress={() => router.navigate("/aisuggestion")}
                 style={styles.fabContainer}
               >
                 <View style={styles.fabOuter}>

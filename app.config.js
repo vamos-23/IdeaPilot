@@ -28,6 +28,7 @@ export default ({ config }) => ({
   android: {
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
     googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
+    softwareKeyboardLayoutMode: "resize",
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundColor: "#ffffff",

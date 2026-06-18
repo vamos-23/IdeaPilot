@@ -6,7 +6,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import "../../global.css";
 import LoadingScreen from "../components/LoadingScreen";
@@ -15,6 +15,9 @@ import usePermissionListener from "../services/notifications/hook/usePermissionL
 import useAuthInitializer from "../store/useAuthInitializer";
 import useAuthStore from "../store/useAuthStore";
 import useThemeStore from "../store/useThemeStore";
+import { StatusBar } from "expo-status-bar";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,11 +31,19 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+    },
+  },
+});
+
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { authInitialized, user, hasCompletedOnboarding } = useAuthStore();
-  const { theme } = useThemeStore();
+  const appTheme = useThemeStore((s) => s.theme);
   const { setColorScheme } = useColorScheme();
   const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
   const [handledInitialNotification, setHandleNotification] =
@@ -40,6 +51,7 @@ export default function RootLayout() {
   const [launchedFromNotification, setLaunchedFromNotification] =
     useState<boolean>(false);
   const isAuthenticated = user !== null;
+  const isDark = appTheme === "dark";
 
   useAuthInitializer();
   useCheckPushStatus();
@@ -62,8 +74,8 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    setColorScheme(theme);
-  }, [setColorScheme, theme]);
+    setColorScheme(appTheme);
+  }, [setColorScheme, appTheme]);
 
   useEffect(() => {
     if (!authInitialized || !fontsLoaded || !handledInitialNotification) return;
@@ -133,19 +145,26 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView
-        style={{ flex: 1 }}
-        edges={["top", "bottom", "left", "right"]}
-        className="bg-brandLight dark:bg-brandDark"
-      >
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(onboarding)" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(main)" />
-        </Stack>
-        <Toast config={toastConfig} />
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <StatusBar style={isDark ? "light" : "dark"} translucent backgroundColor="transparent" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "ios_from_right",
+              contentStyle: {
+                backgroundColor: isDark ? "#0B0F17" : "#F1F5F9",
+              },
+            }}
+          >
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(main)" />
+          </Stack>
+          <Toast config={toastConfig} />
+        </KeyboardProvider>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }

@@ -148,11 +148,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
         <KeyboardProvider>
-          <StatusBar
-            style={isDark ? "light" : "dark"}
-            translucent
-            backgroundColor="transparent"
-          />
+          <StatusBar style={isDark ? "light" : "dark"} translucent backgroundColor="transparent" />
           <Stack
             screenOptions={{
               headerShown: false,

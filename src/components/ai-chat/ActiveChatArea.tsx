@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { KeyboardChatScrollView } from "react-native-keyboard-controller";
-import { SharedValue } from "react-native-reanimated";
+import { withTiming, SharedValue } from "react-native-reanimated";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import AnimatedEmptyScreen from "./AnimatedEmptyScreen";
 import UserBubble from "./UserBubble";
@@ -22,14 +22,14 @@ import {
   useCallback,
   useImperativeHandle,
   useRef,
-  //useState,
+  useState,
 } from "react";
 import { useChatMessages } from "@/src/store/useChatQueries";
 import useAuthStore from "@/src/store/useAuthStore";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-//import RNEventSource from "react-native-sse";
+import RNEventSource from "react-native-sse";
 
 export interface ActiveChatAreaRef {
   sendMessage: (prompt: string) => void;
@@ -95,21 +95,12 @@ export function ActiveChatArea({
     fetchNextPage,
   } = useChatMessages(chatId);
   const messages = chatMessages?.pages.flatMap((page) => page.messages) || [];
-  //const [isStreaming, setStreaming] = useState<boolean>(false);
+  const [isStreaming, setStreaming] = useState<boolean>(false);
 
   useImperativeHandle(ref, () => ({
     sendMessage: (prompt: string) => handleSendPrompt(prompt),
-    //streamStatus: isStreaming,
+    streamStatus: isStreaming,
   }));
-
-  const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
-      if (messages.length > 0) {
-        flashListRef.current?.scrollToEnd({ animated: true });
-        chatScrollViewRef.current?.scrollToEnd({ animated: true });
-      }
-    });
-  }, [messages.length]);
 
   function handleSendPrompt(prompt: string) {
     let currentChatId = chatId;
@@ -135,7 +126,7 @@ export function ActiveChatArea({
 
     queryClient.setQueryData(
       ["messages", currentChatId],
-      (oldData: InfiniteData<MessagePage> | undefined) => {
+      (oldData: InfiniteData<MessagePage>) => {
         const oldPages = oldData?.pages || [];
         const oldPageParams = oldData?.pageParams || [];
 
@@ -161,94 +152,85 @@ export function ActiveChatArea({
         };
       },
     );
-    requestAnimationFrame(scrollToBottom);
-    //responseStreaming(assistantId, userId, currentChatId, prompt);
+    responseStreaming(assistantId, userId, currentChatId, prompt);
   }
 
-  // async function responseStreaming(
-  //   assistantId: string,
-  //   userId: string,
-  //   currentChatId: string,
-  //   promptText: string,
-  // ) {
-  //   let currentText = "";
-  //   blankSpace.value = 350;
-  //   setStreaming(true);
+  async function responseStreaming(
+    assistantId: string,
+    userId: string,
+    currentChatId: string,
+    promptText: string,
+  ) {
+    let currentText = "";
+    blankSpace.value = 350;
+    setStreaming(true);
 
-  //   const params = new URLSearchParams({
-  //     prompt: promptText,
-  //     useMessageId: userId,
-  //     assistantMessageId: assistantId,
-  //   });
-  //   const url = `http://192.168.1.12:3000/chats/${currentChatId}/stream?${params.toString()}`;
+    const params = new URLSearchParams({
+      prompt: promptText,
+      useMessageId: userId,
+      assistantMessageId: assistantId,
+    });
+    const url = `http://192.168.1.12:3000/chats/${currentChatId}/stream?${params.toString()}`;
 
-  //   const eventSource = new RNEventSource(url, {
-  //     method: "GET",
-  //     headers: {
-  //       Accept: "text/event-stream",
-  //     },
-  //   });
+    const eventSource = new RNEventSource(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "text/event-stream",
+      },
+    });
 
-  //   eventSource.addEventListener("message", (event) => {
-  //     if (!event.data || event.data === "[DONE]") {
-  //       eventSource.close();
-  //       setStreaming(false);
-  //       blankSpace.value = withTiming(0, { duration: 250 });
+    eventSource.addEventListener("message", (event) => {
+      if (event.data === "[DONE]") {
+        eventSource.close();
+        setStreaming(false);
+        return;
+      }
+      try {
+        const parsed = JSON.parse(event.data!);
+        if (parsed.text) {
+          currentText += parsed.text;
 
-  //       queryClient.setQueryData(
-  //         ["messages", currentChatId],
-  //         (oldData: InfiniteData<MessagePage> | undefined) => {
-  //           if (!oldData?.pages) return oldData;
-  //           const newPages = [...oldData.pages];
-  //           const lastPageIndex = newPages.length - 1;
-  //           newPages[lastPageIndex] = {
-  //             ...newPages[lastPageIndex],
-  //             messages: newPages[lastPageIndex].messages.map((msg) =>
-  //               msg.id === assistantId ? { ...msg, isStreaming: false } : msg,
-  //             ),
-  //           };
-  //           return { ...oldData, pages: newPages };
-  //         },
-  //       );
-  //       return;
-  //     }
+          queryClient.setQueryData(
+            ["messages", currentChatId],
+            (oldData: InfiniteData<MessagePage>) => {
+              if (!oldData.pages) return oldData;
+              const newPages = [...oldData.pages];
+              const lastPageIndex = newPages.length - 1;
+              newPages[lastPageIndex] = {
+                ...newPages[lastPageIndex],
+                messages: newPages[lastPageIndex].messages.map((msg) =>
+                  msg.id === assistantId
+                    ? { ...msg, content: currentText, isStreaming: true }
+                    : msg,
+                ),
+              };
+              return { ...oldData, pages: newPages };
+            },
+          );
+        }
+      } catch (error) {
+        console.error("SSE JSON parsing error:", error);
+      } finally {
+        blankSpace.value = withTiming(0, { duration: 250 });
+        setStreaming(false);
+      }
+    });
+    eventSource.addEventListener("error", (error) => {
+      console.error("Streaming error:", error);
+      eventSource.close();
+      blankSpace.value = withTiming(0, { duration: 250 });
+      setStreaming(false);
+    });
+  }
 
-  //     try {
-  //       const parsed = JSON.parse(event.data);
-  //       if (parsed.text) {
-  //         currentText += parsed.text;
-
-  //         queryClient.setQueryData(
-  //           ["messages", currentChatId],
-  //           (oldData: InfiniteData<MessagePage> | undefined) => {
-  //             if (!oldData?.pages) return oldData;
-  //             const newPages = [...oldData.pages];
-  //             const lastPageIndex = newPages.length - 1;
-  //             newPages[lastPageIndex] = {
-  //               ...newPages[lastPageIndex],
-  //               messages: newPages[lastPageIndex].messages.map((msg) =>
-  //                 msg.id === assistantId
-  //                   ? { ...msg, content: currentText, isStreaming: true }
-  //                   : msg,
-  //               ),
-  //             };
-  //             return { ...oldData, pages: newPages };
-  //           },
-  //         );
-  //         requestAnimationFrame(scrollToBottom);
-  //       }
-  //     } catch (error) {
-  //       console.error("SSE JSON parsing error:", error);
-  //     }
-  //   });
-
-  //   eventSource.addEventListener("error", (error) => {
-  //     console.error("Streaming network error event emitted:", error);
-  //     eventSource.close();
-  //     setStreaming(false);
-  //     blankSpace.value = withTiming(0, { duration: 250 });
-  //   });
-  // }
+  const scrollToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (messages.length > 0) {
+        flashListRef.current?.scrollToEnd({ animated: true });
+        chatScrollViewRef.current?.scrollToEnd({ animated: true });
+      }
+    });
+  }, [messages.length]);
 
   const renderMessage = ({ item }: { item: Message }) => {
     const isUser = item.role === "user";
@@ -299,11 +281,17 @@ export function ActiveChatArea({
         //@ts-ignore
         estimatedItemSize={100}
         renderScrollComponent={renderScrollComponent}
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        onContentSizeChange={scrollToBottom}
+        onLayout={scrollToBottom}
+        onEndReachedThreshold={0.5}
         onEndReached={onScrollEndReached}
-        onEndReachedThreshold={0.2}
         contentContainerStyle={{
-          paddingTop: HEADER_HEIGHT + top,
-          paddingHorizontal: 16,
+          paddingTop: HEADER_HEIGHT + top + 20,
+          paddingHorizontal: 14,
+          paddingBottom: 0.5,
         }}
         ListFooterComponent={
           isFetchingNextPage ? (

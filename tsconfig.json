@@ -29,7 +29,7 @@
     ".expo/types/**/*.ts",
     "nativewind.d.ts",
     "nativewind-env.d.ts",
-    "src/services/notifications/hook/useCheckPushStatus.ts"
+    "src/services/notifications/hook/useCheckPushStatus.ts",
   ],
   "exclude": ["node_modules"]
 }

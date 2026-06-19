@@ -2,9 +2,6 @@
   "name": "ideapilot",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "overrides": {
-    "react-native": "0.81.5"
-  },
   "scripts": {
     "start": "expo start",
     "dev": "expo start --dev-client",
@@ -58,7 +55,6 @@
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-size-matters": "^0.4.2",
-    "react-native-sse": "^1.2.1",
     "react-native-svg": "15.12.1",
     "react-native-toast-message": "^2.3.3",
     "react-native-web": "~0.21.0",
@@ -66,7 +62,11 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^7.29.7",
+    "@babel/plugin-transform-private-methods": "^7.29.7",
+    "@babel/plugin-transform-private-property-in-object": "^7.29.7",
     "@types/react": "~19.1.0",
+    "babel-preset-expo": "^56.0.15",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "prettier-plugin-tailwindcss": "^0.5.11",

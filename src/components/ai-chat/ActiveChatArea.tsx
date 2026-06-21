@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { KeyboardChatScrollView } from "react-native-keyboard-controller";
-import { withTiming, SharedValue } from "react-native-reanimated";
+import { SharedValue } from "react-native-reanimated";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import AnimatedEmptyScreen from "./AnimatedEmptyScreen";
 import UserBubble from "./UserBubble";
@@ -22,14 +22,12 @@ import {
   useCallback,
   useImperativeHandle,
   useRef,
-  useState,
 } from "react";
 import { useChatMessages } from "@/src/store/useChatQueries";
 import useAuthStore from "@/src/store/useAuthStore";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import RNEventSource from "react-native-sse";
 
 export interface ActiveChatAreaRef {
   sendMessage: (prompt: string) => void;
@@ -95,11 +93,10 @@ export function ActiveChatArea({
     fetchNextPage,
   } = useChatMessages(chatId);
   const messages = chatMessages?.pages.flatMap((page) => page.messages) || [];
-  const [isStreaming, setStreaming] = useState<boolean>(false);
 
   useImperativeHandle(ref, () => ({
     sendMessage: (prompt: string) => handleSendPrompt(prompt),
-    streamStatus: isStreaming,
+
   }));
 
   function handleSendPrompt(prompt: string) {
@@ -152,7 +149,7 @@ export function ActiveChatArea({
         };
       },
     );
-    responseStreaming(assistantId, userId, currentChatId, prompt);
+    //responseStreaming(assistantId, userId, currentChatId, prompt);
   }
 
   async function responseStreaming(
@@ -161,66 +158,7 @@ export function ActiveChatArea({
     currentChatId: string,
     promptText: string,
   ) {
-    let currentText = "";
-    blankSpace.value = 350;
-    setStreaming(true);
-
-    const params = new URLSearchParams({
-      prompt: promptText,
-      useMessageId: userId,
-      assistantMessageId: assistantId,
-    });
-    const url = `http://192.168.1.12:3000/chats/${currentChatId}/stream?${params.toString()}`;
-
-    const eventSource = new RNEventSource(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "text/event-stream",
-      },
-    });
-
-    eventSource.addEventListener("message", (event) => {
-      if (event.data === "[DONE]") {
-        eventSource.close();
-        setStreaming(false);
-        return;
-      }
-      try {
-        const parsed = JSON.parse(event.data!);
-        if (parsed.text) {
-          currentText += parsed.text;
-
-          queryClient.setQueryData(
-            ["messages", currentChatId],
-            (oldData: InfiniteData<MessagePage>) => {
-              if (!oldData.pages) return oldData;
-              const newPages = [...oldData.pages];
-              const lastPageIndex = newPages.length - 1;
-              newPages[lastPageIndex] = {
-                ...newPages[lastPageIndex],
-                messages: newPages[lastPageIndex].messages.map((msg) =>
-                  msg.id === assistantId
-                    ? { ...msg, content: currentText, isStreaming: true }
-                    : msg,
-                ),
-              };
-              return { ...oldData, pages: newPages };
-            },
-          );
-        }
-      } catch (error) {
-        console.error("SSE JSON parsing error:", error);
-      } finally {
-        blankSpace.value = withTiming(0, { duration: 250 });
-        setStreaming(false);
-      }
-    });
-    eventSource.addEventListener("error", (error) => {
-      console.error("Streaming error:", error);
-      eventSource.close();
-      blankSpace.value = withTiming(0, { duration: 250 });
-      setStreaming(false);
-    });
+    
   }
 
   const scrollToBottom = useCallback(() => {

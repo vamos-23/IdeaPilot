@@ -10,7 +10,7 @@ type ThemeState = {
 const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: "dark", // system default or fallback to light mode
+      theme: "light", // system default or fallback to light mode
       toggleEnabled: false,
       toggleTheme: () =>
         set((state) => ({

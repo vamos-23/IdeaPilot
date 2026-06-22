@@ -1,6 +1,5 @@
 import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -12,6 +11,9 @@ import { Keyboard, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { auth } from "../../../config/FirebaseConfig";
 import { handleFirebaseAuthError } from "../../lib/auth/authErrorHandler";
+import useAuthStore from "@/src/store/useAuthStore";
+import useSkillStore from "@/src/store/useSkillStore";
+import { fetchUserSkills } from "@/src/services/users/users.onboarding";
 
 type SignInFormFields = {
   email: string;
@@ -22,12 +24,34 @@ export default function SignInScreen() {
   const router = useRouter();
   const { afterReauth } = useLocalSearchParams();
   const [loading, setButtonLoading] = useState<boolean>(false);
+
+  const setSkills = useSkillStore((s) => s.setSkills);
+  const toggleSync = useSkillStore((s) => s.toggleSync);
+  const logIn = useAuthStore((s) => s.logIn);
+  const setOnboardingStatus = useAuthStore((s) => s.setOnboardingStatus);
+
   const handleSignIn = useCallback(
     async (data: SignInFormFields) => {
       setButtonLoading(true);
       try {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
-        await new Promise((resolve) => setTimeout(resolve, 2300));
+        const userCredentials = await signInWithEmailAndPassword(
+          auth,
+          data.email,
+          data.password,
+        );
+        const authUser = userCredentials.user;
+        const userSkills = await fetchUserSkills(authUser.uid);
+
+        setSkills(userSkills);
+        toggleSync(true);
+        logIn({
+          userId: authUser.uid,
+          userEmail: authUser.email,
+          userName: authUser.displayName || "Guest",
+          techStack: userSkills,
+        });
+        setOnboardingStatus(true);
+
         console.log("Signed in successfully!");
         if (afterReauth === "delete") {
           await deleteFromBackend();
@@ -39,8 +63,9 @@ export default function SignInScreen() {
         setButtonLoading(false);
       }
     },
-    [router, afterReauth],
+    [router, afterReauth, setSkills, toggleSync, logIn, setOnboardingStatus],
   );
+
   const fields = useMemo(
     () => [
       {
@@ -70,6 +95,7 @@ export default function SignInScreen() {
     ],
     [],
   );
+
   return (
     <>
       <StatusBar style="auto" />
@@ -80,26 +106,28 @@ export default function SignInScreen() {
           extraScrollHeight={vs(15)}
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <ThemeToggleButton />
           <IdeaPilotLogo />
+
           <Text
             style={styles.title}
-            className="dark:text-white font-nata-sans-bold"
+            className="text-textLight dark:text-white font-nata-sans-bold mt-4"
           >
             IdeaPilot
           </Text>
           <Text
             style={styles.caption}
-            className="text-textLight dark:text-textDark font-medium"
+            className="text-slate-500 dark:text-textDark font-nata-sans-medium mb-6 text-center px-4"
           >
             AI-powered project discovery for developers
           </Text>
+
           <View
             style={styles.container}
-            className="border-gray-50 dark:border-gray-600 bg-brandLight dark:bg-formContainer elevation-xl dark:elevation-none"
+            className="bg-cardLight dark:bg-cardDark border border-borderLight dark:border-borderDark rounded-3xl shadow-sm dark:shadow-none w-full"
           >
-            <View style={styles.centerContent}>
+            <View style={styles.centerContent} className="p-6">
               <FormLayout<SignInFormFields>
                 title="Welcome Back!"
                 description="Enter your password to continue"

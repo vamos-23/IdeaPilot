@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
+    //"baseUrl": ".",
     "paths": {
       // "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
       "@/*": ["./*"]
@@ -20,14 +20,16 @@
   },
   "include": [
     "src/app",
+    "src/app/project",
     "src/components",
+    "src/animations",
     "config",
     "src/store",
     "expo-env.d.ts",
     ".expo/types/**/*.ts",
     "nativewind.d.ts",
     "nativewind-env.d.ts",
-    "src/services/notifications/hook/useCheckPushStatus.ts"
+    "src/services/notifications/hook/useCheckPushStatus.ts",
   ],
   "exclude": ["node_modules"]
 }

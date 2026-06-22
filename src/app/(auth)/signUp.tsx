@@ -1,20 +1,22 @@
 import { auth } from "@/config/FirebaseConfig";
 import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
-import ThemeToggleButton from "@/src/components/ThemeToggle";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { handleFirebaseAuthError } from "@/src/lib/auth/authErrorHandler";
+import useAuthStore from "@/src/store/useAuthStore";
+import useSkillStore from "@/src/store/useSkillStore";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   createUserWithEmailAndPassword,
-  updateProfile,
   sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
-import { Keyboard, Text, View, Alert } from "react-native";
+import { Alert, Keyboard, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { syncSkills } from "../../services/users/users.onboarding";
 
 type SignUpFormFields = {
   name: string;
@@ -24,7 +26,12 @@ type SignUpFormFields = {
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const setOnboardingStatus = useAuthStore((s) => s.setOnboardingStatus);
+  const logIn = useAuthStore((s) => s.logIn);
+  const skills = useSkillStore((s) => s.skills);
+  const toggleSync = useSkillStore((s) => s.toggleSync);
   const [loading, setButtonLoading] = useState<boolean>(false);
+
   const handleSignUp = useCallback(
     async (data: SignUpFormFields) => {
       setButtonLoading(true);
@@ -32,20 +39,40 @@ export default function SignUpScreen() {
         const userCredentials = await createUserWithEmailAndPassword(
           auth,
           data.email,
-          data.password
+          data.password,
         );
         const authUser = userCredentials.user;
         await updateProfile(authUser, { displayName: data.name });
-        await sendEmailVerification(userCredentials.user);
-        Alert.alert(
-          "Verify your email",
-          "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) "
-        );
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-        console.log("User signed up!");
-        console.log(authUser.displayName);
-        console.log(authUser.email);
-        console.log(authUser.uid);
+        await authUser.reload();
+        await sendEmailVerification(authUser);
+        
+        const result = await syncSkills(authUser.uid, skills);
+        if (result.success) {
+          logIn({
+            userId: authUser.uid,
+            userEmail: authUser.email,
+            userName: authUser.displayName || data.name,
+            techStack: skills,
+          });
+          toggleSync(true);
+          setOnboardingStatus(true);
+          Alert.alert(
+            "Verify your email",
+            "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) ",
+          );
+        } else {
+          logIn({
+            userId: authUser.uid,
+            userEmail: authUser.email,
+            userName: authUser.displayName || data.name,
+            techStack: skills,
+          });
+          setOnboardingStatus(true);
+          Alert.alert(
+            "Profile Error",
+            "Account created, but we couldn't back up your skills. You can retry syncing in your Settings screen.",
+          );
+        }
       } catch (error: any) {
         handleFirebaseAuthError(error, router);
         Keyboard.dismiss();
@@ -53,8 +80,9 @@ export default function SignUpScreen() {
         setButtonLoading(false);
       }
     },
-    [router]
+    [router, skills, toggleSync, setOnboardingStatus, logIn],
   );
+
   const fields = useMemo(
     () => [
       {
@@ -87,8 +115,9 @@ export default function SignUpScreen() {
         },
       },
     ],
-    []
+    [],
   );
+
   return (
     <>
       <StatusBar style="auto" />
@@ -99,26 +128,28 @@ export default function SignUpScreen() {
           extraScrollHeight={vs(15)}
           keyboardOpeningTime={0}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <ThemeToggleButton />
           <IdeaPilotLogo />
+          
           <Text
             style={styles.title}
-            className="dark:text-white font-nata-sans-bold"
+            className="text-textLight dark:text-white font-nata-sans-bold mt-4"
           >
             Join IdeaPilot
           </Text>
           <Text
             style={styles.caption}
-            className="text-formTextLight dark:text-formTextDark font-medium"
+            className="text-slate-500 dark:text-textDark font-nata-sans-medium mb-6 text-center px-4"
           >
             Start discovering projects tailored to your skills
           </Text>
+
           <View
             style={styles.container}
-            className="border-gray-50 dark:border-gray-600 bg-brandLight dark:bg-formContainer elevation-xl dark:elevation-none"
+            className="bg-cardLight dark:bg-cardDark border border-borderLight dark:border-borderDark rounded-3xl shadow-sm dark:shadow-none w-full"
           >
-            <View style={styles.centerContent}>
+            <View style={styles.centerContent} className="p-6">
               <FormLayout<SignUpFormFields>
                 title="Create Account"
                 description="Get personalized project recommendations"

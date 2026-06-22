@@ -1,25 +1,56 @@
 import AccountSettings from "@/src/components/AccountSettings";
 import EditProfilePopup from "@/src/components/EditProfilePopup";
 import EmailInputPopup from "@/src/components/EmailInputPopup";
+import Logout from "@/src/components/Logout";
 import NameInputPopup from "@/src/components/NameInputPopup";
-import Notifications from "@/src/components/Notifications";
 import PasswordInputPopup from "@/src/components/PasswordInputPopup";
 import ProfileInfo from "@/src/components/ProfileInfo";
-import PushTestButton from "@/src/components/PushButton";
 import SkillsInfo from "@/src/components/SkillsInfo";
 import SkillsModal from "@/src/components/SkillsModal";
 import ThemeSettings from "@/src/components/ThemeSettings";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Alert } from "react-native";
 import { sc, vs } from "./../../../constants/responsive";
+import { auth } from "@/config/FirebaseConfig";
+import { signOut } from "firebase/auth";
+import useAuthStore from "@/src/store/useAuthStore";
+import useSkillStore from "@/src/store/useSkillStore";
+import useThemeStore from "@/src/store/useThemeStore";
+import Toast from "react-native-toast-message";
 
 export default function Settings() {
+  const appTheme = useThemeStore((s) => s.theme);
+  const logOut = useAuthStore((s) => s.logOut);
+  const clearLocalSkills = useSkillStore((s) => s.clearLocalSkills);
+
   const [showPopup, setShowPopup] = useState(false);
   const [showNamePopup, setShowNamePopup] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      clearLocalSkills();
+      logOut();
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Logout Failed",
+        text2: "There was an issue signing you out. Please try again.",
+        topOffset: sc(45),
+      });
+    }
+  };
+
+  const confirmLogout = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Sign Out", style: "destructive", onPress: handleLogout },
+    ]);
+  };
 
   const handleOpen = (popup: string) => {
     switch (popup) {
@@ -38,8 +69,6 @@ export default function Settings() {
         setShowPopup(false);
         setShowPasswordPopup(true);
         break;
-      default:
-        return;
     }
   };
 
@@ -60,8 +89,6 @@ export default function Settings() {
         setShowPasswordPopup(false);
         setShowEmailPopup(true);
         break;
-      default:
-        return;
     }
   };
 
@@ -75,12 +102,9 @@ export default function Settings() {
         setShowPasswordPopup(false);
         setShowPopup(true);
         break;
-      default:
-        return;
     }
   };
 
-  // Email → Password re-auth flow
   const handlePendingEmail = (newEmail: string) => {
     setShowEmailPopup(false);
     setPendingEmail(newEmail);
@@ -88,37 +112,39 @@ export default function Settings() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-brandLight dark:bg-brandDark">
+      <View className="px-6 mt-10 mb-5 gap-y-1 w-full">
+        <Text
+          className="text-textLight dark:text-white font-nata-sans-bold"
+          style={styles.title}
+        >
+          Settings
+        </Text>
+        <Text
+          className="text-slate-500 dark:text-slate-400 font-nata-sans-medium"
+          style={styles.subtitle}
+        >
+          Manage your account settings and preferences
+        </Text>
+      </View>
       <ScrollView
-        className="bg-brandLight dark:bg-[#011035] px-7"
-        contentContainerStyle={{ alignItems: "center" }}
+        className="px-6"
+        contentContainerStyle={{ alignItems: "center", paddingBottom: vs(40) }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View className="top-5 mb-16 gap-y-1">
-          <Text
-            className="text-black dark:text-white font-nata-sans-bold"
-            style={styles.title}
-          >
-            Settings
-          </Text>
-          <Text
-            className="text-textLight dark:text-textDark font-semibold"
-            style={styles.subtitle}
-          >
-            Manage your account settings and preferences
-          </Text>
-        </View>
-
         <ProfileInfo onEditProfile={() => handleOpen("Edit Popup")} />
         <SkillsInfo onClick={() => setShowModal(true)} />
-        <PushTestButton />
         <ThemeSettings />
-        <Notifications />
-        <AccountSettings />
+        <Logout onLogout={confirmLogout} appTheme={appTheme} />
+        <AccountSettings appTheme={appTheme} />
       </ScrollView>
-
       {showModal && (
-        <SkillsModal visible={showModal} onClose={() => setShowModal(false)} />
+        <SkillsModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          appTheme={appTheme}
+        />
       )}
 
       {showPopup && (
@@ -126,28 +152,29 @@ export default function Settings() {
           onClose={() => handleClose("Edit Profile Popup")}
           onEditName={() => handleOpen("Name Popup")}
           onEditEmail={() => handleOpen("Email Popup")}
+          appTheme={appTheme}
         />
       )}
-
       {showNamePopup && (
         <NameInputPopup
           onClose={() => handleClose("Name Popup")}
           action={() => handleCloseAfterAction("Close Name Popup")}
+          appTheme={appTheme}
         />
       )}
-
       {showEmailPopup && (
         <EmailInputPopup
           onClose={() => handleClose("Email Popup")}
           action={handlePendingEmail}
+          appTheme={appTheme}
         />
       )}
-
       {showPasswordPopup && (
         <PasswordInputPopup
           onClose={() => handleClose("Password Popup")}
           action={() => handleCloseAfterAction("Close Email Update Popup")}
           pendingEmail={pendingEmail}
+          appTheme={appTheme}
         />
       )}
     </View>
@@ -155,17 +182,6 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: sc(25),
-  },
-  subtitle: {
-    fontSize: sc(12),
-  },
-  scrollView: {
-    flexGrow: 1,
-    padding: sc(23),
-    marginBottom: vs(25),
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  title: { fontSize: sc(28) },
+  subtitle: { fontSize: sc(13) },
 });

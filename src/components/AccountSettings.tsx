@@ -1,16 +1,17 @@
-import { Trash2 } from "lucide-react-native";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import handleDeleteAccount from "../lib/account/handleDeleteAccount";
-import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
 import SubmitButton from "./SubmitButton";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function AccountSettings() {
-  const { theme } = useThemeStore();
+type AccountSettingsProps = {
+  appTheme: string;
+};
+export default function AccountSettings({ appTheme }: AccountSettingsProps) {
   const deletionAlert = () => {
-    return Alert.alert(
+    Alert.alert(
       "Are you sure?",
-      "You are going to delete your account permanently.\nThis action can't be undone.",
+      "You are about to permanently delete your account. This action cannot be undone.",
       [
         {
           text: "Cancel",
@@ -19,35 +20,34 @@ export default function AccountSettings() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            handleDeleteAccount();
-          },
+          onPress: handleDeleteAccount,
         },
       ],
     );
   };
-
+  
   return (
     <View
-      className="border-[#dc2626] dark:border-[#ef4444] bg-[#EEF1F6] dark:bg-[#121720]"
-      style={styles.deletion_container}
+      className="border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none"
+      style={styles.deletionContainer}
     >
-      <View className="mb-7">
-        <View className="gap-2 flex-row items-center">
-          <Trash2
-            stroke={theme === "light" ? "#dc2626" : "#ef4444"}
-            size={sc(24)}
+      <View className="mb-6">
+        <View className="gap-2 flex-row items-center mb-1">
+          <Feather
+            name="trash-2"
+            color={appTheme === "light" ? "#DC2626" : "#EF4444"}
+            size={sc(22)}
           />
           <Text
             className="text-red-600 dark:text-red-500 font-nata-sans-bold"
             style={styles.heading}
           >
-            Danger Zone!
+            Danger Zone
           </Text>
         </View>
         <Text
-          className="text-textLight dark:text-textDark font-medium"
-          style={{ fontSize: sc(11) }}
+          className="text-red-500/80 dark:text-red-400/80 font-nata-sans-medium"
+          style={{ fontSize: sc(13) }}
         >
           Account deletion ahead!
         </Text>
@@ -61,17 +61,13 @@ export default function AccountSettings() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  deletion_container: {
+  deletionContainer: {
     flexGrow: 1,
     width: "100%",
-    borderWidth: sc(1),
-    borderRadius: sc(17),
+    borderRadius: sc(16),
     padding: sc(20),
-    marginBottom: vs(28),
+    marginBottom: vs(40),
   },
-  heading: {
-    fontSize: sc(23),
-  },
+  heading: { fontSize: sc(20) },
 });

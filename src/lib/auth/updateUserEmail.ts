@@ -5,7 +5,6 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import { auth } from "../../../config/FirebaseConfig";
-import useAuthStore from "../../store/useAuthStore";
 
 export const updateUserEmail = async (newEmail: string, password: string) => {
   const user = auth.currentUser;
@@ -16,7 +15,7 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
   if (!user.emailVerified) {
     await sendEmailVerification(user);
     throw new Error(
-      "Please verify your current email address before updating it. A verification link has been sent."
+      "Please verify your current email address before updating it. A verification link has been sent.",
     );
   }
 
@@ -29,11 +28,6 @@ export const updateUserEmail = async (newEmail: string, password: string) => {
     const credential = EmailAuthProvider.credential(user.email!, password);
     await reauthenticateWithCredential(user, credential);
     await verifyBeforeUpdateEmail(user, newEmail);
-    useAuthStore.getState().logIn({
-      userId: user.uid,
-      userEmail: newEmail,
-      userName: user.displayName,
-    });
     return true;
   } catch (error) {
     console.log("Error updating email!", error);

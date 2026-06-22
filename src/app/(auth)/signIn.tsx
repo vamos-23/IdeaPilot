@@ -3,7 +3,7 @@ import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import deleteFromBackend from "@/src/lib/account/deleteFromBackend";
+import handleDeleteAccount from "@/src/lib/account/handleDeleteAccount";
 import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
@@ -54,7 +54,7 @@ export default function SignInScreen() {
 
         console.log("Signed in successfully!");
         if (afterReauth === "delete") {
-          await deleteFromBackend();
+          await handleDeleteAccount();
         }
       } catch (error: any) {
         handleFirebaseAuthError(error, router);

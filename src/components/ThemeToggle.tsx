@@ -1,21 +1,22 @@
+import { Switch, useColorScheme as useDeviceColorScheme } from "react-native";
 import useThemeStore from "@/src/store/useThemeStore";
-import { useColorScheme } from "nativewind";
-import { Switch } from "react-native";
 
 export default function ThemeToggleSwitch() {
-  const toggleTheme = useThemeStore((s) => s.toggleTheme);
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { theme, setTheme } = useThemeStore();
+  const deviceTheme = useDeviceColorScheme();
+  const isDark = theme === "system" ? deviceTheme === "dark" : theme === "dark";
+
   const handleThemeToggle = () => {
-    toggleColorScheme();
-    toggleTheme();
+    setTheme(isDark ? "light" : "dark");
   };
+
   return (
     <Switch
-      trackColor={{ false: "#767577", true: "#4169e1" }}
-      thumbColor={colorScheme === "light" ? "#f5dd4b" : "#f4f3f4"}
+      trackColor={{ false: "#CBD5E1", true: "#4F46E5" }}
+      thumbColor={!isDark ? "#f5dd4b" : "#ffffff"}
       onValueChange={handleThemeToggle}
-      value={colorScheme === "dark"}
-      style={{ transform: [{ scaleX: 1.3 }, { scaleY: 1.3 }] }}
+      value={isDark}
+      style={{ transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }] }}
     />
   );
 }

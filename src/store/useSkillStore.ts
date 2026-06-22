@@ -25,7 +25,7 @@ const useSkillStore = create<SkillState>()(
       setSkills: (skills: Skill[]) =>
         set({
           skills,
-          isSynced: false,
+          isSynced: true,
         }),
 
       addSkill: (newSkill: Skill) =>

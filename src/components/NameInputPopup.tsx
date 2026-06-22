@@ -2,9 +2,7 @@ import { clsx } from "clsx";
 import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
@@ -13,20 +11,26 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Toast from "react-native-toast-message";
 import { sc, vs } from "../constants/responsive";
 import { updateDisplayName } from "../lib/auth/updateDisplayName";
-import useThemeStore from "../store/useThemeStore";
+
 import useAuthStore from "../store/useAuthStore";
 import SubmitButton from "./SubmitButton";
 
 type NameInputProps = {
   onClose: () => void;
   action: () => void;
+  appTheme: string;
 };
-export default function NameInputPopup({ onClose, action }: NameInputProps) {
-  const { theme } = useThemeStore();
-  const { user } = useAuthStore();
+
+export default function NameInputPopup({
+  onClose,
+  action,
+  appTheme,
+}: NameInputProps) {
+  const user = useAuthStore((s) => s.user);
   const [name, setName] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -89,49 +93,53 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
       setLoading(false);
     }
   };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.overlay}>
         <KeyboardAvoidingView
           contentContainerStyle={styles.overView}
           behavior="padding"
-          keyboardVerticalOffset={Platform.OS === "android" ? 60 : 120}
+          keyboardVerticalOffset={Platform.OS === "android" ? 30 : 120}
         >
           <TouchableWithoutFeedback onPress={() => {}}>
             <View
               style={styles.popup}
-              className="bg-[#F5F5F5] dark:bg-[#03154c] border-blue-500 dark:border-gray-500"
+              className="bg-cardLight dark:bg-cardDark border border-borderLight dark:border-borderDark shadow-xl"
             >
-              <View className="flex-row justify-between">
+              <View className="flex-row justify-between items-center mb-6">
                 <Text
-                  className="text-black dark:text-white font-nata-sans-bold"
+                  className="text-textLight dark:text-white font-nata-sans-bold"
                   style={styles.title}
                 >
                   Update Name
                 </Text>
-                <TouchableOpacity onPress={onClose}>
+                <TouchableOpacity
+                  onPress={onClose}
+                  className="bg-brandLight dark:bg-brandDark p-1.5 rounded-full"
+                >
                   <X
-                    stroke={theme === "dark" ? "#ffffff" : "#000000"}
-                    size={sc(20)}
-                    strokeWidth={sc(3)}
+                    stroke={appTheme === "dark" ? "#F8FAFC" : "#0F172A"}
+                    size={sc(18)}
+                    strokeWidth={sc(2.5)}
                   />
                 </TouchableOpacity>
               </View>
               <View
                 style={styles.input}
                 className={clsx(
-                  "bg-slate-300 dark:bg-[#293253] mb-5",
+                  "bg-brandLight dark:bg-brandDark mb-6",
                   isFocus
-                    ? "border-blue-600 dark:border-blue-500"
-                    : "border-[#307ae8b5] dark:border-blue-800"
+                    ? "border border-accent-light dark:border-accent-dark2"
+                    : "border border-borderLight dark:border-borderDark",
                 )}
               >
                 <TextInput
-                  className="text-black dark:text-textDark font-semibold"
-                  cursorColor={theme === "light" ? "green" : "tomato"}
+                  className="text-textLight dark:text-white font-nata-sans-medium flex-1"
+                  cursorColor={appTheme === "light" ? "#4F46E5" : "#818CF8"}
                   placeholder="Enter new display name"
                   placeholderTextColor={
-                    theme === "light" ? "dimgrey" : "silver"
+                    appTheme === "light" ? "#94A3B8" : "#64748B"
                   }
                   onFocus={handleFocus}
                   onBlur={handleBlur}
@@ -153,6 +161,7 @@ export default function NameInputPopup({ onClose, action }: NameInputProps) {
     </TouchableWithoutFeedback>
   );
 }
+
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
@@ -160,30 +169,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
   },
   overView: {
     flex: 1,
+    justifyContent: "center",
   },
   popup: {
-    width: sc(285),
-    padding: sc(20),
-    borderRadius: sc(12),
-    borderWidth: sc(1.7),
+    width: sc(310),
+    padding: sc(24),
+    borderRadius: sc(20),
   },
   input: {
     width: "100%",
-    height: vs(38),
-    borderRadius: sc(7),
-    borderWidth: sc(2),
-    paddingHorizontal: sc(5),
+    height: vs(42),
+    borderRadius: sc(10),
+    paddingHorizontal: sc(12),
   },
   title: {
     fontSize: sc(18),
-    textAlign: "center",
-    marginBottom: sc(16),
   },
 });

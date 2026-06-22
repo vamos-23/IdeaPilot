@@ -1,40 +1,44 @@
 import { sc } from "@/src/constants/responsive";
 import { X } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import useThemeStore from "../store/useThemeStore";
 import SubmitButton from "./SubmitButton";
 
 type EditProfileProps = {
   onClose: () => void;
   onEditName: () => void;
   onEditEmail: () => void;
+  appTheme: string;
 };
 
 export default function EditProfilePopup({
   onClose,
   onEditName,
   onEditEmail,
+  appTheme
 }: EditProfileProps) {
-  const { theme } = useThemeStore();
+
+
   return (
     <View style={styles.overlay}>
       <View
         style={styles.popup}
-        className="bg-[#F5F5F5] dark:bg-[#03154c] border-blue-500
-       dark:border-gray-500"
+        className="bg-cardLight dark:bg-cardDark border border-borderLight dark:border-borderDark shadow-xl"
       >
-        <View className="flex-row justify-between">
+        <View className="flex-row justify-between items-center mb-5">
           <Text
-            className="text-black dark:text-white font-nata-sans-bold"
+            className="text-textLight dark:text-white font-nata-sans-bold"
             style={styles.title}
           >
             Edit Profile
           </Text>
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity
+            onPress={onClose}
+            className="bg-brandLight dark:bg-brandDark p-1.5 rounded-full"
+          >
             <X
-              stroke={theme === "dark" ? "#ffffff" : "#000000"}
-              size={sc(20)}
-              strokeWidth={sc(3)}
+              stroke={appTheme === "dark" ? "#F8FAFC" : "#0F172A"}
+              size={sc(18)}
+              strokeWidth={sc(2.5)}
             />
           </TouchableOpacity>
         </View>
@@ -63,23 +67,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9999,
   },
   popup: {
     width: sc(295),
-    padding: sc(20),
-    borderRadius: sc(12),
-    borderWidth: sc(1.7),
+    padding: sc(24),
+    borderRadius: sc(20),
   },
   title: {
     fontSize: sc(18),
-    textAlign: "center",
-    marginBottom: sc(16),
   },
   buttonGroup: {
-    gap: sc(11),
+    gap: sc(12),
   },
 });

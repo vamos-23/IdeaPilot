@@ -1,6 +1,5 @@
 import { View, ActivityIndicator } from "react-native";
 import useThemeStore from "../store/useThemeStore";
-import { ms, vs } from "../constants/responsive";
 export default function LoadingScreen() {
   const { theme } = useThemeStore();
   return (

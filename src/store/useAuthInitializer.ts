@@ -17,17 +17,26 @@ export default function useAuthInitializer() {
         if (user) {
           try {
             await user.getIdToken();
-            const fetchedSkills = await fetchUserSkills(user.uid);
+            if (skillStore.skills.length > 0 && !skillStore.isSynced) {
+              store.logIn({
+                userId: user.uid,
+                userEmail: user.email,
+                userName: user.displayName,
+                techStack: skillStore.skills,
+              });
+            } else {
+              const fetchedSkills = await fetchUserSkills(user.uid);
 
-            skillStore.setSkills(fetchedSkills);
-            skillStore.toggleSync(true);
+              skillStore.setSkills(fetchedSkills);
+              skillStore.toggleSync(true);
 
-            store.logIn({
-              userId: user.uid,
-              userEmail: user.email,
-              userName: user.displayName,
-              techStack: fetchedSkills,
-            });
+              store.logIn({
+                userId: user.uid,
+                userEmail: user.email,
+                userName: user.displayName,
+                techStack: fetchedSkills,
+              });
+            }
           } catch {
             await signOut(auth);
             store.logOut();

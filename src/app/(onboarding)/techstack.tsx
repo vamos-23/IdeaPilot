@@ -78,7 +78,7 @@ export default function TechStack() {
   const handleRemoveSkillItem = (skill_idToBeRemoved: string) => {
     removeSkill(skill_idToBeRemoved);
   };
-
+  console.log(skills);
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView

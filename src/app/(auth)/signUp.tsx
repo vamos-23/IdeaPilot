@@ -45,7 +45,7 @@ export default function SignUpScreen() {
         await updateProfile(authUser, { displayName: data.name });
         await authUser.reload();
         await sendEmailVerification(authUser);
-        
+        console.log(skills);
         const result = await syncSkills(authUser.uid, skills);
         if (result.success) {
           logIn({
@@ -131,7 +131,7 @@ export default function SignUpScreen() {
           showsVerticalScrollIndicator={false}
         >
           <IdeaPilotLogo />
-          
+
           <Text
             style={styles.title}
             className="text-textLight dark:text-white font-nata-sans-bold mt-4"

@@ -1,33 +1,34 @@
-import { SunMoon } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
 import ThemeToggleSwitch from "./ThemeToggle";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function ThemeSettings() {
-  const { theme } = useThemeStore();
+  const appTheme = useThemeStore((s) => s.theme);
   return (
     <View
-      className="border-[#D8DCE3] dark:border-[#333537] bg-[#EEF1F6] dark:bg-[#121720]"
+      className="border border-borderLight dark:border-borderDark bg-cardLight dark:bg-cardDark shadow-sm dark:shadow-none"
       style={styles.themeToggle}
     >
       <View>
-        <View className="gap-2 flex-row items-center">
-          <SunMoon
-            stroke={theme === "light" ? "#000000" : "#ffffff"}
-            size={sc(26)}
+        <View className="gap-2 flex-row items-center mb-1">
+          <MaterialCommunityIcons
+            name="theme-light-dark"
+            color={appTheme === "light" ? "#0F172A" : "#F8FAFC"}
+            size={sc(22)}
           />
           <Text
-            className="text-black dark:text-white font-nata-sans-bold"
+            className="text-textLight dark:text-white font-nata-sans-bold"
             style={styles.heading}
           >
             UI Theme
           </Text>
         </View>
-        <View className="flex-row justify-between items-center">
+        <View className="flex-row justify-between items-center mt-2">
           <Text
-            className="text-textLight dark:text-textDark font-medium"
-            style={{ fontSize: sc(11) }}
+            className="text-slate-500 dark:text-slate-400 font-nata-sans-medium"
+            style={{ fontSize: sc(13) }}
           >
             Choose your preferred theme
           </Text>
@@ -37,17 +38,13 @@ export default function ThemeSettings() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   themeToggle: {
     flexGrow: 1,
     width: "100%",
-    borderWidth: sc(1),
-    borderRadius: sc(17),
+    borderRadius: sc(16),
     padding: sc(20),
-    marginBottom: vs(28),
+    marginBottom: vs(24),
   },
-  heading: {
-    fontSize: sc(23),
-  },
+  heading: { fontSize: sc(20) },
 });

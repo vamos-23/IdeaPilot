@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Skill from "../constants/types";
 
 interface AppUser {
   userId: string;
   userEmail: string | null;
   userName: string | null;
+  techStack: Skill[];
 }
 
 interface AuthState {
@@ -17,6 +19,7 @@ interface AuthState {
   setAuthInitialized: (status: boolean) => void;
   logIn: (userData: AppUser) => void;
   logOut: () => void;
+  updateTechStack: (skills: Skill[]) => void;
 }
 
 const useAuthStore = create<AuthState>()(
@@ -26,11 +29,14 @@ const useAuthStore = create<AuthState>()(
       hasCompletedOnboarding: false,
       authInitialized: false,
 
-      setOnboardingStatus: (status) =>
-        set({ hasCompletedOnboarding: status }),
+      setOnboardingStatus: (status) => set({ hasCompletedOnboarding: status }),
 
-      setAuthInitialized: (status) =>
-        set({ authInitialized: status }),
+      setAuthInitialized: (status) => set({ authInitialized: status }),
+
+      updateTechStack: (skills) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, techStack: skills } : null,
+        })),
 
       logIn: (userData) =>
         set({
@@ -40,7 +46,6 @@ const useAuthStore = create<AuthState>()(
       logOut: () =>
         set({
           user: null,
-          hasCompletedOnboarding: false,
         }),
     }),
     {
@@ -51,8 +56,8 @@ const useAuthStore = create<AuthState>()(
         user: state.user,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export default useAuthStore;

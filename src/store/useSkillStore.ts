@@ -11,8 +11,7 @@ interface SkillState {
   setSkills: (skills: Skill[]) => void;
   addSkill: (newSkill: Skill) => void;
   removeSkill: (skillID: string) => void;
-  markSynced: () => void;
-  markUnsynced: () => void;
+  toggleSync: (syncStatus: boolean) => void;
   clearLocalSkills: () => void;
 }
 
@@ -41,9 +40,7 @@ const useSkillStore = create<SkillState>()(
           isSynced: false,
         })),
 
-      markSynced: () => set({ isSynced: true }),
-
-      markUnsynced: () => set({ isSynced: false }),
+      toggleSync: (syncStatus) => set({ isSynced: syncStatus }),
 
       clearLocalSkills: () => {
         set({

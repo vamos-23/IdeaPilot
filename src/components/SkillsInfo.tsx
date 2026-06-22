@@ -1,6 +1,6 @@
 import { CodeSquare } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
-import useSkillStore from "../store/useSkill";
+import useSkillStore from "../store/useSkillStore";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
 import SkillTag from "./SkillTag";

@@ -25,17 +25,14 @@ import { ms, sc, vs } from "../../constants/responsive";
 import Skill from "../../constants/types";
 
 export default function TechStack() {
-  const { theme } = useThemeStore();
-  //to handle focus and unfocus effects of text input bar
+  const appTheme = useThemeStore((s) => s.theme);
   const [isFocus, setIsFocus] = useState<boolean>(false);
-  //to handle the state for name of skill typed in text input bar
   const [newSkill, setNewSkill] = useState<string>("");
-  //to handle the state of the array (list) containing each selected skill
   const { skills, addSkill, removeSkill } = useSkillStore();
-  //functions to handle focus and de-focus effects of text input bar
+
   const handleFocus = () => setIsFocus(true);
   const handleBlur = () => setIsFocus(false);
-  //Add a new skill from user-entered input
+
   const handleAddNewSkill = () => {
     const trimmedSkill = newSkill.trim();
     if (!trimmedSkill) return;
@@ -60,7 +57,7 @@ export default function TechStack() {
     setNewSkill("");
     Keyboard.dismiss();
   };
-  //Add skill item from popular skill list
+
   const handleSelectedSkill = (selectedSkill: Skill) => {
     if (
       skills.some(
@@ -78,10 +75,10 @@ export default function TechStack() {
     addSkill(selectedSkill);
   };
 
-  //Deselect or remove skill item from skills list
   const handleRemoveSkillItem = (skill_idToBeRemoved: string) => {
     removeSkill(skill_idToBeRemoved);
   };
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView
@@ -92,51 +89,47 @@ export default function TechStack() {
       >
         <View
           style={shapes.techStackContainer}
-          className="border-gray-300 dark:border-blue-600 bg-[#ffffff]
-        dark:bg-[#111111de] items-center elevation-md dark:elevation-none"
+          className="bg-cardLight dark:bg-cardDark border border-borderLight dark:border-borderDark rounded-3xl shadow-sm dark:shadow-none w-full items-center"
         >
           <UserIconLogo icon={<Code size={sc(45)} stroke="dodgerblue" />} />
+
           <Text
             style={shapes.titleMessage}
-            className=" dark:text-white font-semibold mb-2"
+            className="text-textLight dark:text-white font-nata-sans-bold mt-4"
           >
             What are your skills?
           </Text>
           <Text
             style={shapes.subtitleMessage}
-            className="text-textLight dark:text-textDark font-medium mb-1"
+            className="text-slate-500 dark:text-textDark font-nata-sans-medium mb-1 text-center"
           >
             Select your current tech stack and skills
           </Text>
+
           <Text
             style={shapes.titleMessage}
-            className="font-nata-sans-bold dark:text-white mt-4 mb-2"
+            className="text-textLight dark:text-white font-nata-sans-bold mt-6 mb-2"
           >
             Select Your Skills
           </Text>
           <Text
             style={shapes.introMessage}
-            className="text-textLight dark:text-textDark font-medium px-4"
+            className="text-slate-500 dark:text-textDark font-nata-sans-medium text-center px-4 mb-5"
           >
-            Choose the technologies and skills
+            Choose the technologies and skills you&apos;re comfortable with
           </Text>
-          <Text
-            style={shapes.introMessage}
-            className="text-textLight dark:text-textDark font-medium mb-5"
-          >
-            you&apos;re comfortable with
-          </Text>
+
           {skills.length > 0 && (
-            <View style={shapes.skillsContainer} className="self-start">
+            <View style={shapes.skillsContainer} className="self-start w-full">
               <Text
-                style={{ fontSize: ms(16) }}
-                className="text-textLight dark:text-textDark mb-3 font-medium"
+                style={{ fontSize: ms(13) }}
+                className="text-slate-500 dark:text-textDark mb-3 font-nata-sans-bold tracking-wider"
               >
                 ADDED SKILLS
               </Text>
               <View
                 style={shapes.addStack}
-                className="flex-row justify-evenly flex-wrap"
+                className="flex-row justify-start flex-wrap gap-2"
               >
                 {skills.map((item) => (
                   <SkillTag
@@ -149,21 +142,24 @@ export default function TechStack() {
               </View>
             </View>
           )}
+
           <View style={shapes.stackAdditionContainer}>
             <View
               style={shapes.input}
               className={clsx(
-                "bg-slate-300 dark:bg-[#293253] mb-5",
+                "bg-brandLight dark:bg-brandDark mb-5",
                 isFocus
-                  ? "border-blue-600 dark:border-blue-600"
-                  : "border-[#307ae8b5] dark:border-blue-800",
+                  ? "border border-accent-light dark:border-accent-dark2"
+                  : "border border-borderLight dark:border-borderDark",
               )}
             >
               <TextInput
-                className="text-black dark:text-textDark font-semibold justify-center"
-                cursorColor={theme === "light" ? "black" : "tomato"}
+                className="text-textLight dark:text-white font-nata-sans-medium justify-center"
+                cursorColor={appTheme === "light" ? "#4F46E5" : "#818CF8"}
                 placeholder="e.g. GraphQL, Kubernetes"
-                placeholderTextColor={theme === "light" ? "dimgrey" : "silver"}
+                placeholderTextColor={
+                  appTheme === "light" ? "#94A3B8" : "#64748B"
+                }
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 value={newSkill}
@@ -172,12 +168,14 @@ export default function TechStack() {
             </View>
             <AddButton onPress={handleAddNewSkill} />
           </View>
+
           <Text
-            style={{ fontSize: ms(16) }}
-            className="text-textLight dark:text-textDark mb-3 font-medium self-start pl-1"
+            style={{ fontSize: ms(13) }}
+            className="text-slate-500 dark:text-textDark mt-4 mb-3 font-nata-sans-bold tracking-wider self-start pl-1"
           >
             POPULAR SKILLS
           </Text>
+
           <View style={shapes.stackContainer}>
             {popularTechStacks.map((item) => {
               const isSelected = skills.some((skill) => skill.id === item.id);
@@ -188,8 +186,7 @@ export default function TechStack() {
                     shapes.individualContainer,
                     isSelected && shapes.disabled,
                   ]}
-                  className="bg-[#e5e2e2] dark:bg-[#232348e4]
-              border-orange-400 dark:border-orange-700 justify-center items-center elevation-md dark:elevation-none"
+                  className="bg-brandLight dark:bg-brandDark border border-borderLight dark:border-borderDark justify-center items-center shadow-sm dark:shadow-none"
                   disabled={isSelected}
                   onPress={() => handleSelectedSkill(item)}
                 >
@@ -202,13 +199,13 @@ export default function TechStack() {
                     <View style={shapes.stackDetails}>
                       <Text
                         style={shapes.stackName}
-                        className="text-black dark:text-white font-semibold font-nata-sans-bold"
+                        className="text-textLight dark:text-white font-nata-sans-bold"
                       >
                         {item.stackName}
                       </Text>
                       <Text
                         style={shapes.category}
-                        className="text-textLight dark:text-textDark font-semibold"
+                        className="text-slate-500 dark:text-textDark font-nata-sans-medium"
                       >
                         {item.category}
                       </Text>
@@ -224,6 +221,7 @@ export default function TechStack() {
     </TouchableWithoutFeedback>
   );
 }
+
 const shapes = StyleSheet.create({
   main: {
     padding: sc(19),
@@ -231,13 +229,8 @@ const shapes = StyleSheet.create({
     flexGrow: 1,
   },
   techStackContainer: {
-    width: "100%",
-    justifyContent: "flex-start",
-    alignItems: "center",
     marginTop: vs(51),
     padding: ms(19),
-    borderRadius: sc(17),
-    borderWidth: sc(2),
   },
   titleMessage: {
     fontSize: ms(19),
@@ -250,8 +243,6 @@ const shapes = StyleSheet.create({
   },
   addStack: {
     width: "100%",
-    justifyContent: "flex-start",
-    gap: sc(10),
   },
   skillsContainer: {
     padding: sc(3),
@@ -260,15 +251,13 @@ const shapes = StyleSheet.create({
   stackAdditionContainer: {
     width: "100%",
     flexDirection: "row",
-    gap: sc(25),
-    paddingHorizontal: sc(1),
+    gap: sc(15), // Adjusted gap to ensure AddButton fits nicely
   },
   input: {
-    width: "75%",
+    flex: 1, // Changed from fixed 75% to flex 1 so it fills available space
     height: vs(36),
     borderRadius: sc(7),
-    borderWidth: sc(2),
-    paddingHorizontal: sc(4),
+    paddingHorizontal: sc(10),
   },
   stackName: {
     fontSize: ms(13.5),
@@ -278,25 +267,22 @@ const shapes = StyleSheet.create({
   },
   stackContainer: {
     width: "100%",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     flexDirection: "row",
     flexWrap: "wrap",
-    padding: sc(3),
-    columnGap: sc(4),
   },
   individualContainer: {
-    width: "47.5%",
+    width: "48%",
     height: vs(65),
     padding: sc(2.5),
     borderRadius: ms(10),
-    borderWidth: sc(2),
     marginVertical: vs(6),
   },
   disabled: {
     opacity: 0.4,
   },
   content: {
-    alignContent: "center",
+    alignItems: "center",
     flexDirection: "row",
     gap: vs(8),
   },

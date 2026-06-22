@@ -50,45 +50,55 @@ export default function FormLayout<T extends FieldValues>({
   const { control, handleSubmit } = useForm<T>();
   const [isResetPasswordView, setIsResetPasswordView] =
     useState<boolean>(false);
+
   const handlePasswordReset = useCallback(
     (status: boolean) => setIsResetPasswordView(status),
-    []
+    [],
   );
+
   const handleSendPasswordResetEmail = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
       Alert.alert(
         "Check Your Email",
-        "If an account with that email exists, a link will be sent into your inbox or spam section."
+        "If an account with that email exists, a link will be sent to your inbox or spam folder.",
       );
       Keyboard.dismiss();
+      setIsResetPasswordView(false);
     } catch (e) {
       console.error("Password Reset Link error!", e);
       Alert.alert(
         "Check Your Email",
-        "If an account with that email exists, a link will be sent into your inbox or spam section."
+        "If an account with that email exists, a link will be sent to your inbox or spam folder.",
       );
       Keyboard.dismiss();
+      setIsResetPasswordView(false);
     }
   };
+
   const onReset = (data: T) => {
     handleSendPasswordResetEmail(data.email);
   };
+
   return (
     <View>
       <View>
-        <Text style={shapes.title} className="font-semibold dark:text-white">
+        <Text
+          style={shapes.title}
+          className="text-textLight dark:text-white font-nata-sans-bold"
+        >
           {isResetPasswordView ? "Reset Password" : title}
         </Text>
         <Text
           style={shapes.description}
-          className="text-textLight dark:text-textDark font-semibold"
+          className="text-slate-500 dark:text-textDark font-nata-sans-medium mt-1"
         >
           {isResetPasswordView
-            ? "Enter your email address and we'll send you a reset link"
+            ? "Enter your email address and we'll send you a reset link."
             : description}
         </Text>
       </View>
+
       <View style={shapes.fieldSpace}>
         {isResetPasswordView ? (
           <InputField<T>
@@ -129,7 +139,7 @@ export default function FormLayout<T extends FieldValues>({
 
       {!isResetPasswordView && forgotPassWord && (
         <TouchableOpacity onPress={() => handlePasswordReset(true)}>
-          <Text className="text-blue-800 underline dark:text-white font-medium text-center mt-6">
+          <Text className="text-accent-light dark:text-accent-dark2 font-nata-sans-medium text-center mt-6">
             {forgotPassWord}
           </Text>
         </TouchableOpacity>
@@ -137,7 +147,7 @@ export default function FormLayout<T extends FieldValues>({
 
       {isResetPasswordView && (
         <TouchableOpacity onPress={() => handlePasswordReset(false)}>
-          <Text className="text-blue-900 underline dark:text-white font-medium text-center mt-6">
+          <Text className="text-accent-light dark:text-accent-dark2 font-nata-sans-medium text-center mt-6">
             Back to Sign In
           </Text>
         </TouchableOpacity>
@@ -145,7 +155,7 @@ export default function FormLayout<T extends FieldValues>({
 
       {!isResetPasswordView && (
         <View className={forgotPassWord ? "mt-4" : "mt-6"}>
-          <Text className="text-textLight dark:text-formTextDark font-medium text-center">
+          <Text className="text-textLight dark:text-textDark font-nata-sans-medium text-center">
             {userFormPromptText + " "}
             <Link
               href={
@@ -154,7 +164,7 @@ export default function FormLayout<T extends FieldValues>({
                   : "/(auth)/signIn"
               }
             >
-              <Text className="text-lg underline font-semibold text-blue-900 dark:text-white">
+              <Text className="text-lg text-accent-light dark:text-accent-dark2 font-nata-sans-bold">
                 {formActionText}
               </Text>
             </Link>
@@ -167,15 +177,15 @@ export default function FormLayout<T extends FieldValues>({
 
 const shapes = StyleSheet.create({
   title: {
-    fontSize: ms(25),
-    marginBottom: vs(3),
+    fontSize: ms(24),
   },
   description: {
-    fontSize: sc(11),
+    fontSize: sc(13),
+    lineHeight: vs(20),
   },
   fieldSpace: {
-    gap: vs(20),
-    marginTop: vs(20),
-    marginBottom: vs(22),
+    gap: vs(16),
+    marginTop: vs(24),
+    marginBottom: vs(24),
   },
 });

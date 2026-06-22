@@ -1,7 +1,7 @@
 import AddButton from "@/src/components/AddButton";
 import SkillTag from "@/src/components/SkillTag";
 import UserIconLogo from "@/src/components/UserIconLogo";
-import useSkillStore from "@/src/store/useSkill";
+import useSkillStore from "@/src/store/useSkillStore";
 import useThemeStore from "@/src/store/useThemeStore";
 import { clsx } from "clsx";
 import * as Crypto from "expo-crypto";
@@ -22,7 +22,7 @@ import { ms, sc, vs } from "../constants/responsive";
 import Skill from "../constants/types";
 
 export default function TechStackContent() {
-  const { theme } = useThemeStore();
+  const appTheme = useThemeStore((s) => s.theme);
   //to handle focus and unfocus effects of text input bar
   const [isFocus, setIsFocus] = useState<boolean>(false);
   //to handle the state for name of skill typed in text input bar
@@ -152,9 +152,9 @@ export default function TechStackContent() {
         >
           <TextInput
             className="text-black dark:text-textDark font-semibold justify-center"
-            cursorColor={theme === "light" ? "black" : "tomato"}
+            cursorColor={appTheme === "light" ? "black" : "tomato"}
             placeholder="e.g. GraphQL, Kubernetes"
-            placeholderTextColor={theme === "light" ? "dimgrey" : "silver"}
+            placeholderTextColor={appTheme === "light" ? "dimgrey" : "silver"}
             onFocus={handleFocus}
             onBlur={handleBlur}
             value={newSkill}

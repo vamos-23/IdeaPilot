@@ -24,28 +24,6 @@ import { Chat, MenuState, ChatRenameState } from "@/src/constants/types";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-// const INITIAL_MOCK_CHATS = [
-//   { id: "1", title: "React Native vs React" },
-//   { id: "2", title: "Black Hole Explanation" },
-//   { id: "3", title: "TanStack Query Setup" },
-//   { id: "4", title: "PostgreSQL Cascade Delete" },
-//   { id: "5", title: "Project Onboarding & Setup" },
-//   { id: "6", title: "Q3 Marketing Strategy Brainstorm" },
-//   { id: "7", title: "API Integration Bug Fixes" },
-//   { id: "8", title: "UI/UX Design Feedback" },
-//   { id: "9", title: "Weekly Sync & Status Update" },
-//   { id: "10", title: "Client Presentation Rehearsal" },
-//   { id: "11", title: "Budget Review & Allocations" },
-//   { id: "12", title: "Product Roadmap Planning" },
-//   { id: "13", title: "Customer Support Escalations" },
-//   { id: "14", title: "Database Migration Checklist" },
-//   { id: "15", title: "HR Policy Updates 2026" },
-//   { id: "16", title: "Website Redesign Concepts" },
-//   { id: "17", title: "Sales Performance Dashboard" },
-//   { id: "18", title: "Security Audit Remediation" },
-//   { id: "19", title: "React Native Reanimated" },
-// ];
-
 type ChatListProps = {
   isDrawerOpen: boolean;
   onSelectChat: (id: string) => void;
@@ -56,12 +34,16 @@ export default function ChatList({
   onSelectChat,
 }: ChatListProps) {
   const appTheme = useThemeStore((s) => s.theme);
-
-  const { data: chats = [], isLoading } = useChatHistory(isDrawerOpen);
+  const {
+    data: chats = [],
+    isLoading,
+    isFetching,
+  } = useChatHistory(isDrawerOpen);
   const renameMutation = useRenameChat();
   const togglePinMutation = useToggleChatPinStatus();
   const deleteChatMutation = useDeleteChat();
   console.log(chats);
+
   const [menuState, setMenuState] = useState<MenuState>({
     visible: false,
     isPinned: false,
@@ -197,23 +179,33 @@ export default function ChatList({
   return (
     <View className="flex-1">
       {isLoading ? (
-        <View className="flex-row items-center gap-2 mt-3">
+        <View className="flex-row items-center justify-center">
           <ActivityIndicator color="#818CF8" size="small" />
-          <Text className="font-nata-sans-bold text-base text-textLight dark:text-white">
-            Syncing your chats...
+          <Text className="ml-2 font-nata-sans-bold text-base text-textLight dark:text-white">
+            Loading your chats...
           </Text>
         </View>
       ) : (
-        <FlashList
-          data={sortedChats}
-          renderItem={renderChatRow}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            gap: 2,
-            paddingBottom: 4,
-          }}
-        />
+        <>
+          {isFetching && !isLoading && (
+            <View className="flex-row items-center justify-center">
+              <ActivityIndicator color="#818CF8" size="small" />
+              <Text className="ml-2 font-nata-sans-bold text-base text-textLight dark:text-white">
+                Syncing your chats...
+              </Text>
+            </View>
+          )}
+          <FlashList
+            data={sortedChats}
+            renderItem={renderChatRow}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              gap: 2,
+              paddingBottom: 4,
+            }}
+          />
+        </>
       )}
 
       <Modal visible={menuState.visible} transparent animationType="fade">

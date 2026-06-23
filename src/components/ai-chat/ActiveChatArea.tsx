@@ -4,6 +4,7 @@ import {
   ScrollViewProps,
   ActivityIndicator,
 } from "react-native";
+import axios from "axios";
 import { KeyboardChatScrollView } from "react-native-keyboard-controller";
 import { SharedValue } from "react-native-reanimated";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
@@ -25,12 +26,13 @@ import {
 } from "react";
 import { useChatMessages } from "@/src/store/useChatQueries";
 import useAuthStore from "@/src/store/useAuthStore";
+import useSkillStore from "@/src/store/useSkillStore";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface ActiveChatAreaRef {
-  sendMessage: (prompt: string) => void;
+  sendMessage: (prompt: string) => Promise<void>;
 }
 
 export interface ActiveChatAreaProps {
@@ -95,11 +97,10 @@ export function ActiveChatArea({
   const messages = chatMessages?.pages.flatMap((page) => page.messages) || [];
 
   useImperativeHandle(ref, () => ({
-    sendMessage: (prompt: string) => handleSendPrompt(prompt),
-
+    sendMessage: async (prompt: string) => await handleSendPrompt(prompt),
   }));
 
-  function handleSendPrompt(prompt: string) {
+  async function handleSendPrompt(prompt: string) {
     let currentChatId = chatId;
     if (isNewChat) {
       const chat_UUID = Crypto.randomUUID();
@@ -123,7 +124,7 @@ export function ActiveChatArea({
 
     queryClient.setQueryData(
       ["messages", currentChatId],
-      (oldData: InfiniteData<MessagePage>) => {
+      (oldData: InfiniteData<MessagePage> | undefined) => {
         const oldPages = oldData?.pages || [];
         const oldPageParams = oldData?.pageParams || [];
 
@@ -149,7 +150,7 @@ export function ActiveChatArea({
         };
       },
     );
-    //responseStreaming(assistantId, userId, currentChatId, prompt);
+    await responseStreaming(assistantId, userId, currentChatId, prompt);
   }
 
   async function responseStreaming(
@@ -158,7 +159,57 @@ export function ActiveChatArea({
     currentChatId: string,
     promptText: string,
   ) {
-    
+    const userTechStack = useSkillStore.getState().skills || [];
+    try {
+      const response = await axios.post(`/chats/${currentChatId}/stream`, {
+        userMessageId: userId,
+        assistantMessageId: assistantId,
+        prompt: promptText,
+        techStack: userTechStack,
+      });
+      const finalContent = response.data?.text || "No generation provided";
+
+      queryClient.setQueryData(
+        ["messages", currentChatId],
+        (oldData: InfiniteData<MessagePage> | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                msg.id === assistantId
+                  ? { ...msg, content: finalContent, isStreaming: false }
+                  : msg,
+              ),
+            })),
+          };
+        },
+      );
+    } catch {
+      queryClient.setQueryData(
+        ["messages", currentChatId],
+        (oldData: InfiniteData<MessagePage> | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                msg.id === assistantId
+                  ? {
+                      ...msg,
+                      content:
+                        "Failed to connect or generate a response. Try again later. ",
+                      isStreaming: false,
+                    }
+                  : msg,
+              ),
+            })),
+          };
+        },
+      );
+    }
   }
 
   const scrollToBottom = useCallback(() => {

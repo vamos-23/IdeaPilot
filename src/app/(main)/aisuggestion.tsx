@@ -47,11 +47,14 @@ export default function AISuggestions() {
   const queryClient = useQueryClient();
   const chatAreaRef = useRef<ActiveChatAreaRef | null>(null);
 
-  const handleSendPrompt = (text: string) => {
+  const handleSendPrompt = async (text: string) => {
     if (chatAreaRef.current) {
-      chatAreaRef.current.sendMessage(text);
       setGlobalStreaming(true);
-      setTimeout(() => setGlobalStreaming(false), 20000);
+      try {
+        await chatAreaRef.current.sendMessage(text);
+      } finally {
+        setGlobalStreaming(false);
+      }
     }
   };
 
@@ -107,7 +110,6 @@ export default function AISuggestions() {
   };
 
   const handleNewChatCreated = (newId: string) => {
-    setFirstOpen(false);
     setActiveChatId(newId);
     queryClient.setQueryData<Chat[]>(["chats"], (oldChats) => {
       const currentChats = oldChats ? [...oldChats] : [];
@@ -160,7 +162,6 @@ export default function AISuggestions() {
         </KeyboardStickyView>
       </View>
 
-      {/* Chat History Drawer */}
       <Animated.View
         className="absolute inset-0  dark:bg-black/50"
         style={[animatedOverlayStyle]}

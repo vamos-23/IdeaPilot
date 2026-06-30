@@ -1,7 +1,7 @@
 import useThemeStore from "@/src/store/useThemeStore";
 import { Tabs, useRouter, useSegments } from "expo-router"; // [CHANGED] added useRouter
 import { Home, Settings, Sparkles } from "lucide-react-native";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -18,7 +18,7 @@ const DESIGN_TOKENS = {
     bar: "#131926",
     active: "#818CF8",
     inactive: "#475569",
-    border: "#1E293B",
+    border: "#404652",
     fabBg: "#4338CA",
     fabBorder: "#131926",
     fabGlow: "#6366F1",
@@ -137,6 +137,7 @@ export default function TabsMainLayout() {
                 activeOpacity={0.8}
                 onPress={() => navigation.navigate("dashboard")}
                 style={styles.tabButton}
+                hitSlop={20}
               >
                 <View style={styles.iconContainer}>
                   {activeRouteName === "dashboard" && (
@@ -161,6 +162,7 @@ export default function TabsMainLayout() {
                 activeOpacity={0.85}
                 onPress={() => router.navigate("/aisuggestion")}
                 style={styles.fabContainer}
+                hitSlop={10}
               >
                 <View style={styles.fabOuter}>
                   <Animated.View
@@ -201,6 +203,7 @@ export default function TabsMainLayout() {
                 activeOpacity={0.8}
                 onPress={() => navigation.navigate("settings")}
                 style={styles.tabButton}
+                hitSlop={20}
               >
                 <View style={styles.iconContainer}>
                   {activeRouteName === "settings" && (
@@ -237,16 +240,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: "visible",
+    overflow: "hidden",
     backgroundColor: "transparent",
   },
   tabBarWrapper: {
     flexDirection: "row",
-    marginHorizontal: sc(30),
-    marginBottom: vs(10),
-    paddingHorizontal: sc(28),
+    marginHorizontal: sc(60),
+    marginVertical: vs(16),
+    paddingHorizontal: sc(25),
     borderRadius: sc(28),
-    height: vs(63),
+    height: vs(60),
     borderWidth: sc(1),
     elevation: 6,
     shadowOffset: { width: 0, height: 6 },
@@ -265,9 +268,9 @@ const styles = StyleSheet.create({
   },
   iconGlow: {
     position: "absolute",
-    width: sc(45),
-    height: sc(45),
-    borderRadius: sc(16),
+    width: sc(60),
+    height: sc(50),
+    borderRadius: sc(20),
     opacity: 0.15,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },

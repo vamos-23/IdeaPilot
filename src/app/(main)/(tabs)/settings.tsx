@@ -129,7 +129,7 @@ export default function Settings() {
       </View>
       <ScrollView
         className="px-6"
-        contentContainerStyle={{ alignItems: "center", paddingBottom: vs(40) }}
+        contentContainerStyle={{ alignItems: "center", paddingBottom: vs(85) }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

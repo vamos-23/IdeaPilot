@@ -1,8 +1,10 @@
+import "react-native-get-random-values";
 import {
   View,
   StyleSheet,
   ScrollViewProps,
   ActivityIndicator,
+  Keyboard,
 } from "react-native";
 import { KeyboardChatScrollView } from "react-native-keyboard-controller";
 import { SharedValue } from "react-native-reanimated";
@@ -21,26 +23,31 @@ import {
   RefCallback,
   useCallback,
   useImperativeHandle,
+  useMemo,
   useRef,
 } from "react";
 import { useChatMessages } from "@/src/store/useChatQueries";
 import useAuthStore from "@/src/store/useAuthStore";
+import useSkillStore from "@/src/store/useSkillStore";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
-import * as Crypto from "expo-crypto";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { apiClient } from "@/src/services/api/apiClient";
+import { monotonicFactory } from "ulidx";
+import * as Crypto from "expo-crypto";
 
 export interface ActiveChatAreaRef {
-  sendMessage: (prompt: string) => void;
+  sendMessage: (prompt: string) => Promise<void>;
 }
 
 export interface ActiveChatAreaProps {
   isFirstOpen: boolean;
   ref: React.RefObject<ActiveChatAreaRef | null>;
   chatId: string;
-  blankSpace: SharedValue<number>;
   extraContentPadding: SharedValue<number>;
   onNewChatStarted: (currentChatId: string) => void;
 }
+
+const generateULID = monotonicFactory();
 
 const HEADER_HEIGHT = 76;
 
@@ -63,7 +70,7 @@ const VirtualizedListScrollView = forwardRef<
       {...props}
       keyboardDismissMode="interactive"
       keyboardShouldPersistTaps="handled"
-      keyboardLiftBehavior="whenAtEnd"
+      keyboardLiftBehavior="never"
       contentInsetAdjustmentBehavior="never"
       automaticallyAdjustKeyboardInsets={true}
     />
@@ -75,7 +82,6 @@ export function ActiveChatArea({
   ref,
   chatId,
   isFirstOpen,
-  blankSpace,
   extraContentPadding,
   onNewChatStarted,
 }: ActiveChatAreaProps) {
@@ -90,16 +96,31 @@ export function ActiveChatArea({
     data: chatMessages,
     hasNextPage,
     isFetchingNextPage,
+    isLoading,
     fetchNextPage,
   } = useChatMessages(chatId);
-  const messages = chatMessages?.pages.flatMap((page) => page.messages) || [];
+
+  const messages = useMemo(
+    () => chatMessages?.pages.flatMap((page) => page.messages) || [],
+    [chatMessages?.pages],
+  );
+
+  const projectPreviewLatestId =
+    chatMessages?.pages?.[0]?.latestPreviewId || null;
 
   useImperativeHandle(ref, () => ({
-    sendMessage: (prompt: string) => handleSendPrompt(prompt),
-
+    sendMessage: async (prompt: string) => await handleSendPrompt(prompt),
   }));
 
-  function handleSendPrompt(prompt: string) {
+  const scrollToBottom = () => {
+    flashListRef.current?.scrollToIndex({
+      index: 0,
+      animated: true,
+      viewPosition: 0,
+    });
+  };
+
+  async function handleSendPrompt(prompt: string) {
     let currentChatId = chatId;
     if (isNewChat) {
       const chat_UUID = Crypto.randomUUID();
@@ -107,13 +128,15 @@ export function ActiveChatArea({
       onNewChatStarted(currentChatId);
     }
 
-    const userId = `${Crypto.randomUUID()}-user`;
+    const userId = generateULID();
+    const assistantId = generateULID();
+
     const userMessage: Message = {
       id: userId,
       role: "user",
       content: prompt,
     };
-    const assistantId = `${Crypto.randomUUID()}-assistant`;
+
     const assistantMessage: Message = {
       id: assistantId,
       role: "assistant",
@@ -123,24 +146,23 @@ export function ActiveChatArea({
 
     queryClient.setQueryData(
       ["messages", currentChatId],
-      (oldData: InfiniteData<MessagePage>) => {
+      (oldData: InfiniteData<MessagePage> | undefined) => {
         const oldPages = oldData?.pages || [];
         const oldPageParams = oldData?.pageParams || [];
 
         const newPages =
           oldPages.length > 0
             ? [...oldPages]
-            : [{ messages: [], nextCursor: null }];
+            : [{ messages: [], nextCursor: null, latestPreviewId: null }];
         const newPageParams =
           oldPageParams.length > 0 ? [...oldPageParams] : [null];
 
-        const lastPageIndex = newPages.length - 1;
-        newPages[lastPageIndex] = {
-          ...newPages[lastPageIndex],
+        newPages[0] = {
+          ...newPages[0],
           messages: [
-            ...(newPages[lastPageIndex].messages || []),
-            userMessage,
             assistantMessage,
+            userMessage,
+            ...(newPages[0].messages || []),
           ],
         };
         return {
@@ -149,42 +171,113 @@ export function ActiveChatArea({
         };
       },
     );
-    //responseStreaming(assistantId, userId, currentChatId, prompt);
+    Keyboard.dismiss();
+    scrollToBottom();
+    await responseStreaming(userId, assistantId, currentChatId, prompt);
   }
 
   async function responseStreaming(
-    assistantId: string,
     userId: string,
+    assistantId: string,
     currentChatId: string,
     promptText: string,
   ) {
-    
+    const userTechStack = useSkillStore.getState().skills || [];
+    try {
+      const response = await apiClient.post(`/${currentChatId}/stream`, {
+        userMessageId: userId,
+        assistantMessageId: assistantId,
+        prompt: promptText,
+        techStack: userTechStack,
+      });
+      const finalContent = response.data?.text || "No generation provided";
+
+      queryClient.setQueryData(
+        ["messages", currentChatId],
+        (oldData: InfiniteData<MessagePage> | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page, index) => {
+              const isFirstPage = index === 0;
+              const hasProject = /```json_idea/i.test(finalContent);
+              return {
+                ...page,
+                ...(isFirstPage && hasProject
+                  ? { latestPreviewId: assistantId }
+                  : {}),
+                messages: page.messages.map((msg) =>
+                  msg.id === assistantId
+                    ? { ...msg, content: finalContent, isStreaming: false }
+                    : msg,
+                ),
+              };
+            }),
+          };
+        },
+      );
+    } catch {
+      queryClient.setQueryData(
+        ["messages", currentChatId],
+        (oldData: InfiniteData<MessagePage> | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((msg) =>
+                msg.id === assistantId
+                  ? {
+                      ...msg,
+                      content:
+                        "Failed to connect or generate a response. Try again later after sometime. ",
+                      isStreaming: false,
+                    }
+                  : msg,
+              ),
+            })),
+          };
+        },
+      );
+    }
   }
 
-  const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
-      if (messages.length > 0) {
-        flashListRef.current?.scrollToEnd({ animated: true });
-        chatScrollViewRef.current?.scrollToEnd({ animated: true });
-      }
-    });
-  }, [messages.length]);
+  const latestPreviewMessageId = useMemo(() => {
+    const isActivelyStreaming = messages.some((msg) => msg.isStreaming);
+    if (isActivelyStreaming) {
+      const livePreviewMessage = messages.find(
+        (msg) => msg.role === "assistant" && /```json_idea/i.test(msg.content),
+      );
+      return livePreviewMessage?.id;
+    }
+    if (projectPreviewLatestId) {
+      return projectPreviewLatestId;
+    }
+  }, [messages, projectPreviewLatestId]);
 
-  const renderMessage = ({ item }: { item: Message }) => {
-    const isUser = item.role === "user";
-    return (
-      <View className={`mb-3 ${isUser ? "items-end" : "items-start"}`}>
-        {isUser ? (
-          <UserBubble content={item.content} />
-        ) : (
-          <AssistantBubble
-            content={item.content}
-            isStreaming={item.isStreaming as boolean}
-          />
-        )}
-      </View>
-    );
-  };
+  const renderMessage = useCallback(
+    ({ item }: { item: Message }) => {
+      const isUser = item.role === "user";
+      return (
+        <View
+          className={`mb-3 w-full ${isUser ? "items-end" : "items-start"}`}
+          style={{ transform: [{ scaleY: -1 }] }}
+        >
+          {isUser ? (
+            <UserBubble content={item.content} />
+          ) : (
+            <AssistantBubble
+              messageId={item.id}
+              content={item.content}
+              isLatestPreview={item.id === latestPreviewMessageId}
+              isStreaming={item.isStreaming as boolean}
+            />
+          )}
+        </View>
+      );
+    },
+    [latestPreviewMessageId],
+  );
 
   const renderScrollComponent = useCallback(
     (props: ScrollViewProps) => (
@@ -192,10 +285,9 @@ export function ActiveChatArea({
         {...props}
         chatScrollViewRef={chatScrollViewRef}
         extraContentPadding={extraContentPadding}
-        blankSpace={blankSpace}
       />
     ),
-    [extraContentPadding, blankSpace],
+    [extraContentPadding],
   );
 
   const onScrollEndReached = () => {
@@ -204,8 +296,20 @@ export function ActiveChatArea({
     }
   };
 
+  const getItemType = (item: Message) => {
+    return item.role;
+  };
+
   return (
-    <View style={StyleSheet.absoluteFillObject}>
+    <View style={styles.container}>
+      {isLoading && (
+        <View
+          className="flex-1 mt-72 justify-center items-center"
+          style={{ transform: [{ scaleY: -1 }] }}
+        >
+          <ActivityIndicator color="white" className="my-4" size="large" />
+        </View>
+      )}
       <AnimatedEmptyScreen
         isFirstOpen={isFirstOpen}
         isVisible={messages.length === 0 && isNewChat}
@@ -214,29 +318,44 @@ export function ActiveChatArea({
       <FlashList
         ref={flashListRef}
         data={messages}
+        style={{ transform: [{ scaleY: -1 }] }}
+        drawDistance={500}
         renderItem={renderMessage}
+        extraData={[isFetchingNextPage, latestPreviewMessageId]}
         keyExtractor={(item) => item.id}
-        //@ts-ignore
-        estimatedItemSize={100}
+        getItemType={getItemType}
         renderScrollComponent={renderScrollComponent}
+        removeClippedSubviews={true}
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        onContentSizeChange={scrollToBottom}
-        onLayout={scrollToBottom}
+        scrollEventThrottle={20}
         onEndReachedThreshold={0.5}
         onEndReached={onScrollEndReached}
         contentContainerStyle={{
-          paddingTop: HEADER_HEIGHT + top + 20,
+          paddingBottom: HEADER_HEIGHT + top,
+          paddingTop: 10,
           paddingHorizontal: 14,
-          paddingBottom: 0.5,
         }}
         ListFooterComponent={
           isFetchingNextPage ? (
-            <ActivityIndicator color="#818CF8" className="my-4" size="small" />
+            <View
+              className="py-4 h-6 my-5 items-center justify-center"
+              style={{ transform: [{ scaleY: -1 }] }}
+            >
+              <ActivityIndicator
+                color="#818CF8"
+                className="my-4"
+                size="large"
+              />
+            </View>
           ) : null
         }
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+});

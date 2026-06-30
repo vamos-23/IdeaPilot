@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   TextInput,
@@ -13,9 +13,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { FlashList } from "@shopify/flash-list";
 import { Search, X, MessageSquare } from "lucide-react-native";
-import {
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useChatHistory } from "@/src/store/useChatQueries";
+import { Chat } from "@/src/constants/types";
 
 type SearchOverlayProps = {
   isOpen: boolean;
@@ -29,32 +29,8 @@ export default function SearchChatsOverlay({
   onSelectChat,
 }: SearchOverlayProps) {
   const { top } = useSafeAreaInsets();
-
-  const chats = useMemo(
-    () => [
-      { id: "1", title: "React Native vs React" },
-      { id: "2", title: "Black Hole Explanation" },
-      { id: "3", title: "TanStack Query Setup" },
-      { id: "4", title: "PostgreSQL Cascade Delete" },
-      { id: "5", title: "Project Onboarding & Setup" },
-      { id: "6", title: "Q3 Marketing Strategy Brainstorm" },
-      { id: "7", title: "API Integration Bug Fixes" },
-      { id: "8", title: "UI/UX Design Feedback" },
-      { id: "9", title: "Weekly Sync & Status Update" },
-      { id: "10", title: "Client Presentation Rehearsal" },
-      { id: "11", title: "Budget Review & Allocations" },
-      { id: "12", title: "Product Roadmap Planning" },
-      { id: "13", title: "Customer Support Escalations" },
-      { id: "14", title: "Database Migration Checklist" },
-      { id: "15", title: "HR Policy Updates 2026" },
-      { id: "16", title: "Website Redesign Concepts" },
-      { id: "17", title: "Sales Performance Dashboard" },
-      { id: "18", title: "Security Audit Remediation" },
-      { id: "19", title: "React Native Reanimated" },
-    ],
-    [],
-  );
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: chats = [] } = useChatHistory(isOpen);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -78,11 +54,41 @@ export default function SearchChatsOverlay({
     ],
   }));
 
-  const handleSelect = (id: string) => {
-    setSearchQuery("");
-    onClose();
-    setTimeout(() => onSelectChat(id), 250);
-  };
+  const handleSelect = useCallback(
+    (id: string) => {
+      setSearchQuery("");
+      onClose();
+      setTimeout(() => onSelectChat(id), 250);
+    },
+    [onClose, setSearchQuery, onSelectChat],
+  );
+
+  const ChatItem = React.memo(
+    ({ item }: { item: Chat }) => (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => handleSelect(item.id)}
+        className="flex-row items-center px-5 py-4 border-b border-gray-100 dark:border-gray-800/50 bg-cardLight dark:bg-cardDark"
+      >
+        <View className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full">
+          <MessageSquare size={18} color="#818CF8" />
+        </View>
+        <Text className="ml-4 text-base text-textLight dark:text-textDark font-medium">
+          {item.title}
+        </Text>
+      </TouchableOpacity>
+    ),
+    (prevProps, nextProps) => {
+      return (
+        prevProps.item.id === nextProps.item.id,
+        prevProps.item.title === nextProps.item.title,
+        prevProps.item.isPinned === nextProps.item.isPinned
+      );
+    },
+  );
+  ChatItem.displayName = "ChatItem";
+
+  const renderChats = ({ item }: { item: Chat }) => <ChatItem item={item} />;
 
   return (
     <Animated.View
@@ -94,9 +100,7 @@ export default function SearchChatsOverlay({
       ]}
       className="bg-brandLight dark:bg-brandDark"
     >
-      <View
-        className="flex-row items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-cardLight dark:bg-cardDark"
-      >
+      <View className="flex-row items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-cardLight dark:bg-cardDark">
         <View className="flex-1 flex-row items-center bg-gray-100 dark:bg-gray-900 rounded-full px-2 py-2.5">
           <Search size={20} color="#9CA3AF" />
           <TextInput
@@ -119,20 +123,7 @@ export default function SearchChatsOverlay({
         //@ts-ignore
         estimatedItemSize={65}
         keyboardShouldPersistTaps="handled"
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleSelect(item.id)}
-            className="flex-row items-center px-5 py-4 border-b border-gray-100 dark:border-gray-800/50 bg-cardLight dark:bg-cardDark"
-          >
-            <View className="bg-gray-100 dark:bg-gray-800 p-2 rounded-full">
-              <MessageSquare size={18} color="#818CF8" />
-            </View>
-            <Text className="ml-4 text-base text-textLight dark:text-textDark font-medium">
-              {item.title}
-            </Text>
-          </TouchableOpacity>
-        )}
+        renderItem={renderChats}
         ListEmptyComponent={
           <Text className="text-center text-lg text-gray-500 mt-10">
             {searchQuery
@@ -144,4 +135,3 @@ export default function SearchChatsOverlay({
     </Animated.View>
   );
 }
-

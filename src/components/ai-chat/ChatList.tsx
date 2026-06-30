@@ -24,28 +24,6 @@ import { Chat, MenuState, ChatRenameState } from "@/src/constants/types";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-// const INITIAL_MOCK_CHATS = [
-//   { id: "1", title: "React Native vs React" },
-//   { id: "2", title: "Black Hole Explanation" },
-//   { id: "3", title: "TanStack Query Setup" },
-//   { id: "4", title: "PostgreSQL Cascade Delete" },
-//   { id: "5", title: "Project Onboarding & Setup" },
-//   { id: "6", title: "Q3 Marketing Strategy Brainstorm" },
-//   { id: "7", title: "API Integration Bug Fixes" },
-//   { id: "8", title: "UI/UX Design Feedback" },
-//   { id: "9", title: "Weekly Sync & Status Update" },
-//   { id: "10", title: "Client Presentation Rehearsal" },
-//   { id: "11", title: "Budget Review & Allocations" },
-//   { id: "12", title: "Product Roadmap Planning" },
-//   { id: "13", title: "Customer Support Escalations" },
-//   { id: "14", title: "Database Migration Checklist" },
-//   { id: "15", title: "HR Policy Updates 2026" },
-//   { id: "16", title: "Website Redesign Concepts" },
-//   { id: "17", title: "Sales Performance Dashboard" },
-//   { id: "18", title: "Security Audit Remediation" },
-//   { id: "19", title: "React Native Reanimated" },
-// ];
-
 type ChatListProps = {
   isDrawerOpen: boolean;
   onSelectChat: (id: string) => void;
@@ -56,12 +34,11 @@ export default function ChatList({
   onSelectChat,
 }: ChatListProps) {
   const appTheme = useThemeStore((s) => s.theme);
-
   const { data: chats = [], isLoading } = useChatHistory(isDrawerOpen);
   const renameMutation = useRenameChat();
   const togglePinMutation = useToggleChatPinStatus();
   const deleteChatMutation = useDeleteChat();
-  console.log(chats);
+
   const [menuState, setMenuState] = useState<MenuState>({
     visible: false,
     isPinned: false,
@@ -166,7 +143,7 @@ export default function ChatList({
           }
         >
           <Text
-            className="flex-1 pr-3 font-nata-sans-bold text-textLight dark:text-white text-base"
+            className="flex-1 font-nata-sans-bold text-textLight dark:text-white text-base"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -184,36 +161,42 @@ export default function ChatList({
     },
     (prevProps, nextProps) => {
       return (
-        prevProps.item.id === nextProps.item.id,
-        prevProps.item.title === nextProps.item.title,
+        prevProps.item.id === nextProps.item.id &&
+        prevProps.item.title === nextProps.item.title &&
         prevProps.item.isPinned === nextProps.item.isPinned
       );
     },
   );
   ChatRow.displayName = "ChatRow";
-
   const renderChatRow = ({ item }: { item: Chat }) => <ChatRow item={item} />;
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 w-full">
       {isLoading ? (
-        <View className="flex-row items-center gap-2 mt-3">
+        <View className="flex-row mt-64 items-center justify-center">
           <ActivityIndicator color="#818CF8" size="small" />
-          <Text className="font-nata-sans-bold text-base text-textLight dark:text-white">
-            Syncing your chats...
+          <Text className="ml-2 font-nata-sans-bold text-lg text-textLight dark:text-white">
+            Loading your chats...
           </Text>
         </View>
       ) : (
-        <FlashList
-          data={sortedChats}
-          renderItem={renderChatRow}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            gap: 2,
-            paddingBottom: 4,
-          }}
-        />
+        <>
+          <FlashList
+            data={sortedChats}
+            renderItem={renderChatRow}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              gap: 2,
+              paddingBottom: 4,
+            }}
+            ListEmptyComponent={
+              <Text className="text-center mt-64 text-lg font-nata-sans-bold text-textLight dark:text-white">
+                No chats found
+              </Text>
+            }
+          />
+        </>
       )}
 
       <Modal visible={menuState.visible} transparent animationType="fade">
@@ -223,7 +206,7 @@ export default function ChatList({
           onPress={closeMenu}
         >
           <View
-            className="w-[220px] bg-cardLight dark:bg-[#0f402b] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-3 gap-3"
+            className="w-[220px] bg-cardLight dark:bg-[#313238] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-3 gap-3"
             style={{
               top: menuState.y,
               left: menuState.x,
@@ -240,13 +223,13 @@ export default function ChatList({
                 <MaterialCommunityIcons
                   name="pin-off-outline"
                   size={20}
-                  color="white"
+                  color={appTheme === "light" ? "#0F172A" : "#ffffff"}
                 />
               ) : (
                 <MaterialCommunityIcons
                   name="pin-outline"
                   size={20}
-                  color="white"
+                  color={appTheme === "light" ? "#0F172A" : "#ffffff"}
                 />
               )}
               <Text className="text-lg font-nata-sans-bold text-textLight dark:text-white">
@@ -259,7 +242,7 @@ export default function ChatList({
               activeOpacity={0.4}
               onPress={handleRenameChat}
             >
-              <MaterialCommunityIcons name="pencil" size={20} color="white" />
+              <MaterialCommunityIcons name="pencil" size={20} co color={appTheme === "light" ? "#0F172A" : "#ffffff"} />
               <Text className="text-lg font-nata-sans-bold text-textLight dark:text-white">
                 Rename
               </Text>
@@ -282,7 +265,6 @@ export default function ChatList({
           </View>
         </TouchableOpacity>
       </Modal>
-
       <Modal visible={renameState.visible} transparent animationType="fade">
         <KeyboardAvoidingView
           behavior="padding"

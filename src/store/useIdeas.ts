@@ -2,8 +2,8 @@ import { create } from "zustand";
 import {
   fetchRecommendedIdeas,
   fetchAIIdeas,
+  syncBookmarks,
 } from "../services/ideas/ideas.service";
-import { syncBookmarks } from "../services/users/syncBookmarks";
 import { ProjectIdea, TabType } from "../constants/types";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -34,7 +34,8 @@ interface Ideastate {
     result: "success" | "failure";
     action?: "bookmarked" | "unbookmarked";
   }>;
-  saveLocalAIIdeas: (newIdeaId: ProjectIdea) => void;
+  saveLocalAIIdea: (newIdea: ProjectIdea) => void;
+  removeLocalAIIdea: (ideaId: string) => void;
 }
 
 export const useIdeas = create<Ideastate>()(
@@ -147,8 +148,35 @@ export const useIdeas = create<Ideastate>()(
         }
       },
 
-      saveLocalAIIdeas: (newIdea) => {
-        set((state) => ({ aiIdeas: [newIdea, ...state.aiIdeas] }));
+      saveLocalAIIdea: (newIdea) => {
+        set((state) => {
+          const existingIndex = state.aiIdeas.findIndex(
+            (idea) => idea.id === newIdea.id,
+          );
+          if (existingIndex !== -1) {
+            const updatedIdeas = [...state.aiIdeas];
+            updatedIdeas[existingIndex] = newIdea;
+            console.log(state.aiIdeas);
+            return { aiIdeas: updatedIdeas };
+          } else {
+            console.log(state.aiIdeas);
+            return { aiIdeas: [newIdea, ...state.aiIdeas] };
+          }
+        });
+      },
+
+      removeLocalAIIdea: (ideaId: string) => {
+        set((state) => {
+          const { [ideaId]: _, ...remainingBookmarkedIds } =
+            state.bookmarkedIds;
+          return {
+            aiIdeas: state.aiIdeas.filter((idea) => idea.id !== ideaId),
+            bookmarkedIdeas: state.bookmarkedIdeas.filter(
+              (idea) => idea.id !== ideaId,
+            ),
+            bookmarkedIds: remainingBookmarkedIds,
+          };
+        });
       },
     }),
     {

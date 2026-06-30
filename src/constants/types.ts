@@ -12,18 +12,19 @@ export default interface Skill {
 
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
 export type TabType = "discover" | "bookmarked" | "ai";
+export type SaveStatus = "saving" | "saved" | "updated" | "idle";
 
 export interface ProjectIdea {
   id: string;
+  projectPreviewId?: string;
   isAIGenerated?: boolean;
   category: string;
   description: string;
   difficulty: Difficulty;
   domain: string;
   estimatedTime: string;
-  isTrending: boolean;
   name: string;
-  randomValue: number;
+  randomValue?: number;
   techStack: string[];
   detailedDescription: string;
   whatYouWillLearn: string[];
@@ -45,6 +46,7 @@ export interface Message {
 export interface MessagePage {
   messages: Message[];
   nextCursor: string | null;
+  latestPreviewId: string | null;
 }
 
 export interface MenuState {

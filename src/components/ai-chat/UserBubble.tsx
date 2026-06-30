@@ -9,11 +9,9 @@ function UserBubble({ content }: UserPrompt) {
   return (
     <View
       style={styles.userBubble}
-      className="px-4 py-3 bg-accent-light dark:bg-accent-dark1"
+      className="px-4 py-3 bg-accent-dark1 dark:bg-accent-dark1"
     >
-      <Text className="font-nata-sans-medium text-sm text-white leading-6">
-        {content}
-      </Text>
+      <Text className="text-[15px] text-white leading-6 flex-wrap">{content}</Text>
     </View>
   );
 }

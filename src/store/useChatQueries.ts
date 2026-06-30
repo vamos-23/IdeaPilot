@@ -7,15 +7,16 @@ import {
 import { apiClient } from "../services/api/apiClient";
 import { Chat, MessagePage } from "../constants/types";
 
-export function useChatHistory(isDrawerOpen: boolean) {
+export function useChatHistory(enabled: boolean) {
   return useQuery<Chat[]>({
     queryKey: ["chats"],
     queryFn: async () => {
-      const { data: chatHistory } = await apiClient.get("/chats");
+      const { data: chatHistory } = await apiClient.get("/");
       return chatHistory;
     },
     staleTime: 1000 * 60 * 5,
-    enabled: isDrawerOpen
+    gcTime: 1000 * 60 * 30,
+    enabled: enabled,
   });
 }
 
@@ -24,15 +25,17 @@ export function useChatMessages(chatId: string) {
     queryKey: ["messages", chatId],
     queryFn: async ({ pageParam = null }) => {
       const { data: chatMessages } = await apiClient.get(
-        `/chats/${chatId}/messages`,
+        `/${chatId}/messages`,
         { params: { cursor: pageParam } },
       );
       return chatMessages;
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    staleTime: 1000 * 30,
-    enabled: chatId !== "new"
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 15,
+    retry: 3,
+    enabled: chatId !== "new",
   });
 }
 
@@ -46,11 +49,12 @@ export function useToggleChatPinStatus() {
       chatId: string;
       isPinned: boolean;
     }) => {
-      const { data } = await apiClient.patch(`/chats/${chatId}/pin`, {
+      const { data } = await apiClient.patch(`/${chatId}/pin`, {
         isPinned,
       });
       return data;
     },
+    retry: 0,
     onMutate: async ({ chatId, isPinned }) => {
       //cancel any ongoing re-fetches so that their results do not affect the temporary UI optimistic updates
       await queryClient.cancelQueries({ queryKey: ["chats"] });
@@ -68,7 +72,7 @@ export function useToggleChatPinStatus() {
         queryClient.setQueryData(["chats"], context.previousChats);
       }
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
@@ -84,11 +88,12 @@ export function useRenameChat() {
       chatId: string;
       title: string;
     }) => {
-      const { data } = await apiClient.patch(`/chats/${chatId}/rename`, {
+      const { data } = await apiClient.patch(`/${chatId}/rename`, {
         title,
       });
       return data;
     },
+    retry: 0,
     onMutate: async ({ chatId, title }) => {
       await queryClient.cancelQueries({ queryKey: ["chats"] });
       const previousChats = queryClient.getQueryData<Chat[]>(["chats"]);
@@ -103,7 +108,7 @@ export function useRenameChat() {
         queryClient.setQueryData<Chat[]>(["chats"], context.previousChats);
       }
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
@@ -113,9 +118,10 @@ export function useDeleteChat() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (chatId: string) => {
-      const { data } = await apiClient.delete(`/chats/${chatId}`);
+      const { data } = await apiClient.delete(`/${chatId}`);
       return data;
     },
+    retry: 0,
     onMutate: async (chatId) => {
       await queryClient.cancelQueries({ queryKey: ["chats"] });
       const previousChats = queryClient.getQueryData<Chat[]>(["chats"]);
@@ -130,7 +136,10 @@ export function useDeleteChat() {
         queryClient.setQueryData<Chat[]>(["chats"], context.previousChats);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_data, chatId) => {
+      queryClient.removeQueries({ queryKey: ["messages", chatId] });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });

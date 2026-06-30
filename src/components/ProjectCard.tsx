@@ -1,4 +1,4 @@
-import { Text, View, TouchableOpacity } from "react-native";
+import { Alert, Text, View, TouchableOpacity } from "react-native";
 import { DIFFICULTY_STYLES } from "../constants/projectCardStyles/project-card-styles";
 import { sc } from "../constants/responsive";
 import { ProjectIdea } from "../constants/types";
@@ -6,7 +6,8 @@ import { useRouter } from "expo-router";
 import { memo, useCallback } from "react";
 import Toast from "react-native-toast-message";
 import Ionicons from "@expo/vector-icons/Ionicons";
-
+import Feather from "@expo/vector-icons/Feather";
+import { deleteAIIdeaFromVault } from "../services/ideas/ideas.service";
 import { AnimatedBookmarkCheck } from "../animations/components/projectCards/AnimatedBookmarkCheck";
 import { useIdeas } from "../store/useIdeas";
 
@@ -30,7 +31,8 @@ export const ProjectCard = memo(function ProjectCard({
   toggleBookmark,
 }: ProjectCardProps) {
   const router = useRouter();
-
+  const removeLocalAIIdea = useIdeas((state) => state.removeLocalAIIdea);
+  const bookmarkedIdeas = useIdeas((state) => state.bookmarkedIdeas);
   const isBookmarked = useIdeas((state) => !!state.bookmarkedIds[item.id]);
 
   const difficulty =
@@ -61,6 +63,46 @@ export const ProjectCard = memo(function ProjectCard({
     router.push(`/project/${item.id}`);
   }, [router, item.id]);
 
+  const handleDeleteAIIdea = async () => {
+    if (!userId) return;
+    try {
+      await deleteAIIdeaFromVault(userId, item.id);
+      removeLocalAIIdea(item.id);
+      
+      Toast.show({
+        type: "success",
+        text1: "Project Deleted 🗑️",
+        text2: `Removed ${item.name} from AI Vault`,
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Deletion Failed 😖",
+        text2:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Try again later.",
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Are you sure",
+      "You are going to delete your AI-generated idea. This will delete it from the AI Vault but you can always add it back from the preview in your chats.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: handleDeleteAIIdea,
+        },
+      ],
+    );
+  };
   const visibleTech = item.techStack.slice(0, 3);
   const extraTechCount = item.techStack.length - 3;
 
@@ -76,12 +118,26 @@ export const ProjectCard = memo(function ProjectCard({
             {difficulty.label}
           </Text>
         </View>
-
-        <AnimatedBookmarkCheck
-          isBookmarked={isBookmarked}
-          onPress={handleBookmark}
-          isDark={isDark}
-        />
+        <View className="flex-row gap-2 items-center">
+          {item.isAIGenerated && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              hitSlop={20}
+              onPress={handleDelete}
+            >
+              <Feather
+                name="trash"
+                size={21}
+                color={isDark ? "#f74343" : "#DC2626"}
+              />
+            </TouchableOpacity>
+          )}
+          <AnimatedBookmarkCheck
+            isBookmarked={isBookmarked}
+            onPress={handleBookmark}
+            isDark={isDark}
+          />
+        </View>
       </View>
 
       <View className="gap-y-2">
@@ -135,7 +191,7 @@ export const ProjectCard = memo(function ProjectCard({
           onPress={handleNavigation}
           className="bg-orange-600/10 dark:bg-orange-500/10 p-1.5 rounded-full"
         >
-          <Ionicons name="chevron-forward" size={18} color="#ea580c" />
+          <Feather name="chevron-right" size={18} color="#ea580c" />
         </TouchableOpacity>
       </View>
     </View>

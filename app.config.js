@@ -50,7 +50,6 @@ export default ({ config }) => ({
     "expo-font",
     "expo-asset",
     "expo-web-browser",
-    "react-native-enriched-markdown",
     [
       "expo-splash-screen",
       {

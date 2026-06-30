@@ -19,6 +19,7 @@
     "noEmit": true
   },
   "include": [
+    "*.d.ts",
     "src/app",
     "src/app/project",
     "src/components",
@@ -28,8 +29,7 @@
     "expo-env.d.ts",
     ".expo/types/**/*.ts",
     "nativewind.d.ts",
-    "nativewind-env.d.ts",
-    "src/services/notifications/hook/useCheckPushStatus.ts",
+    "nativewind-env.d.ts"
   ],
   "exclude": ["node_modules"]
 }

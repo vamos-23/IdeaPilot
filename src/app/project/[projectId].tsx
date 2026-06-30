@@ -56,16 +56,14 @@ export default function ProjectDetails() {
     ),
   );
 
-  const { diffStyle, trendingStyle, iconColor } = useMemo(() => {
+  const { diffStyle, iconColor } = useMemo(() => {
     const diffKey =
       (projectData?.difficulty as keyof typeof DIFFICULTY_STYLES) || "Beginner";
     const style = DIFFICULTY_STYLES[diffKey] || DIFFICULTY_STYLES["Beginner"];
     const color = isDark ? style.iconDark : style.iconLight;
-    const trendingStyle = DIFFICULTY_STYLES["Beginner"];
-    return { diffStyle: style, trendingStyle: trendingStyle, iconColor: color };
+    return { diffStyle: style, iconColor: color };
   }, [projectData, isDark]);
 
-  const isTrending = projectData?.isTrending;
   const handleGenerateRoadmap = () => {
     console.log("Generating roadmap for:", projectData?.name);
   };
@@ -138,17 +136,6 @@ export default function ProjectDetails() {
                 {projectData.domain}
               </Text>
             </View>
-            {isTrending && (
-              <View
-                className={`px-4 py-1.5 rounded-full border ${trendingStyle.bg} ${trendingStyle.border} `}
-              >
-                <Text
-                  className={`font-nata-sans-bold text-[10px] uppercase tracking-widest ${trendingStyle.text}`}
-                >
-                  Trending
-                </Text>
-              </View>
-            )}
           </View>
 
           <Text className="text-[32px] font-nata-sans-bold text-slate-900 dark:text-white mb-4 leading-tight">
@@ -158,7 +145,11 @@ export default function ProjectDetails() {
             {projectData.description}
           </Text>
 
-          <InformationCard timelineValue={projectData.estimatedTime}  categoryValue={projectData.category} iconColor={iconColor} />
+          <InformationCard
+            timelineValue={projectData.estimatedTime}
+            categoryValue={projectData.category}
+            iconColor={iconColor}
+          />
 
           <View className="mb-10">
             <View className="flex-row items-center mb-4">

@@ -34,15 +34,10 @@ export default function ChatList({
   onSelectChat,
 }: ChatListProps) {
   const appTheme = useThemeStore((s) => s.theme);
-  const {
-    data: chats = [],
-    isLoading,
-    isFetching,
-  } = useChatHistory(isDrawerOpen);
+  const { data: chats = [], isLoading } = useChatHistory(isDrawerOpen);
   const renameMutation = useRenameChat();
   const togglePinMutation = useToggleChatPinStatus();
   const deleteChatMutation = useDeleteChat();
-  console.log(chats);
 
   const [menuState, setMenuState] = useState<MenuState>({
     visible: false,
@@ -148,7 +143,7 @@ export default function ChatList({
           }
         >
           <Text
-            className="flex-1 pr-3 font-nata-sans-bold text-textLight dark:text-white text-base"
+            className="flex-1 font-nata-sans-bold text-textLight dark:text-white text-base"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -166,35 +161,26 @@ export default function ChatList({
     },
     (prevProps, nextProps) => {
       return (
-        prevProps.item.id === nextProps.item.id,
-        prevProps.item.title === nextProps.item.title,
+        prevProps.item.id === nextProps.item.id &&
+        prevProps.item.title === nextProps.item.title &&
         prevProps.item.isPinned === nextProps.item.isPinned
       );
     },
   );
   ChatRow.displayName = "ChatRow";
-
   const renderChatRow = ({ item }: { item: Chat }) => <ChatRow item={item} />;
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 w-full">
       {isLoading ? (
-        <View className="flex-row items-center justify-center">
+        <View className="flex-row mt-64 items-center justify-center">
           <ActivityIndicator color="#818CF8" size="small" />
-          <Text className="ml-2 font-nata-sans-bold text-base text-textLight dark:text-white">
+          <Text className="ml-2 font-nata-sans-bold text-lg text-textLight dark:text-white">
             Loading your chats...
           </Text>
         </View>
       ) : (
         <>
-          {isFetching && !isLoading && (
-            <View className="flex-row items-center justify-center">
-              <ActivityIndicator color="#818CF8" size="small" />
-              <Text className="ml-2 font-nata-sans-bold text-base text-textLight dark:text-white">
-                Syncing your chats...
-              </Text>
-            </View>
-          )}
           <FlashList
             data={sortedChats}
             renderItem={renderChatRow}
@@ -204,6 +190,11 @@ export default function ChatList({
               gap: 2,
               paddingBottom: 4,
             }}
+            ListEmptyComponent={
+              <Text className="text-center mt-64 text-lg font-nata-sans-bold text-textLight dark:text-white">
+                No chats found
+              </Text>
+            }
           />
         </>
       )}
@@ -215,7 +206,7 @@ export default function ChatList({
           onPress={closeMenu}
         >
           <View
-            className="w-[220px] bg-cardLight dark:bg-[#0f402b] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-3 gap-3"
+            className="w-[220px] bg-cardLight dark:bg-[#313238] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-3 gap-3"
             style={{
               top: menuState.y,
               left: menuState.x,
@@ -232,13 +223,13 @@ export default function ChatList({
                 <MaterialCommunityIcons
                   name="pin-off-outline"
                   size={20}
-                  color="white"
+                  color={appTheme === "light" ? "#0F172A" : "#ffffff"}
                 />
               ) : (
                 <MaterialCommunityIcons
                   name="pin-outline"
                   size={20}
-                  color="white"
+                  color={appTheme === "light" ? "#0F172A" : "#ffffff"}
                 />
               )}
               <Text className="text-lg font-nata-sans-bold text-textLight dark:text-white">
@@ -251,7 +242,7 @@ export default function ChatList({
               activeOpacity={0.4}
               onPress={handleRenameChat}
             >
-              <MaterialCommunityIcons name="pencil" size={20} color="white" />
+              <MaterialCommunityIcons name="pencil" size={20} co color={appTheme === "light" ? "#0F172A" : "#ffffff"} />
               <Text className="text-lg font-nata-sans-bold text-textLight dark:text-white">
                 Rename
               </Text>
@@ -274,7 +265,6 @@ export default function ChatList({
           </View>
         </TouchableOpacity>
       </Modal>
-
       <Modal visible={renameState.visible} transparent animationType="fade">
         <KeyboardAvoidingView
           behavior="padding"

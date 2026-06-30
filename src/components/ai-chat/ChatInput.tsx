@@ -2,11 +2,10 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   LayoutChangeEvent,
 } from "react-native";
 import { useState } from "react";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 type ChatInputProps = {
   onSend: (prompt: string) => void;
@@ -45,7 +44,7 @@ export default function ChatInput({
   };
 
   return (
-    <View className="px-3 items-center bg-transparent">
+    <>
       <View
         className={`flex-row items-end bg-white dark:bg-[#131720] px-4 py-3 border rounded-3xl ${
           isFocused
@@ -63,7 +62,7 @@ export default function ChatInput({
           onLayout={onLayoutChanges}
           placeholder="Describe your ideas..."
           placeholderTextColor="#94A3B8"
-          className="flex-1 text-textLight dark:text-white font-nata-sans-medium text-md max-h-36"
+          className="flex-1 text-textLight dark:text-white text-base max-h-36"
         />
 
         <View className="ml-3">
@@ -77,14 +76,22 @@ export default function ChatInput({
               className={`h-12 w-12 items-center justify-center rounded-full ${getButtonBgStyle()}`}
             >
               {streamingStatus ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <MaterialCommunityIcons
+                  name="square-rounded"
+                  size={20}
+                  color="#ffffff"
+                />
               ) : (
-                <Ionicons name="arrow-up" size={20} color={getIconColor()} />
+                <MaterialCommunityIcons
+                  name="arrow-up"
+                  size={20}
+                  color={getIconColor()}
+                />
               )}
             </View>
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </>
   );
 }

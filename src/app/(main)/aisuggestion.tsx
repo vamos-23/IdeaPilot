@@ -1,20 +1,20 @@
-import React, { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, startTransition } from "react";
 import {
-  LayoutChangeEvent,
   StyleSheet,
   View,
   Keyboard,
   Dimensions,
-  TouchableOpacity,
+  LayoutChangeEvent,
 } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import Animated, {
-  useSharedValue,
   withTiming,
   useAnimatedStyle,
+  FadeIn,
+  useSharedValue,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
@@ -30,16 +30,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Chat } from "@/src/constants/types";
 
 const HEADER_HEIGHT = 76;
-const BASE_INPUT_HEIGHT = 60;
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const DRAWER_WIDTH = SCREEN_WIDTH * 0.74;
+const DRAWER_WIDTH = Dimensions.get("window").width;
+const MIN_INPUT_HEIGHT = 36;
 
 export default function AISuggestions() {
-  //AI Screen Main Components
   const { top, bottom } = useSafeAreaInsets();
   const extraContentPadding = useSharedValue(0);
-  const blankSpace = useSharedValue(0);
   const [activeChatId, setActiveChatId] = useState<string>("new");
+  const pendingChatId = useRef<string | null>(null);
   const [isFirstOpen, setFirstOpen] = useState<boolean>(true);
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const [isSearchOpen, setSearchOpen] = useState<boolean>(false);
@@ -59,44 +57,42 @@ export default function AISuggestions() {
   };
 
   const drawerTranslateX = useSharedValue(-DRAWER_WIDTH);
-  const overlayOpacity = useSharedValue(0);
-
   const toggleDrawer = useCallback(() => {
     Keyboard.dismiss();
+
     const isClosing = drawerTranslateX.value > -DRAWER_WIDTH / 2;
-    if (isClosing) {
-      drawerTranslateX.value = withTiming(-DRAWER_WIDTH, { duration: 250 });
-      overlayOpacity.value = withTiming(0, { duration: 250 });
-      scheduleOnRN(setDrawerOpen, false);
-    } else {
-      drawerTranslateX.value = withTiming(0, { duration: 300 });
-      overlayOpacity.value = withTiming(1, { duration: 300 });
-      scheduleOnRN(setDrawerOpen, true);
-    }
-  }, [overlayOpacity, drawerTranslateX]);
+    const targetValue = isClosing ? -DRAWER_WIDTH : 0;
+
+    const handleFinish = (
+      finished: boolean | undefined,
+      wasClosing: boolean,
+    ) => {
+      if (finished) {
+        setDrawerOpen(!wasClosing);
+        if (wasClosing && pendingChatId.current) {
+          startTransition(() => {
+            setActiveChatId(pendingChatId.current!);
+            pendingChatId.current = null;
+          });
+        }
+      }
+    };
+
+    drawerTranslateX.value = withTiming(
+      targetValue,
+      { duration: 350 },
+      (finished) => {
+        scheduleOnRN(handleFinish, finished, isClosing);
+      },
+    );
+  }, [drawerTranslateX]);
 
   const animatedDrawerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: drawerTranslateX.value }],
   }));
 
-  const animatedOverlayStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
-    zIndex: overlayOpacity.value === 0 ? -1 : 1500,
-  }));
-
-  const onInputLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      const height = e.nativeEvent.layout.height;
-      extraContentPadding.value = withTiming(
-        Math.max(height - BASE_INPUT_HEIGHT, 0),
-        { duration: 200 },
-      );
-    },
-    [extraContentPadding],
-  );
-
   const selectChat = (chatId: string) => {
-    setActiveChatId(chatId);
+    pendingChatId.current = chatId;
     toggleDrawer();
   };
   const searchChat = () => {
@@ -114,15 +110,23 @@ export default function AISuggestions() {
     queryClient.setQueryData<Chat[]>(["chats"], (oldChats) => {
       const currentChats = oldChats ? [...oldChats] : [];
       return [
-        {
-          id: newId,
-          title: "AI Idea",
-          isPinned: false,
-        },
+        { id: newId, title: "AI Idea", isPinned: false },
         ...currentChats,
       ];
     });
   };
+
+  const onInputLayout = useCallback(
+    (e: LayoutChangeEvent) => {
+      const height = e.nativeEvent.layout.height;
+
+      extraContentPadding.value = withTiming(
+        Math.max(height - MIN_INPUT_HEIGHT, 0),
+        { duration: 250 },
+      );
+    },
+    [extraContentPadding],
+  );
 
   return (
     <View style={styles.container} className="bg-brandLight dark:bg-brandDark">
@@ -136,56 +140,48 @@ export default function AISuggestions() {
       >
         <ChatHeader toggleChatDrawer={toggleDrawer} />
       </SafeAreaView>
+
       <View style={styles.listContainer}>
-        <ActiveChatArea
-          ref={chatAreaRef}
+        <Animated.View
+          style={{ flex: 1 }}
+          entering={FadeIn.duration(400).springify()}
           key={activeChatId}
-          chatId={activeChatId}
-          isFirstOpen={isFirstOpen}
-          blankSpace={blankSpace}
-          extraContentPadding={extraContentPadding}
-          onNewChatStarted={handleNewChatCreated}
-        />
-      </View>
-      <View
-        style={{ opacity: isSearchOpen ? 0 : 1 }}
-        pointerEvents={isSearchOpen ? "none" : "auto"}
-      >
-        <KeyboardStickyView offset={{ closed: 0, opened: 12 }}>
-          <View style={{ paddingBottom: Math.max(bottom, 19) }}>
-            <ChatInput
-              onSend={handleSendPrompt}
-              streamingStatus={globalStreaming}
-              onLayoutChanges={onInputLayout}
-            />
-          </View>
-        </KeyboardStickyView>
+        >
+          <ActiveChatArea
+            ref={chatAreaRef}
+            chatId={activeChatId}
+            isFirstOpen={isFirstOpen}
+            extraContentPadding={extraContentPadding}
+            onNewChatStarted={handleNewChatCreated}
+          />
+        </Animated.View>
       </View>
 
-      <Animated.View
-        className="absolute inset-0  dark:bg-black/50"
-        style={[animatedOverlayStyle]}
+      <KeyboardStickyView
+        offset={{ closed: 0, opened: 12 }}
+        style={{
+          opacity: isSearchOpen ? 0 : 1,
+          marginBottom: Math.max(bottom, 19),
+          marginHorizontal: 10,
+          padding: 5,
+          borderRadius: 30,
+          backgroundColor: "transparent",
+          alignItems: "center",
+        }}
+        pointerEvents={isSearchOpen ? "none" : "auto"}
       >
-        <TouchableOpacity
-          className="absolute inset-0 dark:bg-black/50"
-          style={{
-            zIndex: 1500,
-          }}
-          onPress={toggleDrawer}
-          activeOpacity={1}
+        <ChatInput
+          onSend={handleSendPrompt}
+          streamingStatus={globalStreaming}
+          onLayoutChanges={onInputLayout}
         />
-      </Animated.View>
+      </KeyboardStickyView>
 
       <Animated.View
         className="absolute top-0 left-0 bottom-0 bg-cardLight dark:bg-cardDark"
         style={[
           animatedDrawerStyle,
-          {
-            paddingTop: top,
-            width: DRAWER_WIDTH,
-            zIndex: 2000,
-            elevation: 20,
-          },
+          { paddingTop: top, width: DRAWER_WIDTH, zIndex: 2000, elevation: 20 },
         ]}
       >
         <ChatHistoryDrawer
@@ -193,6 +189,7 @@ export default function AISuggestions() {
           onNewChat={newChat}
           onSearchClicked={searchChat}
           onSelectChat={selectChat}
+          onClose={toggleDrawer}
         />
       </Animated.View>
 
@@ -208,11 +205,5 @@ export default function AISuggestions() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContainer: { flex: 1 },
-  header: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-  },
+  header: { position: "absolute", top: 0, left: 0, right: 0, zIndex: 1000 },
 });

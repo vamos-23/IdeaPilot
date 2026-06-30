@@ -160,7 +160,7 @@ export default function Dashboard() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: sc(20),
-          paddingBottom: vs(80),
+          paddingBottom: vs(84),
           flexGrow: 1,
         }}
       />

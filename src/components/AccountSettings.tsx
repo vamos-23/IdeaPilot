@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
 import handleDeleteAccount from "../lib/account/handleDeleteAccount";
-import { sc, vs } from "./../constants/responsive";
+import { sc } from "./../constants/responsive";
 import SubmitButton from "./SubmitButton";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -25,7 +25,7 @@ export default function AccountSettings({ appTheme }: AccountSettingsProps) {
       ],
     );
   };
-  
+
   return (
     <View
       className="border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none"
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: sc(16),
     padding: sc(20),
-    marginBottom: vs(40),
   },
   heading: { fontSize: sc(20) },
 });

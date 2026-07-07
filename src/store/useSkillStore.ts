@@ -12,15 +12,21 @@ interface SkillState {
   addSkill: (newSkill: Skill) => void;
   removeSkill: (skillID: string) => void;
   toggleSync: (syncStatus: boolean) => void;
+
   clearLocalSkills: () => void;
+  reset: () => void;
 }
+
+const initialState = {
+  skills: [] as Skill[],
+  isSynced: false,
+  hasHydrated: false,
+};
 
 const useSkillStore = create<SkillState>()(
   persist(
     (set) => ({
-      skills: [],
-      isSynced: false,
-      hasHydrated: false,
+      ...initialState,
 
       setSkills: (skills: Skill[]) =>
         set({
@@ -40,20 +46,26 @@ const useSkillStore = create<SkillState>()(
           isSynced: false,
         })),
 
-      toggleSync: (syncStatus) => set({ isSynced: syncStatus }),
+      toggleSync: (syncStatus: boolean) =>
+        set({
+          isSynced: syncStatus,
+        }),
 
-      clearLocalSkills: () => {
+      clearLocalSkills: () =>
         set({
           skills: [],
           isSynced: false,
-        });
-      },
+        }),
+
+      reset: () =>
+        set({
+          ...initialState,
+        }),
     }),
     {
       name: "user-skills",
       storage: createJSONStorage(() => AsyncStorage),
-
-      onRehydrateStorage: (state) => {
+      onRehydrateStorage: () => (state) => {
         if (state) {
           state.hasHydrated = true;
         }
@@ -61,4 +73,5 @@ const useSkillStore = create<SkillState>()(
     },
   ),
 );
+
 export default useSkillStore;

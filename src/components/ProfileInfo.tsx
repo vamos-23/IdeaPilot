@@ -1,15 +1,15 @@
 import Feather from "@expo/vector-icons/Feather";
 import { StyleSheet, Text, View } from "react-native";
-import { auth } from "@/config/FirebaseConfig";
 import useThemeStore from "../store/useThemeStore";
 import { sc, vs } from "./../constants/responsive";
 import SubmitButton from "./SubmitButton";
+import useAuthStore from "../store/useAuthStore";
 
 type ProfileInfoProps = { onEditProfile: () => void };
 
 export default function ProfileInfo({ onEditProfile }: ProfileInfoProps) {
   const appTheme = useThemeStore((s) => s.theme);
-  const user = auth.currentUser;
+  const user = useAuthStore((s) => s.user);
 
   return (
     <View
@@ -43,13 +43,13 @@ export default function ProfileInfo({ onEditProfile }: ProfileInfoProps) {
           className="text-textLight dark:text-white font-nata-sans-bold"
           style={{ fontSize: sc(15) }}
         >
-          {user?.displayName ?? "Guest"}
+          {user?.userName ?? "Guest"}
         </Text>
         <Text
           className="text-slate-500 dark:text-slate-400 font-nata-sans-medium mt-1"
           style={{ fontSize: sc(13) }}
         >
-          {user?.email ?? "---"}
+          {user?.userEmail ?? "---"}
         </Text>
       </View>
 

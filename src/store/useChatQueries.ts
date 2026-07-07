@@ -11,7 +11,7 @@ export function useChatHistory(enabled: boolean) {
   return useQuery<Chat[]>({
     queryKey: ["chats"],
     queryFn: async () => {
-      const { data: chatHistory } = await apiClient.get("/");
+      const { data: chatHistory } = await apiClient.get("/chats");
       return chatHistory;
     },
     staleTime: 1000 * 60 * 5,
@@ -25,7 +25,7 @@ export function useChatMessages(chatId: string) {
     queryKey: ["messages", chatId],
     queryFn: async ({ pageParam = null }) => {
       const { data: chatMessages } = await apiClient.get(
-        `/${chatId}/messages`,
+        `/chats/${chatId}/messages`,
         { params: { cursor: pageParam } },
       );
       return chatMessages;
@@ -49,7 +49,7 @@ export function useToggleChatPinStatus() {
       chatId: string;
       isPinned: boolean;
     }) => {
-      const { data } = await apiClient.patch(`/${chatId}/pin`, {
+      const { data } = await apiClient.patch(`/chats/${chatId}/pin`, {
         isPinned,
       });
       return data;
@@ -88,7 +88,7 @@ export function useRenameChat() {
       chatId: string;
       title: string;
     }) => {
-      const { data } = await apiClient.patch(`/${chatId}/rename`, {
+      const { data } = await apiClient.patch(`/chats/${chatId}/rename`, {
         title,
       });
       return data;
@@ -118,7 +118,7 @@ export function useDeleteChat() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (chatId: string) => {
-      const { data } = await apiClient.delete(`/${chatId}`);
+      const { data } = await apiClient.delete(`/chats/${chatId}`);
       return data;
     },
     retry: 0,

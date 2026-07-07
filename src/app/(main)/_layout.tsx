@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
 
 export default function RootLayout() {
-
   return (
     <Stack
       screenOptions={{
-        headerShown: false
+        headerShown: false,
       }}
     >
       <Stack.Screen
@@ -14,7 +13,12 @@ export default function RootLayout() {
           animation: "slide_from_right",
         }}
       />
-
+      <Stack.Screen
+        name="manual-projects"
+        options={{
+          animation: "slide_from_right",
+        }}
+      />
       <Stack.Screen
         name="aisuggestion"
         options={{
@@ -22,6 +26,8 @@ export default function RootLayout() {
           animation: "slide_from_bottom",
         }}
       />
+      <Stack.Screen name="project/[projectId]" />
+      <Stack.Screen name="editProject/[editId]" />
     </Stack>
   );
 }

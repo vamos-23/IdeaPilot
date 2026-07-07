@@ -1,5 +1,5 @@
 import useThemeStore from "@/src/store/useThemeStore";
-import { Tabs, useRouter, useSegments } from "expo-router"; // [CHANGED] added useRouter
+import { Tabs, useRouter, useSegments } from "expo-router";
 import { Home, Settings, Sparkles } from "lucide-react-native";
 import { useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
@@ -12,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { sc, vs } from "../../../constants/responsive";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DESIGN_TOKENS = {
   dark: {
@@ -39,11 +40,10 @@ const DESIGN_TOKENS = {
 } as const;
 
 export default function TabsMainLayout() {
-  const isDark = useThemeStore((s) => s.theme) === "dark";
+  const isDark = useThemeStore((s) => s.theme === "dark");
   const segments = useSegments();
   const router = useRouter();
   const t = isDark ? DESIGN_TOKENS.dark : DESIGN_TOKENS.light;
-
   const ring1Scale = useSharedValue(1);
   const ring1Opacity = useSharedValue(0.2);
   const ring2Scale = useSharedValue(1);
@@ -107,6 +107,8 @@ export default function TabsMainLayout() {
     transform: [{ scale: coreScale.value }],
   }));
 
+  const { bottom } = useSafeAreaInsets();
+  
   return (
     <Tabs
       screenOptions={{
@@ -130,6 +132,7 @@ export default function TabsMainLayout() {
                   borderColor: t.border,
                   shadowColor: t.shadow,
                   shadowOpacity: t.shadowOpacity,
+                  marginBottom: bottom + 10,
                 },
               ]}
             >
@@ -240,13 +243,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: "hidden",
     backgroundColor: "transparent",
   },
   tabBarWrapper: {
     flexDirection: "row",
     marginHorizontal: sc(60),
-    marginVertical: vs(16),
+    marginTop: vs(3),
     paddingHorizontal: sc(25),
     borderRadius: sc(28),
     height: vs(60),

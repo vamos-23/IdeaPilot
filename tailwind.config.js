@@ -11,7 +11,6 @@ module.exports = {
         cardLight: "#FFFFFF",
         cardDark: "#131926",
         
-       
         borderLight: "#D1D5DB", 
         borderDark: "#2563EB", 
 

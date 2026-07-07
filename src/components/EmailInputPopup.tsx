@@ -12,51 +12,34 @@ import {
   View,
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import Toast from "react-native-toast-message";
 import { sc, vs } from "../constants/responsive";
-import useAuthStore from "../store/useAuthStore";
 import SubmitButton from "./SubmitButton";
 
 type EmailInputProps = {
+  appTheme: string;
+  title: string;
+  placeholderText: string;
+  buttonText: string;
   onClose: () => void;
   action: (new_email: string) => void;
-  appTheme: string;
 };
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export default function EmailInputPopup({
+  appTheme,
+  title,
+  placeholderText,
+  buttonText,
   onClose,
   action,
-  appTheme,
 }: EmailInputProps) {
-  const user = useAuthStore((s) => s.user);
   const [email, setEmail] = useState<string>("");
   const [isFocus, setFocus] = useState<boolean>(false);
 
   const handleFocus = () => setFocus(true);
   const handleBlur = () => setFocus(false);
 
-  const storeNewEmail = (new_email: string) => {
-    const emailStr = new_email.toLowerCase().trim();
-    if (emailStr === user?.userEmail?.toLowerCase()) {
-      Toast.show({
-        type: "info",
-        text1: "Email Status",
-        text2: "Email already in use.",
-        topOffset: sc(45),
-      });
-      return;
-    }
-    if (!EMAIL_REGEX.test(emailStr)) {
-      Toast.show({
-        type: "error",
-        text1: "Invalid Email!",
-        text2: "Please enter valid email address.",
-        topOffset: sc(45),
-      });
-      return;
-    }
-    action(emailStr);
+  const handleSubmit = () => {
+    action(email);
     setEmail("");
   };
 
@@ -78,7 +61,7 @@ export default function EmailInputPopup({
                   className="text-textLight dark:text-white font-nata-sans-bold"
                   style={styles.title}
                 >
-                  Enter New Email
+                  {title}
                 </Text>
                 <TouchableOpacity
                   onPress={onClose}
@@ -103,7 +86,7 @@ export default function EmailInputPopup({
                 <TextInput
                   className="text-textLight dark:text-white font-nata-sans-medium flex-1"
                   cursorColor={appTheme === "light" ? "#4F46E5" : "#818CF8"}
-                  placeholder="Enter new email"
+                  placeholder={placeholderText}
                   placeholderTextColor={
                     appTheme === "light" ? "#94A3B8" : "#64748B"
                   }
@@ -114,9 +97,9 @@ export default function EmailInputPopup({
                 />
               </View>
               <SubmitButton
-                buttonText="Proceed"
+                buttonText={buttonText}
                 isDisabled={!email.trim()}
-                onSubmit={() => storeNewEmail(email)}
+                onSubmit={handleSubmit}
               />
             </View>
           </TouchableWithoutFeedback>

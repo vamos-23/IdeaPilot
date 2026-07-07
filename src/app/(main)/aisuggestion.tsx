@@ -17,7 +17,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import { KeyboardStickyView } from "react-native-keyboard-controller";
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
 import ChatHeader from "@/src/components/ai-chat/ChatHeader";
 import ChatInput from "@/src/components/ai-chat/ChatInput";
 import ChatHistoryDrawer from "@/src/components/ai-chat/ChatHistoryDrawer";
@@ -31,11 +31,10 @@ import { Chat } from "@/src/constants/types";
 
 const HEADER_HEIGHT = 76;
 const DRAWER_WIDTH = Dimensions.get("window").width;
-const MIN_INPUT_HEIGHT = 36;
 
 export default function AISuggestions() {
   const { top, bottom } = useSafeAreaInsets();
-  const extraContentPadding = useSharedValue(0);
+  const [inputHeight, setInputHeight] = useState(0);
   const [activeChatId, setActiveChatId] = useState<string>("new");
   const pendingChatId = useRef<string | null>(null);
   const [isFirstOpen, setFirstOpen] = useState<boolean>(true);
@@ -44,6 +43,8 @@ export default function AISuggestions() {
   const [globalStreaming, setGlobalStreaming] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const chatAreaRef = useRef<ActiveChatAreaRef | null>(null);
+
+  const { progress, height } = useReanimatedKeyboardAnimation();
 
   const handleSendPrompt = async (text: string) => {
     if (chatAreaRef.current) {
@@ -116,20 +117,23 @@ export default function AISuggestions() {
     });
   };
 
-  const onInputLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      const height = e.nativeEvent.layout.height;
+  const onInputLayout = useCallback((e: LayoutChangeEvent) => {
+    setInputHeight(e.nativeEvent.layout.height);
+  }, []);
 
-      extraContentPadding.value = withTiming(
-        Math.max(height - MIN_INPUT_HEIGHT, 0),
-        { duration: 250 },
-      );
-    },
-    [extraContentPadding],
-  );
+  const animatedInputStyle = useAnimatedStyle(() => {
+    const baselinePadding = bottom;
+    const translateY = height.value + progress.value * baselinePadding;
+    return {
+      transform: [{ translateY }],
+    };
+  });
 
   return (
-    <View style={styles.container} className="bg-brandLight dark:bg-brandDark">
+    <View
+      style={[styles.container, { paddingBottom: bottom }]}
+      className="bg-brandLight dark:bg-brandDark"
+    >
       <SafeAreaView
         edges={["top"]}
         style={[
@@ -151,31 +155,29 @@ export default function AISuggestions() {
             ref={chatAreaRef}
             chatId={activeChatId}
             isFirstOpen={isFirstOpen}
-            extraContentPadding={extraContentPadding}
+            inputHeight={inputHeight}
             onNewChatStarted={handleNewChatCreated}
           />
         </Animated.View>
       </View>
 
-      <KeyboardStickyView
-        offset={{ closed: 0, opened: 12 }}
-        style={{
-          opacity: isSearchOpen ? 0 : 1,
-          marginBottom: Math.max(bottom, 19),
-          marginHorizontal: 10,
-          padding: 5,
-          borderRadius: 30,
-          backgroundColor: "transparent",
-          alignItems: "center",
-        }}
-        pointerEvents={isSearchOpen ? "none" : "auto"}
+      <Animated.View
+        onLayout={onInputLayout}
+        pointerEvents="box-none"
+        style={[
+          styles.inputStickyWrapper,
+          animatedInputStyle,
+          {
+            paddingBottom: bottom + 10,
+            paddingTop: 7,
+          },
+        ]}
       >
         <ChatInput
           onSend={handleSendPrompt}
           streamingStatus={globalStreaming}
-          onLayoutChanges={onInputLayout}
         />
-      </KeyboardStickyView>
+      </Animated.View>
 
       <Animated.View
         className="absolute top-0 left-0 bottom-0 bg-cardLight dark:bg-cardDark"
@@ -206,4 +208,12 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   listContainer: { flex: 1 },
   header: { position: "absolute", top: 0, left: 0, right: 0, zIndex: 1000 },
+  inputStickyWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 12,
+    zIndex: 1100,
+  },
 });

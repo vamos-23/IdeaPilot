@@ -20,6 +20,7 @@ import {
   useToggleChatPinStatus,
 } from "@/src/store/useChatQueries";
 import { Chat, MenuState, ChatRenameState } from "@/src/constants/types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -33,6 +34,7 @@ export default function ChatList({
   isDrawerOpen,
   onSelectChat,
 }: ChatListProps) {
+  const { bottom } = useSafeAreaInsets();
   const appTheme = useThemeStore((s) => s.theme);
   const { data: chats = [], isLoading } = useChatHistory(isDrawerOpen);
   const renameMutation = useRenameChat();
@@ -188,7 +190,7 @@ export default function ChatList({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               gap: 2,
-              paddingBottom: 4,
+              paddingBottom: bottom + 4,
             }}
             ListEmptyComponent={
               <Text className="text-center mt-64 text-lg font-nata-sans-bold text-textLight dark:text-white">
@@ -242,7 +244,11 @@ export default function ChatList({
               activeOpacity={0.4}
               onPress={handleRenameChat}
             >
-              <MaterialCommunityIcons name="pencil" size={20} co color={appTheme === "light" ? "#0F172A" : "#ffffff"} />
+              <MaterialCommunityIcons
+                name="pencil"
+                size={20}
+                color={appTheme === "light" ? "#0F172A" : "#ffffff"}
+              />
               <Text className="text-lg font-nata-sans-bold text-textLight dark:text-white">
                 Rename
               </Text>

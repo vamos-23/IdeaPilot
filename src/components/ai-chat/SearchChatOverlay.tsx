@@ -94,27 +94,28 @@ export default function SearchChatsOverlay({
     <Animated.View
       pointerEvents={isOpen ? "auto" : "none"}
       style={[
-        StyleSheet.absoluteFillObject,
+        StyleSheet.absoluteFill,
         animatedStyle,
-        { zIndex: 3000, top: top },
+        { zIndex: 3000, paddingTop: top },
       ]}
       className="bg-brandLight dark:bg-brandDark"
     >
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-cardLight dark:bg-cardDark">
-        <View className="flex-1 flex-row items-center bg-gray-100 dark:bg-gray-900 rounded-full px-2 py-2.5">
-          <Search size={20} color="#9CA3AF" />
-          <TextInput
-            className="flex-1 ml-2 text-base font-nata-sans-bold text-textLight dark:text-white"
-            placeholder="Search ideas..."
-            placeholderTextColor="#9CA3AF"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoFocus={isOpen}
-          />
-          <TouchableOpacity onPress={onClose} className="p-1">
-            <X size={18} color="#9CA3AF" />
+      <View className="flex-row items-center px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+        <Search size={20} color="#94A3B8" />
+
+        <TextInput
+          className="flex-1 ml-3 text-base text-textLight dark:text-white"
+          placeholder="Search projects..."
+          placeholderTextColor="#94A3B8"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <X size={18} color="#94A3B8" />
           </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       <FlashList

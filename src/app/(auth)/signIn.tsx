@@ -2,8 +2,7 @@ import FormLayout from "@/src/components/FormLayout";
 import IdeaPilotLogo from "@/src/components/IdeaPilotLogo";
 import { styles } from "@/src/constants/formStyles";
 import { vs } from "@/src/constants/responsive";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import handleDeleteAccount from "@/src/lib/account/handleDeleteAccount";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useCallback, useMemo, useState } from "react";
@@ -14,6 +13,7 @@ import { handleFirebaseAuthError } from "../../lib/auth/authErrorHandler";
 import useAuthStore from "@/src/store/useAuthStore";
 import useSkillStore from "@/src/store/useSkillStore";
 import { fetchUserSkills } from "@/src/services/users/users.onboarding";
+import { PASSWORD_MESSAGE, PASSWORD_REGEX } from "@/src/constants/auth";
 
 type SignInFormFields = {
   email: string;
@@ -22,7 +22,6 @@ type SignInFormFields = {
 
 export default function SignInScreen() {
   const router = useRouter();
-  const { afterReauth } = useLocalSearchParams();
   const [loading, setButtonLoading] = useState<boolean>(false);
 
   const setSkills = useSkillStore((s) => s.setSkills);
@@ -44,6 +43,7 @@ export default function SignInScreen() {
 
         setSkills(userSkills);
         toggleSync(true);
+
         logIn({
           userId: authUser.uid,
           userEmail: authUser.email,
@@ -52,10 +52,6 @@ export default function SignInScreen() {
         });
         setOnboardingStatus(true);
 
-        console.log("Signed in successfully!");
-        if (afterReauth === "delete") {
-          await handleDeleteAccount();
-        }
       } catch (error: any) {
         handleFirebaseAuthError(error, router);
         Keyboard.dismiss();
@@ -63,7 +59,7 @@ export default function SignInScreen() {
         setButtonLoading(false);
       }
     },
-    [router, afterReauth, setSkills, toggleSync, logIn, setOnboardingStatus],
+    [router, setSkills, toggleSync, logIn, setOnboardingStatus],
   );
 
   const fields = useMemo(
@@ -86,9 +82,8 @@ export default function SignInScreen() {
         rules: {
           required: "Password is required",
           pattern: {
-            value: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
-            message:
-              "Must have 1 uppercase, 1 number, 1 special character, min 8 chars",
+            value: PASSWORD_REGEX,
+            message: PASSWORD_MESSAGE,
           },
         },
       },

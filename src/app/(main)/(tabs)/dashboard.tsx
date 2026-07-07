@@ -1,4 +1,4 @@
-import { SkeletonProjectCard } from "@/src/animations/components/projectCards/SkeletonProjectCard";
+import { SkeletonProjectCard } from "@/src/animations/components/project/SkeletonProjectCard";
 import { ProjectCard } from "@/src/components/ProjectCard";
 import DashboardHeader from "@/src/components/DashboardHeader";
 import { ProjectIdea } from "@/src/constants/types";
@@ -11,6 +11,10 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { View, Text } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Toast from "react-native-toast-message";
+import { useFocusEffect } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {FLOATING_TAB_BAR_HEIGHT} from "../../../constants/tabBarHeight"
+
 
 const SKELETON_DATA = Array.from(
   { length: 6 },
@@ -38,6 +42,7 @@ const EmptyListState = () => (
 const renderSeparator = () => <View className="h-4" />;
 
 export default function Dashboard() {
+  const { bottom } = useSafeAreaInsets();
   const userId = useAuthStore((state) => state.user?.userId || "");
   const username = useAuthStore((state) => state.user?.userName || "Builder");
   const appTheme = useThemeStore((state) => state.theme);
@@ -56,14 +61,15 @@ export default function Dashboard() {
   const toggleBookmark = useIdeas((state) => state.toggleBookmarkIdea);
 
   const isDiscover = activeTab === "discover";
+  const isAIVault = activeTab === "ai";
 
   const handleRefresh = async () => {
-    const response = await refreshFeedRateLimiter();
+    const response = await refreshFeedRateLimiter(userId);
     if (response.allowed) {
       Toast.show({
         type: "success",
         text1: "Feed Updated 🎉",
-        text2: `Refreshed Discover Feed successfull!!`,
+        text2: `Refreshed ${isDiscover ? "Discover" : isAIVault ? "AI Vault" : "Saved"} Feed successfully!!`,
         topOffset: vs(33),
       });
     }
@@ -84,11 +90,13 @@ export default function Dashboard() {
     });
   }, [activeTab]);
 
-  useEffect(() => {
-    if (userId) {
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+
       fetchInitialIdeas(userId);
-    }
-  }, [fetchInitialIdeas, userId]);
+    }, [userId, fetchInitialIdeas]),
+  );
 
   const list = useMemo(() => {
     if (loading) {
@@ -133,15 +141,11 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <View className="bg-brandLight dark:bg-brandDark flex-1">
-      <DashboardHeader
-        username={username}
-        isDark={isDark}
-        userId={userId}
-        isBookmarked
-        toggleBookmark={toggleBookmark}
-        loading={loading}
-      />
+    <View
+      className="bg-brandLight dark:bg-brandDark flex-1"
+      style={{ paddingBottom: bottom }}
+    >
+      <DashboardHeader username={username} />
 
       <FlashList
         ref={flashListRef}
@@ -152,15 +156,14 @@ export default function Dashboard() {
         //@ts-ignore
         estimatedItemSize={190}
         drawDistance={400}
-        estimatedFirstItemOffset={0}
         ListEmptyComponent={loading ? null : EmptyListState}
         onRefresh={handleRefresh}
-        refreshing={isDiscover && refreshing}
+        refreshing={(isDiscover || isAIVault) && refreshing}
         ItemSeparatorComponent={renderSeparator}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: sc(20),
-          paddingBottom: vs(84),
+          paddingBottom: bottom + FLOATING_TAB_BAR_HEIGHT,
           flexGrow: 1,
         }}
       />

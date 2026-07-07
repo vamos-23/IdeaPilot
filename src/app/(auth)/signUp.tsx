@@ -17,6 +17,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Alert, Keyboard, Text, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { syncSkills } from "../../services/users/users.onboarding";
+import { PASSWORD_REGEX, PASSWORD_MESSAGE } from "../../constants/auth";
 
 type SignUpFormFields = {
   name: string;
@@ -41,36 +42,36 @@ export default function SignUpScreen() {
           data.email,
           data.password,
         );
+
         const authUser = userCredentials.user;
-        await updateProfile(authUser, { displayName: data.name });
+
+        await updateProfile(authUser, {
+          displayName: data.name,
+        });
         await authUser.reload();
         await sendEmailVerification(authUser);
-        console.log(skills);
+
         const result = await syncSkills(authUser.uid, skills);
+
+        logIn({
+          userId: authUser.uid,
+          userEmail: authUser.email,
+          userName: authUser.displayName || data.name,
+          techStack: skills,
+        });
+
+        setOnboardingStatus(true);
+
         if (result.success) {
-          logIn({
-            userId: authUser.uid,
-            userEmail: authUser.email,
-            userName: authUser.displayName || data.name,
-            techStack: skills,
-          });
           toggleSync(true);
-          setOnboardingStatus(true);
           Alert.alert(
             "Verify your email",
-            "A verification link has been sent to your email address. Please check your inbox (and spam folders too!) ",
+            "A verification link has been sent to your email address. Please check your inbox (and spam folders too!).",
           );
         } else {
-          logIn({
-            userId: authUser.uid,
-            userEmail: authUser.email,
-            userName: authUser.displayName || data.name,
-            techStack: skills,
-          });
-          setOnboardingStatus(true);
           Alert.alert(
             "Profile Error",
-            "Account created, but we couldn't back up your skills. You can retry syncing in your Settings screen.",
+            "Account created, but we couldn't back up your skills. You can retry syncing from Settings.",
           );
         }
       } catch (error: any) {
@@ -108,9 +109,8 @@ export default function SignUpScreen() {
         rules: {
           required: "Password is required",
           pattern: {
-            value: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
-            message:
-              "Must have 1 uppercase, 1 number, 1 special character, min 8 characters",
+            value: PASSWORD_REGEX,
+            message: PASSWORD_MESSAGE,
           },
         },
       },

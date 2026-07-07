@@ -2,20 +2,19 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  LayoutChangeEvent,
 } from "react-native";
 import { useState } from "react";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 type ChatInputProps = {
   onSend: (prompt: string) => void;
-  onLayoutChanges: (e: LayoutChangeEvent) => void;
+
   streamingStatus: boolean;
 };
 
 export default function ChatInput({
   onSend,
-  onLayoutChanges,
+
   streamingStatus,
 }: ChatInputProps) {
   const [prompt, setPrompt] = useState<string>("");
@@ -46,7 +45,7 @@ export default function ChatInput({
   return (
     <>
       <View
-        className={`flex-row items-end bg-white dark:bg-[#131720] px-4 py-3 border rounded-3xl ${
+        className={`flex-row items-end bg-white dark:bg-[#131720] px-2 py-2 border rounded-3xl ${
           isFocused
             ? "border-accent-light dark:border-white"
             : "border-gray-400 dark:border-gray-600"
@@ -59,7 +58,6 @@ export default function ChatInput({
           onBlur={handleBlur}
           multiline
           maxLength={800}
-          onLayout={onLayoutChanges}
           placeholder="Describe your ideas..."
           placeholderTextColor="#94A3B8"
           className="flex-1 text-textLight dark:text-white text-base max-h-36"

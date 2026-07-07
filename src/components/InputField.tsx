@@ -35,11 +35,11 @@ export default function InputField<T extends FieldValues>({
 }: InputFieldProps<T>) {
   const [showPassword, setshowPassword] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
-  const { theme } = useThemeStore();
+  const theme = useThemeStore((s) => s.theme);
 
   const handlePasswordIcon = useCallback(
     () => setshowPassword((prev) => !prev),
-    []
+    [],
   );
   const handleFocus = useCallback(() => setIsFocus(true), []);
   const handleBlur = useCallback(() => setIsFocus(false), []);
@@ -64,7 +64,7 @@ export default function InputField<T extends FieldValues>({
             ]}
             className={clsx(
               "border-gray-300 dark:border-slate-400 bg-[#F8F9FA] dark:bg-[#2A2A2A]",
-              error && "border-red-600 dark:border-red-700"
+              error && "border-red-600 dark:border-red-700",
             )}
           >
             <TextInput

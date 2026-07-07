@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { XCircle } from "lucide-react-native";
-import { sc, vs } from "../constants/responsive";
+import { sc } from "../constants/responsive";
 import TechStackContent from "./techStackContent";
 import SubmitButton from "./SubmitButton";
 import { useState } from "react";
@@ -15,6 +15,7 @@ import { syncSkills } from "../services/users/users.onboarding";
 import useSkillStore from "../store/useSkillStore";
 import useAuthStore from "../store/useAuthStore";
 import Toast from "react-native-toast-message";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type SkillsModalProps = {
   visible: boolean;
@@ -32,6 +33,7 @@ export default function SkillsModal({
   const skills = useSkillStore((s) => s.skills);
   const toggleSync = useSkillStore((s) => s.toggleSync);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { bottom } = useSafeAreaInsets();
 
   const handleSaveSkills = async () => {
     if (!user) return;
@@ -98,7 +100,7 @@ export default function SkillsModal({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
-              paddingBottom: vs(14),
+              paddingBottom: bottom,
             }}
           >
             <View className="flex-row justify-between px-2 items-center">

@@ -49,12 +49,28 @@ export async function fetchRecommendedIdeas(): Promise<ProjectIdea[]> {
 
 export async function fetchAIIdeas(userId: string): Promise<ProjectIdea[]> {
   try {
-    const ai_ideasRef = collection(db, "users", userId, "ai-ideas");
-    const snapshot = await getDocs(ai_ideasRef);
+    const aiIdeasRef = collection(db, "users", userId, "ai-ideas");
+    const snapshot = await getDocs(aiIdeasRef);
 
     return snapshot.docs.map((doc) => ({
       id: doc.id,
       isAIGenerated: true,
+      ...doc.data(),
+    })) as ProjectIdea[];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchBookmarkedIdeas(
+  userId: string,
+): Promise<ProjectIdea[]> {
+  try {
+    const savedIdeasRef = collection(db, "users", userId, "savedIdeas");
+    const snapshot = await getDocs(savedIdeasRef);
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
       ...doc.data(),
     })) as ProjectIdea[];
   } catch {
@@ -129,6 +145,7 @@ export async function deleteAIIdeaFromVault(userId: string, aiIdeaId: string) {
 export async function syncBookmarks(
   userId: string,
   ideaId: string,
+  ideaData: ProjectIdea,
   isBookmarked: boolean,
 ): Promise<{ status: "bookmarked" | "unbookmarked" } | void> {
   if (!userId || !ideaId) return;
@@ -137,13 +154,7 @@ export async function syncBookmarks(
 
   try {
     if (isBookmarked) {
-      await setDoc(
-        savedIdeaRef,
-        {
-          savedIdeas: ideaId,
-        },
-        { merge: true },
-      );
+      await setDoc(savedIdeaRef, ideaData, { merge: true });
       return { status: "bookmarked" };
     } else {
       await deleteDoc(savedIdeaRef);

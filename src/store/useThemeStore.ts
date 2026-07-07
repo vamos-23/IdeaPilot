@@ -7,13 +7,33 @@ export type ThemeMode = "light" | "dark" | "system";
 type ThemeState = {
   theme: ThemeMode;
   setTheme: (mode: ThemeMode) => void;
+  clearPreference: () => void;
+  reset: () => void;
+};
+
+const initialState = {
+  theme: "dark" as ThemeMode,
 };
 
 const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
-      theme: "system", // system default or fallback to light mode
-      setTheme: (mode) => set({ theme: mode }),
+      ...initialState,
+
+      setTheme: (mode) =>
+        set({
+          theme: mode,
+        }),
+
+      clearPreference: () =>
+        set({
+          theme: "dark",
+        }),
+
+      reset: () =>
+        set({
+          ...initialState,
+        }),
     }),
     {
       name: "theme-storage",
@@ -21,4 +41,5 @@ const useThemeStore = create<ThemeState>()(
     },
   ),
 );
+
 export default useThemeStore;

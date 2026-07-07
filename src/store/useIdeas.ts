@@ -3,6 +3,7 @@ import {
   fetchRecommendedIdeas,
   fetchAIIdeas,
   syncBookmarks,
+  fetchBookmarkedIdeas,
 } from "../services/ideas/ideas.service";
 import { ProjectIdea, TabType } from "../constants/types";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -16,14 +17,17 @@ interface Ideastate {
 
   activeTab: TabType;
   loading: boolean;
+  hasFetched: boolean;
   refreshing: boolean;
   refreshCount: number;
   lastRefreshTime: number | null;
 
   setActiveTab: (tab: TabType) => void;
-  fetchInitialIdeas: (userId: string) => Promise<ProjectIdea[] | void>;
-  refreshFeed: () => Promise<ProjectIdea[] | void>;
-  refreshFeedRateLimiter: () => Promise<{
+  fetchInitialIdeas: (userId: string) => Promise<void>;
+  clearIdeas: () => void;
+  reset: () => void;
+  refreshFeed: (userId: string) => Promise<void>;
+  refreshFeedRateLimiter: (userId: string) => Promise<{
     allowed: boolean;
     reason?: "cooldown";
   }>;
@@ -38,55 +42,78 @@ interface Ideastate {
   removeLocalAIIdea: (ideaId: string) => void;
 }
 
+const initialState = {
+  recommendedIdeas: [],
+  bookmarkedIdeas: [],
+  bookmarkedIds: {},
+  aiIdeas: [],
+  activeTab: "discover" as TabType,
+  loading: true,
+  hasFetched: false,
+  refreshing: false,
+  refreshCount: 0,
+  lastRefreshTime: null as number | null,
+};
+
 export const useIdeas = create<Ideastate>()(
   persist(
     (set, get) => ({
-      recommendedIdeas: [],
-      bookmarkedIdeas: [],
-      bookmarkedIds: {},
-      aiIdeas: [],
-      activeTab: "discover",
-      loading: true,
-      refreshing: false,
-      refreshCount: 0,
-      lastRefreshTime: null,
+      ...initialState,
 
       setActiveTab: (tab) => set({ activeTab: tab }),
 
       fetchInitialIdeas: async (userId: string) => {
-        if (get().recommendedIdeas.length > 0 && get().aiIdeas.length > 0) {
-          set({ loading: false });
-          return;
-        }
+        if (get().hasFetched) return;
+        set({ loading: true });
 
-        const [globalIdeas, aiGeneratedIdeas] = await Promise.all([
-          fetchRecommendedIdeas(),
-          fetchAIIdeas(userId),
-        ]);
+        const [globalIdeas, userBookmarkedIdeas, aiGeneratedIdeas] =
+          await Promise.all([
+            fetchRecommendedIdeas(),
+            fetchBookmarkedIdeas(userId),
+            fetchAIIdeas(userId),
+          ]);
 
         set({
-          recommendedIdeas: globalIdeas || [],
-          aiIdeas: aiGeneratedIdeas || [],
+          recommendedIdeas: globalIdeas ?? [],
+          bookmarkedIdeas: userBookmarkedIdeas ?? [],
+          aiIdeas: aiGeneratedIdeas ?? [],
           loading: false,
+          hasFetched: true,
         });
       },
 
-      refreshFeed: async () => {
+      refreshFeed: async (userId: string) => {
+        const { activeTab } = get();
         set({
           refreshing: true,
         });
-        const freshIdeas = await fetchRecommendedIdeas();
-        set({
-          recommendedIdeas: freshIdeas || [],
-          refreshing: false,
-        });
+
+        if (activeTab === "bookmarked") {
+          const freshBookmarkedIdeas = await fetchBookmarkedIdeas(userId);
+          const ideas = freshBookmarkedIdeas || [];
+          set({
+            bookmarkedIdeas: ideas,
+            refreshing: false,
+          });
+        } else if (activeTab === "ai") {
+          const freshAIIdeas = await fetchAIIdeas(userId);
+          const ideas = freshAIIdeas || [];
+          set({
+            aiIdeas: ideas,
+            refreshing: false,
+          });
+        } else {
+          const freshIdeas = await fetchRecommendedIdeas();
+          const ideas = freshIdeas || [];
+          set({
+            recommendedIdeas: ideas,
+            refreshing: false,
+          });
+        }
       },
 
-      refreshFeedRateLimiter: async () => {
-        const { lastRefreshTime, refreshFeed, activeTab } = get();
-        if (activeTab !== "discover") {
-          return { allowed: false };
-        }
+      refreshFeedRateLimiter: async (userId: string) => {
+        const { lastRefreshTime, refreshFeed } = get();
         const now = Date.now();
         const COOL_DOWN_TIME = 1000 * 60 * 2;
 
@@ -105,7 +132,7 @@ export const useIdeas = create<Ideastate>()(
           lastRefreshTime: now,
         }));
 
-        await refreshFeed();
+        await refreshFeed(userId);
         return { allowed: true };
       },
 
@@ -131,6 +158,7 @@ export const useIdeas = create<Ideastate>()(
           const response = await syncBookmarks(
             userId,
             idea.id,
+            idea,
             !isCurrentlyBookmarked,
           );
           return { result: "success", action: response?.status };
@@ -178,6 +206,25 @@ export const useIdeas = create<Ideastate>()(
           };
         });
       },
+
+      clearIdeas: () =>
+        set({
+          recommendedIdeas: [],
+          bookmarkedIdeas: [],
+          bookmarkedIds: {},
+          aiIdeas: [],
+          activeTab: "discover",
+          loading: true,
+          refreshing: false,
+          refreshCount: 0,
+          lastRefreshTime: null,
+          hasFetched: false,
+        }),
+
+      reset: () =>
+        set({
+          ...initialState,
+        }),
     }),
     {
       name: "idea-storage",

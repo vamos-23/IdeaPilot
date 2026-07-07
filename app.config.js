@@ -17,7 +17,6 @@ export default ({ config }) => ({
       image: "./assets/images/logo.svg",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
-      // Dark mode configuration
       dark: {
         image: "./assets/images/logo-dark.svg",
         backgroundColor: "#000000"
@@ -29,10 +28,11 @@ export default ({ config }) => ({
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
     googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
     softwareKeyboardLayoutMode: "resize",
+    launchMode: "singleTask", 
+
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
       backgroundColor: "#ffffff",
-      // Dark mode configuration
       dark: {
         foregroundImage: "./assets/images/android-icon-foreground.png",
         backgroundColor: "#060C1C",

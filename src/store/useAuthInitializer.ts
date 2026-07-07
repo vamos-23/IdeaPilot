@@ -1,9 +1,10 @@
 import { onIdTokenChanged, signOut, Unsubscribe } from "firebase/auth";
 import { useEffect } from "react";
 import { auth } from "../../config/FirebaseConfig";
+import { fetchUserSkills } from "../services/users/users.onboarding";
 import useAuthStore from "./useAuthStore";
 import useSkillStore from "./useSkillStore";
-import { fetchUserSkills } from "../services/users/users.onboarding";
+import { AppState, AppStateStatus } from "react-native";
 
 export default function useAuthInitializer() {
   useEffect(() => {
@@ -11,14 +12,14 @@ export default function useAuthInitializer() {
 
     const initializeApp = async () => {
       unsubscribe = onIdTokenChanged(auth, async (user) => {
-        const store = useAuthStore.getState();
+        const authStore = useAuthStore.getState();
         const skillStore = useSkillStore.getState();
 
         if (user) {
           try {
             await user.getIdToken();
             if (skillStore.skills.length > 0 && !skillStore.isSynced) {
-              store.logIn({
+              authStore.logIn({
                 userId: user.uid,
                 userEmail: user.email,
                 userName: user.displayName,
@@ -26,32 +27,50 @@ export default function useAuthInitializer() {
               });
             } else {
               const fetchedSkills = await fetchUserSkills(user.uid);
-
               skillStore.setSkills(fetchedSkills);
               skillStore.toggleSync(true);
-
-              store.logIn({
+              authStore.logIn({
                 userId: user.uid,
                 userEmail: user.email,
                 userName: user.displayName,
                 techStack: fetchedSkills,
               });
             }
-          } catch {
+          } catch (error) {
+            console.error(error);
             await signOut(auth);
-            store.logOut();
+            authStore.logOut();
             skillStore.clearLocalSkills();
           }
         } else {
-          store.logOut();
+          authStore.logOut();
           skillStore.clearLocalSkills();
         }
-
-        store.setAuthInitialized(true);
+        authStore.setAuthInitialized(true);
       });
     };
 
     initializeApp();
-    return () => unsubscribe?.();
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (state: AppStateStatus) => {
+        if (state !== "active") return;
+        const user = auth.currentUser;
+        if (!user) return;
+
+        await user.reload();
+
+        useAuthStore.getState().refreshUser(user.email, user.displayName);
+      },
+    );
+
+    return () => subscription.remove();
   }, []);
 }

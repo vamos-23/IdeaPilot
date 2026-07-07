@@ -26,7 +26,7 @@ export default function SubmitButton({
   isDelete = false,
   onSubmit,
 }: GradientButtonProps) {
-  const { theme } = useThemeStore();
+  const theme = useThemeStore((s) => s.theme);
   const isDark = theme === "dark";
 
   const gradientColors: [string, string] = isDelete

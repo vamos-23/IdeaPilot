@@ -9,10 +9,9 @@ import {
   Workflow,
 } from "lucide-react-native";
 import { useIdeas } from "@/src/store/useIdeas";
-import { vs, sc } from "../../constants/responsive";
-import { DIFFICULTY_STYLES } from "../../constants/projectCardStyles/project-card-styles";
+import { vs, sc } from "../../../constants/responsive";
+import { DIFFICULTY_STYLES } from "../../../constants/projectCardStyles/project-card-styles";
 import useThemeStore from "@/src/store/useThemeStore";
-import SubmitButton from "@/src/components/SubmitButton";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   useCallback,
@@ -21,10 +20,13 @@ import {
   useState,
   useTransition,
 } from "react";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { InformationCard } from "@/src/components/InformationCard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ResourceSection from "@/src/animations/components/project/ResourceSection";
 
 export default function ProjectDetails() {
+  const { top, bottom } = useSafeAreaInsets();
   const router = useRouter();
   const { theme: appTheme } = useThemeStore();
   const isDark = appTheme === "dark";
@@ -64,10 +66,6 @@ export default function ProjectDetails() {
     return { diffStyle: style, iconColor: color };
   }, [projectData, isDark]);
 
-  const handleGenerateRoadmap = () => {
-    console.log("Generating roadmap for:", projectData?.name);
-  };
-
   if (isPending || !isReady) {
     return <View className="flex-1 bg-brandLight dark:bg-brandDark" />;
   }
@@ -76,8 +74,9 @@ export default function ProjectDetails() {
     return (
       <View className="flex-1 bg-brandLight dark:bg-brandDark items-center justify-center">
         <Animated.View
-          className="justify-center items-center"
+          className="items-center justify-center"
           entering={FadeInDown.duration(400).springify()}
+          exiting={FadeIn.duration(400).springify()}
         >
           <View className="bg-orange-500/10 dark:bg-cardDark p-10 rounded-full mb-3">
             <FileSearch size={sc(80)} color="#ea580c" />
@@ -86,6 +85,7 @@ export default function ProjectDetails() {
             Project not found!
           </Text>
           <TouchableOpacity
+            activeOpacity={0.9}
             onPress={() => router.back()}
             className="mt-8 bg-orange-600 px-10 py-4 rounded-2xl"
           >
@@ -99,8 +99,11 @@ export default function ProjectDetails() {
   }
 
   return (
-    <View className="flex-1 bg-brandLight dark:bg-brandDark">
-      <View className="flex-row items-center justify-between px-6 pt-12 pb-5 border-b border-slate-200 dark:border-white/5">
+    <View
+      className="flex-1 bg-brandLight dark:bg-brandDark"
+      style={{ paddingTop: top + 20, paddingBottom: bottom }}
+    >
+      <View className="flex-row items-center justify-between px-6 pb-5 border-b border-slate-200 dark:border-white/5">
         <TouchableOpacity
           onPress={() => router.back()}
           className="p-2.5 bg-white dark:bg-cardDark rounded-xl border border-slate-300 dark:border-white/10"
@@ -115,11 +118,12 @@ export default function ProjectDetails() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: vs(40) }}
+        contentContainerStyle={{ paddingBottom: vs(10) }}
       >
         <Animated.View
           className="p-6"
           entering={FadeInDown.duration(400).springify()}
+          exiting={FadeIn.duration(400).springify()}
         >
           <View className="flex-row flex-wrap items-center gap-2 mb-6">
             <View
@@ -138,7 +142,7 @@ export default function ProjectDetails() {
             </View>
           </View>
 
-          <Text className="text-[32px] font-nata-sans-bold text-slate-900 dark:text-white mb-4 leading-tight">
+          <Text className="text-[28px] font-nata-sans-bold text-slate-900 dark:text-white mb-4 leading-tight">
             {projectData.name}
           </Text>
           <Text className="text-slate-500 dark:text-slate-300 font-nata-sans-medium text-md mb-8 leading-5">
@@ -210,19 +214,27 @@ export default function ProjectDetails() {
             </View>
           </View>
 
-          <View className="mb-5">
-            <View className="flex-row items-center mb-5">
+          <View className="gap-3">
+            <View className="flex-row items-center mb-4">
               <Workflow size={20} color={iconColor} />
               <Text className="text-xl font-nata-sans-bold text-slate-900 dark:text-white ml-3">
-                Roadmap
+                Resources to explore
               </Text>
             </View>
-            <View className="p-6 bg-cardLight dark:bg-cardDark rounded-[32px] border border-slate-300 dark:border-white/10">
-              <SubmitButton
-                onSubmit={handleGenerateRoadmap}
-                buttonText="Generate Roadmap"
-                isDisabled={false}
-                loadingText="Generating..."
+            <View className="gap-4">
+              <ResourceSection
+                title="Video Tutorials"
+                type="youtube"
+                techStack={projectData.techStack}
+                domain={projectData.domain}
+                category={projectData.category}
+              />
+              <ResourceSection
+                title="Github Repositories"
+                type="github"
+                techStack={projectData.techStack}
+                domain={projectData.domain}
+                category={projectData.category}
               />
             </View>
           </View>

@@ -14,7 +14,8 @@ import useThemeStore from "../store/useThemeStore";
 import { StatusBar } from "expo-status-bar";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
@@ -61,6 +62,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!authInitialized || !fontsLoaded) return;
+
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
     if (
@@ -84,38 +86,44 @@ export default function RootLayout() {
     isAuthenticated,
     hasCompletedOnboarding,
     segments,
-    router,
+    router
   ]);
 
-  if (!authInitialized || !fontsLoaded) {
+  const shouldShowLoader = !fontsLoaded || !authInitialized;
+
+  if (shouldShowLoader) {
     return <LoadingScreen />;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <KeyboardProvider>
-          <StatusBar
-            style={isDark ? "light" : "dark"}
-            translucent
-            backgroundColor="transparent"
-          />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: "ios_from_right",
-              contentStyle: {
-                backgroundColor: isDark ? "#0B0F17" : "#F1F5F9",
-              },
-            }}
-          >
-            <Stack.Screen name="(onboarding)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(main)" />
-          </Stack>
-          <Toast config={toastConfig} />
-        </KeyboardProvider>
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <KeyboardProvider>
+            <BottomSheetModalProvider>
+              <StatusBar
+                style={isDark ? "light" : "dark"}
+                translucent
+                backgroundColor="transparent"
+              />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: "ios_from_right",
+                  contentStyle: {
+                    backgroundColor: isDark ? "#0B0F17" : "#F1F5F9",
+                  },
+                }}
+              >
+                <Stack.Screen name="(onboarding)" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(main)" />
+              </Stack>
+              <Toast config={toastConfig} />
+            </BottomSheetModalProvider>
+          </KeyboardProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }

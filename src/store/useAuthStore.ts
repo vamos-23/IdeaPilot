@@ -19,23 +19,40 @@ interface AuthState {
   setAuthInitialized: (status: boolean) => void;
   logIn: (userData: AppUser) => void;
   logOut: () => void;
+  refreshUser: (userEmail: string | null, userName: string | null) => void;
   updateTechStack: (skills: Skill[]) => void;
+  reset: () => void;
 }
+
+const initialState = {
+  user: null,
+  hasCompletedOnboarding: false,
+};
 
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      user: null,
-      hasCompletedOnboarding: false,
       authInitialized: false,
+      ...initialState,
 
-      setOnboardingStatus: (status) => set({ hasCompletedOnboarding: status }),
+      setOnboardingStatus: (status) =>
+        set({
+          hasCompletedOnboarding: status,
+        }),
 
-      setAuthInitialized: (status) => set({ authInitialized: status }),
+      setAuthInitialized: (status) =>
+        set({
+          authInitialized: status,
+        }),
 
       updateTechStack: (skills) =>
         set((state) => ({
-          user: state.user ? { ...state.user, techStack: skills } : null,
+          user: state.user
+            ? {
+                ...state.user,
+                techStack: skills,
+              }
+            : null,
         })),
 
       logIn: (userData) =>
@@ -47,11 +64,27 @@ const useAuthStore = create<AuthState>()(
         set({
           user: null,
         }),
+
+      refreshUser: (userEmail, userName) => {
+        set((state) => ({
+          user: state.user
+            ? {
+                ...state.user,
+                userName,
+                userEmail,
+              }
+            : null,
+        }));
+      },
+
+      reset: () =>
+        set({
+          ...initialState,
+        }),
     }),
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
-
       partialize: (state) => ({
         user: state.user,
         hasCompletedOnboarding: state.hasCompletedOnboarding,

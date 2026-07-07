@@ -1,19 +1,11 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  Keyboard,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Link } from "expo-router";
 import { useForm, RegisterOptions, Path, FieldValues } from "react-hook-form";
 import { useCallback, useState } from "react";
 import { sc, vs, ms } from "@/src/constants/responsive";
+import performPasswordReset from "../lib/account/performPasswordReset";
 import InputField from "@/src/components/InputField";
 import SubmitButton from "@/src/components/SubmitButton";
-import { auth } from "../../config/FirebaseConfig";
-import { sendPasswordResetEmail } from "firebase/auth";
 
 type Fields<T extends FieldValues> = {
   name: Path<T>;
@@ -57,23 +49,7 @@ export default function FormLayout<T extends FieldValues>({
   );
 
   const handleSendPasswordResetEmail = async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      Alert.alert(
-        "Check Your Email",
-        "If an account with that email exists, a link will be sent to your inbox or spam folder.",
-      );
-      Keyboard.dismiss();
-      setIsResetPasswordView(false);
-    } catch (e) {
-      console.error("Password Reset Link error!", e);
-      Alert.alert(
-        "Check Your Email",
-        "If an account with that email exists, a link will be sent to your inbox or spam folder.",
-      );
-      Keyboard.dismiss();
-      setIsResetPasswordView(false);
-    }
+    await performPasswordReset(email, () => setIsResetPasswordView(false));
   };
 
   const onReset = (data: T) => {

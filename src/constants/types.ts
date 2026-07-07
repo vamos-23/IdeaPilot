@@ -3,7 +3,9 @@ import {
   type KeyboardChatScrollViewProps,
 } from "react-native-keyboard-controller";
 import { ScrollViewProps } from "react-native";
+import { Timestamp } from "firebase/firestore";
 
+//Default / Pre-defined project types
 export default interface Skill {
   id: string;
   stackName: string;
@@ -30,6 +32,7 @@ export interface ProjectIdea {
   whatYouWillLearn: string[];
 }
 
+//AI Chat Screen types
 export interface Chat {
   id: string;
   title: string;
@@ -72,3 +75,45 @@ export type ChatScrollViewProps = ScrollViewProps &
   KeyboardChatScrollViewProps & {
     chatScrollViewRef?: React.RefObject<ChatScrollViewRef | null>;
   };
+
+//Custom project screen types
+export interface ProjectDetails {
+  id: string;
+  projectName: string;
+  category: string;
+  description: string;
+  detailedDescription: string;
+  difficulty: Difficulty;
+  domain: string;
+  estimatedTime: string;
+  technologies: string[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export type FetchedProjects = Omit<ProjectDetails, "createdAt" | "updatedAt">;
+export type DraftProject = Omit<
+  ProjectDetails,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+//Project Resources types
+export interface VideoTutorial {
+  id: string;
+  title: string;
+  channelName: string;
+  thumbnailUrl: string;
+  videoUrl: string;
+}
+
+export interface Repository {
+  id: string;
+  avatarUrl: string;
+  name: string;
+  fullName: string;
+  description: string;
+  stars: string;
+  watchers: string;
+  forks: string;
+  repoUrl: string;
+}

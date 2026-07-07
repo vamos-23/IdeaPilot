@@ -7,7 +7,6 @@ import {
   Keyboard,
 } from "react-native";
 import { KeyboardChatScrollView } from "react-native-keyboard-controller";
-import { SharedValue } from "react-native-reanimated";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import AnimatedEmptyScreen from "./AnimatedEmptyScreen";
 import UserBubble from "./UserBubble";
@@ -34,6 +33,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiClient } from "@/src/services/api/apiClient";
 import { monotonicFactory } from "ulidx";
 import * as Crypto from "expo-crypto";
+import useThemeStore from "@/src/store/useThemeStore";
 
 export interface ActiveChatAreaRef {
   sendMessage: (prompt: string) => Promise<void>;
@@ -43,7 +43,7 @@ export interface ActiveChatAreaProps {
   isFirstOpen: boolean;
   ref: React.RefObject<ActiveChatAreaRef | null>;
   chatId: string;
-  extraContentPadding: SharedValue<number>;
+  inputHeight: number;
   onNewChatStarted: (currentChatId: string) => void;
 }
 
@@ -72,7 +72,7 @@ const VirtualizedListScrollView = forwardRef<
       keyboardShouldPersistTaps="handled"
       keyboardLiftBehavior="never"
       contentInsetAdjustmentBehavior="never"
-      automaticallyAdjustKeyboardInsets={true}
+      automaticallyAdjustKeyboardInsets={false}
     />
   );
 });
@@ -82,7 +82,7 @@ export function ActiveChatArea({
   ref,
   chatId,
   isFirstOpen,
-  extraContentPadding,
+  inputHeight,
   onNewChatStarted,
 }: ActiveChatAreaProps) {
   const { top } = useSafeAreaInsets();
@@ -91,6 +91,7 @@ export function ActiveChatArea({
   const chatScrollViewRef = useRef<ChatScrollViewRef>(null);
   const queryClient = useQueryClient();
   const isNewChat = chatId === "new";
+  const isDark = useThemeStore((s) => s.theme);
 
   const {
     data: chatMessages,
@@ -284,10 +285,9 @@ export function ActiveChatArea({
       <VirtualizedListScrollView
         {...props}
         chatScrollViewRef={chatScrollViewRef}
-        extraContentPadding={extraContentPadding}
       />
     ),
-    [extraContentPadding],
+    [],
   );
 
   const onScrollEndReached = () => {
@@ -307,7 +307,11 @@ export function ActiveChatArea({
           className="flex-1 mt-72 justify-center items-center"
           style={{ transform: [{ scaleY: -1 }] }}
         >
-          <ActivityIndicator color="white" className="my-4" size="large" />
+          <ActivityIndicator
+            color={isDark ? "#4F46E5" : "#ffffff"}
+            className="my-4"
+            size="large"
+          />
         </View>
       )}
       <AnimatedEmptyScreen
@@ -333,8 +337,8 @@ export function ActiveChatArea({
         onEndReachedThreshold={0.5}
         onEndReached={onScrollEndReached}
         contentContainerStyle={{
-          paddingBottom: HEADER_HEIGHT + top,
-          paddingTop: 10,
+          paddingBottom: top + HEADER_HEIGHT + 10,
+          paddingTop: inputHeight,
           paddingHorizontal: 14,
         }}
         ListFooterComponent={

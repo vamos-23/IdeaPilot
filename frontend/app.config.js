@@ -28,7 +28,7 @@ export default ({ config }) => ({
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
     googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
     softwareKeyboardLayoutMode: "resize",
-    launchMode: "singleTask", 
+    launchMode: "singleTask",
 
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
@@ -72,6 +72,7 @@ export default ({ config }) => ({
   updates: {
     enabled: true,
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/37955152-0da1-41b9-a735-dfc819e7f784", 
   },
   runtimeVersion: {
     policy: "appVersion",

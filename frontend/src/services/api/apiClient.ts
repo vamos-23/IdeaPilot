@@ -2,8 +2,7 @@ import { create } from "axios";
 import { auth } from "@/config/FirebaseConfig";
 
 export const apiClient = create({
-  baseURL: "http://192.168.1.7:3000/api", //to be replaced with Render Deployed URL
-  timeout: 12000,
+  baseURL: "https://ideapilot-gz77.onrender.com/api",
 });
 
 apiClient.interceptors.request.use(

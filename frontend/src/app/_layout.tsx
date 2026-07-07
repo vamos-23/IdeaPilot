@@ -16,7 +16,13 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import axios from "axios";
+
 SplashScreen.preventAutoHideAsync();
+
+axios.get("https://ideapilot-gz77.onrender.com/health").catch((err) => {
+  console.warn("Pre-warm ping failed (likely offline):", err.message);
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,7 +92,7 @@ export default function RootLayout() {
     isAuthenticated,
     hasCompletedOnboarding,
     segments,
-    router
+    router,
   ]);
 
   const shouldShowLoader = !fontsLoaded || !authInitialized;

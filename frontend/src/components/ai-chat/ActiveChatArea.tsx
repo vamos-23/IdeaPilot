@@ -185,7 +185,7 @@ export function ActiveChatArea({
   ) {
     const userTechStack = useSkillStore.getState().skills || [];
     try {
-      const response = await apiClient.post(`/${currentChatId}/stream`, {
+      const response = await apiClient.post(`/chats/${currentChatId}/stream`, {
         userMessageId: userId,
         assistantMessageId: assistantId,
         prompt: promptText,

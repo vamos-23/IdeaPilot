@@ -2,7 +2,7 @@ import "dotenv/config";
 
 export default ({ config }) => ({
   ...config,
-  name: "IdeaPilot",
+  name: process.env.APP_NAME || "IdeaPilot",
   slug: "ideapilot",
   version: "1.0.0",
   orientation: "portrait",

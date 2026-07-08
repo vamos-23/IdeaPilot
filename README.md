@@ -43,21 +43,18 @@ To keep data handled correctly based on its type and use case, the storage layer
 ## ✨ Application Preview
 
 ### ⚡ Core Capabilities
-
 | Dashboard & UI | Chat & AI Context | Offline State & Sync |
 |:---:|:---:|:---:|
-| <img width="320" alt="Dashboard UI" src="https://github.com" /> | <img width="320" alt="AIChatScreen" src="https://github.com" /> | <img width="320" alt="OfflineSync" src="https://github.com" /> |
+| <img width="320" height="480" alt="Dashboard UI" src="https://github.com/user-attachments/assets/4e6a6053-4e5c-45a3-b48b-a2f0d595f467" /> | <img width="320" height="480" alt="AIChatScreen" src="https://github.com/user-attachments/assets/b3448f2e-0e26-4c82-a915-485884f28558" /> | <img width="320" height="480" alt="OfflineSync" src="https://github.com/user-attachments/assets/d2117a0f-28ea-499d-b128-cf21f8a906c8" /> |
 | *Gesture handlers and dynamic skeleton loading states.* | *Conversational AI using NeonDB vector indexing and Redis caching.* | *Optimistic UI updates syncing state smoothly with data caches.* |
 
 <br>
 
 ### 🛠️ Project Ideation & Management
-
 | Project Creation | Rich Details View |
 |:---:|:---:|
-| <img width="320" alt="ProjectCreation" src="https://github.com" /> | <img width="320" alt="ProjectDetails" src="https://github.com" /> |
+| <img width="320" height="480" alt="ProjectCreation" src="https://github.com/user-attachments/assets/c535cc06-b3e7-4593-b52a-d463e670385e" /> | <img width="320" height="480" alt="ProjectDetails" src="https://github.com/user-attachments/assets/6691138a-7d07-4db2-ba8e-848d506204ff" /> |
 | *Seamless data entry form with immediate list reconciliation.* | *Deep-linked project views featuring dynamic tag rendering.* |
-
 ---
 
 ## 🏗️ Architectural Decisions & The "Why"

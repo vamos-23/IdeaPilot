@@ -32,11 +32,7 @@ export default ({ config }) => ({
 
     adaptiveIcon: {
       foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundColor: "#ffffff",
-      dark: {
-        foregroundImage: "./assets/images/android-icon-foreground.png",
-        backgroundColor: "#060C1C",
-      },
+      backgroundImage: "./assets/images/android-icon-background.png",
     },
     edgeToEdgeEnabled: true,
   },
@@ -56,12 +52,12 @@ export default ({ config }) => ({
         image: "./assets/images/logo.png",
         imageWidth: 300,
         resizeMode: "contain",
-        backgroundColor: "#000000",
+        backgroundColor: "#5C50CF",
         dark: {
           image: "./assets/images/logo.png",
           imageWidth: 300,
           resizeMode: "contain",
-          backgroundColor: "#000000",
+          backgroundColor: "#3A1B67",
         },
       },
     ],
@@ -72,7 +68,7 @@ export default ({ config }) => ({
   updates: {
     enabled: true,
     fallbackToCacheTimeout: 0,
-    url: "https://u.expo.dev/37955152-0da1-41b9-a735-dfc819e7f784", 
+    url: "https://u.expo.dev/37955152-0da1-41b9-a735-dfc819e7f784",
   },
   runtimeVersion: {
     policy: "appVersion",

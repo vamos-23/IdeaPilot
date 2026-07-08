@@ -11,7 +11,8 @@
       "env": {
         "APP_ENV": "development",
         "ANDROID_PACKAGE": "com.vamos23.ideapilot.dev",
-        "APP_NAME": "IdeaPilot(Dev)"
+        "APP_NAME": "IdeaPilot(Dev)",
+        "EXPO_PUBLIC_SENTRY_ENV": "development"
       }
     },
     "preview": {
@@ -21,14 +22,16 @@
       },
       "channel": "preview",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_SENTRY_ENV": "preview"
       }
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_SENTRY_ENV": "production"
       }
     }
   },

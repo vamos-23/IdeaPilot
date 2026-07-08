@@ -16,6 +16,7 @@ import { Search, X, MessageSquare } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useChatHistory } from "@/src/store/useChatQueries";
 import { Chat } from "@/src/constants/types";
+import useThemeStore from "@/src/store/useThemeStore";
 
 type SearchOverlayProps = {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export default function SearchChatsOverlay({
   onSelectChat,
 }: SearchOverlayProps) {
   const { top } = useSafeAreaInsets();
+  const isDark = useThemeStore((s) => s.theme === "dark");
   const [searchQuery, setSearchQuery] = useState("");
   const { data: chats = [] } = useChatHistory(isOpen);
 
@@ -112,8 +114,19 @@ export default function SearchChatsOverlay({
         />
 
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setSearchQuery("")}
+          >
             <X size={18} color="#94A3B8" />
+          </TouchableOpacity>
+        )}
+        {searchQuery.length === 0 && (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={onClose}
+          >
+            <X size={18} color={isDark ? "#818CF8" : "#4F46E5"} />
           </TouchableOpacity>
         )}
       </View>

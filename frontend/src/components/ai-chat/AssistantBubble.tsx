@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Text } from "react-native";
 import Markdown, { ASTNode } from "react-native-markdown-display";
 import ProjectBluePrint from "./ProjectBluePrint";
 import useAuthStore from "@/src/store/useAuthStore";
@@ -56,8 +56,8 @@ function AssistantBubble({
     try {
       const payload = {
         ...projectData,
-        projectPreviewId: messageId
-      }
+        projectPreviewId: messageId,
+      };
       const savedIdea = await saveAIIdeasToVault(userId, payload);
       saveLocalAIIdea(savedIdea);
       const newStatus = isAlreadySaved ? "updated" : "saved";
@@ -111,8 +111,11 @@ function AssistantBubble({
     ${isStreaming ? "" : "w-full"} rounded-[20px] rounded-tl-sm`}
     >
       {isStreaming ? (
-        <View className="h-6 justify-center items-start">
+        <View className="h-6 flex-row justify-center gap-2 items-start">
           <ActivityIndicator color="#818CF8" size="small" />
+          <Text className="italic text-textLight dark:text-white">
+            IdeaPilot is thinking...
+          </Text>
         </View>
       ) : (
         <Markdown

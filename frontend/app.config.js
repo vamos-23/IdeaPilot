@@ -15,11 +15,9 @@ export default ({ config }) => ({
 
   android: {
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
-
     googleServicesFile: isDev
       ? process.env.GOOGLE_SERVICES_JSON_DEV
       : process.env.GOOGLE_SERVICES_JSON_PROD,
-
     softwareKeyboardLayoutMode: "resize",
     launchMode: "singleTask",
     adaptiveIcon: {
@@ -53,6 +51,14 @@ export default ({ config }) => ({
         },
       },
     ],
+    [
+      "@sentry/react-native",
+      {
+        url: "https://sentry.io/",
+        project: "ideapilot",
+        organization: "adrij-samanta",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
@@ -66,9 +72,14 @@ export default ({ config }) => ({
     policy: "appVersion",
   },
   extra: {
+    APP_ENV: process.env.APP_ENV || "development",
+
     eas: {
       projectId: "37955152-0da1-41b9-a735-dfc819e7f784",
     },
+
+    API_URL: isDev ? process.env.DEV_API_URL : process.env.PROD_API_URL,
+
     FIREBASE_API_KEY: isDev
       ? process.env.DEV_FIREBASE_API_KEY
       : process.env.FIREBASE_API_KEY,

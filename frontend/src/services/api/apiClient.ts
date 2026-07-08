@@ -1,8 +1,9 @@
 import { create } from "axios";
 import { auth } from "@/config/FirebaseConfig";
+import Constants from "expo-constants";
 
 export const apiClient = create({
-  baseURL: "https://ideapilot-gz77.onrender.com/api",
+  baseURL: Constants.expoConfig?.extra?.API_URL,
 });
 
 apiClient.interceptors.request.use(

@@ -30,13 +30,13 @@ To keep data handled correctly based on its type and use case, the storage layer
 * **NeonDB (PostgreSQL):** Safely retains historical chat logs and vector embeddings generated during AI conversations.
 * **Redis:** Serves as a quick, temporary cache for active chat sessions to avoid loading delays mid-conversation.
 
- ⚠️ **Infrastructure Note: Free-Tier Backend Cold Starts**
+>⚠️ **Infrastructure Note: Free-Tier Backend Cold Starts**
  
- The backend environment for IdeaPilot runs on Render's free tier, which puts the server instance to sleep after 15 minutes of inactivity to save resources. 
+>The backend environment for IdeaPilot runs on Render's free tier, which puts the server instance to sleep after 15 minutes of inactivity to save resources. 
  
- **What this means for you:** If you open the app for the first time after a period of quiet, the very first action requiring the central server (like pulling data or interacting with the chat) might take **up to 50 seconds** to process while the Node.js container boots back up. 
+>**What this means for you:** If you open the app for the first time after a period of quiet, the very first action requiring the central server (like pulling data or interacting with the chat) might take **up to 50 seconds** to process while the Node.js container boots back up. 
  
- **How it was handled:** To help make this lag less noticeable, the frontend app kicks off an asynchronous *pre-warm ping* the exact moment it mounts. This triggers the server's boot sequence in the background while you are looking at the initial splash or onboarding screens, giving the system a head start. While the backend might not be instantly available if you rush straight to the AI chat screen, this approach significantly cuts down the waiting time. Once the free-tier instance is fully awake, typical API requests and Redis lookups process smoothly in single-digit milliseconds.
+>**How it was handled:** To help make this lag less noticeable, the frontend app kicks off an asynchronous *pre-warm ping* the exact moment it mounts. This triggers the server's boot sequence in the background while you are looking at the initial splash or onboarding screens, giving the system a head start. While the backend might not be instantly available if you rush straight to the AI chat screen, this approach significantly cuts down the waiting time. Once the free-tier instance is fully awake, typical API requests and Redis lookups process smoothly in single-digit milliseconds.
 
 ---
 

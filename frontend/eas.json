@@ -9,9 +9,8 @@
       "distribution": "internal",
       "channel": "development",
       "env": {
-        "APP_ENV": "development",
-        "ANDROID_PACKAGE": "com.vamos23.ideapilot.dev",
         "APP_NAME": "IdeaPilot(Dev)",
+        "ANDROID_PACKAGE": "com.vamos23.ideapilot.dev",
         "EXPO_PUBLIC_SENTRY_ENV": "development"
       }
     },
@@ -22,7 +21,7 @@
       },
       "channel": "preview",
       "env": {
-        "APP_ENV": "production",
+        "NODE_ENV": "production",
         "EXPO_PUBLIC_SENTRY_ENV": "preview"
       }
     },
@@ -30,7 +29,7 @@
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "APP_ENV": "production",
+        "NODE_ENV": "production",
         "EXPO_PUBLIC_SENTRY_ENV": "production"
       }
     }

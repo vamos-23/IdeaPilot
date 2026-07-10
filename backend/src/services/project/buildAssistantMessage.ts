@@ -19,7 +19,6 @@ export class AssistantResponseBuilder {
 
     return `${markdown}
     
-    
     \`\`\`json_idea
     ${JSON.stringify(finalizedProject, null, 2)}
     \`\`\`

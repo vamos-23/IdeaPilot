@@ -185,12 +185,16 @@ export function ActiveChatArea({
   ) {
     const userTechStack = useSkillStore.getState().skills || [];
     try {
-      const response = await apiClient.post(`/chats/${currentChatId}/stream`, {
-        userMessageId: userId,
-        assistantMessageId: assistantId,
-        prompt: promptText,
-        techStack: userTechStack,
-      });
+      const response = await apiClient.post(
+        `/chats/${currentChatId}/stream`,
+        {
+          userMessageId: userId,
+          assistantMessageId: assistantId,
+          prompt: promptText,
+          techStack: userTechStack,
+        },
+        { timeout: 70000 },
+      );
       const finalContent = response.data?.text || "No generation provided";
 
       queryClient.setQueryData(

@@ -23,7 +23,7 @@ export class ProjectParser {
 
   static parse(rawResponse: string): ParseProjectResponse {
     const match = rawResponse.match(this.regex);
-    console.log(match);
+
     if (!match) {
       return {
         markdown: rawResponse.trim(),
@@ -32,7 +32,7 @@ export class ProjectParser {
     }
 
     const markdown = rawResponse.replace(this.regex, "").trim();
-    console.log(markdown)
+    
     try {
       const parsed = JSON.parse(match[1].trim());
       if (!this.isValidProject(parsed)) {

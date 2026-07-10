@@ -99,7 +99,7 @@ export async function togglePin(req: Request, res: Response): Promise<void> {
     const result = await ChatService.toggleChatPinStatus(chatId, uid, isPinned);
     if (result.length === 0) {
       res.status(404).json({
-        error: "Chat not found or unauthorized pin operation attempted",
+        error: "Chat not found",
       });
       return;
     }
@@ -178,7 +178,7 @@ export async function deleteChat(req: Request, res: Response) {
     if (result.length === 0) {
       res
         .status(404)
-        .json({ error: "Chat not found or unauthorized deletion attempted" });
+        .json({ error: "Chat not found" });
       return;
     }
     await ChatContextService.invalidateContext(chatId);

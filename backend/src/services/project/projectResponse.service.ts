@@ -33,7 +33,7 @@ export class ProjectResponseService {
       projectId,
       assistantMessageId,
     );
-
+  
     return {
       finalContent,
     };

@@ -54,7 +54,7 @@ export default ({ config }) => ({
     [
       "@sentry/react-native",
       {
-        url: "https://sentry.io/",
+        url: "https://sentry.io",
         project: "ideapilot",
         organization: "adrij-samanta",
       },

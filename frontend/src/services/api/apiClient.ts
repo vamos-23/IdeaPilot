@@ -1,9 +1,11 @@
 import { create } from "axios";
 import { auth } from "@/config/FirebaseConfig";
-import Constants from "expo-constants";
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export const apiClient = create({
-  baseURL: Constants.expoConfig?.extra?.API_URL,
+  baseURL: BASE_URL,
+  timeout: 15000
 });
 
 apiClient.interceptors.request.use(
@@ -13,6 +15,6 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    Promise.reject(error);
+    return Promise.reject(error);
   },
 );

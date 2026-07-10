@@ -1,6 +1,8 @@
 import "dotenv/config";
 
-const isDev = process.env.ANDROID_PACKAGE === "com.vamos23.ideapilot.dev";
+const isDev =
+  process.env.APP_ENV === "development" ||
+  process.env.ANDROID_PACKAGE === "com.vamos23.ideapilot.dev";
 
 export default ({ config }) => ({
   ...config,
@@ -16,8 +18,8 @@ export default ({ config }) => ({
   android: {
     package: process.env.ANDROID_PACKAGE || "com.vamos23.ideapilot",
     googleServicesFile: isDev
-      ? (process.env.GOOGLE_SERVICES_JSON_DEV || "./google-services-dev.json")
-      : (process.env.GOOGLE_SERVICES_JSON_PROD || "./google-services-prod.json"),
+      ? process.env.GOOGLE_SERVICES_JSON_DEV || "./google-services-dev.json"
+      : process.env.GOOGLE_SERVICES_JSON_PROD || "./google-services-prod.json",
     softwareKeyboardLayoutMode: "resize",
     launchMode: "singleTask",
     adaptiveIcon: {

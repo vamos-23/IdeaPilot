@@ -32,9 +32,7 @@ yarn-error.*
 
 # local env files
 .env
-.env.development
-.env.local
-.env.*.local
+.env*
 
 #config files
 google-services-prod.json

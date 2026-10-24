@@ -10,8 +10,7 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
-# Note: Verifying download-model script name against your package.json setup
-RUN node download-model.mjs
+RUN node download-model.js
 
 RUN npm run build
 

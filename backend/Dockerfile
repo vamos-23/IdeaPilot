@@ -1,4 +1,4 @@
-FROM node:20-slim AS builder
+FROM node:22.23.4-slim AS builder
 
 WORKDIR /app
 
@@ -10,12 +10,13 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
-RUN node download-model.js
+# Note: Verifying download-model script name against your package.json setup
+RUN node download-model.mjs
 
 RUN npm run build
 
 
-FROM node:20-slim AS runner
+FROM node:22.23.4-slim AS runner
 
 WORKDIR /app
 

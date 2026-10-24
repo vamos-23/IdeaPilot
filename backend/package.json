@@ -11,6 +11,9 @@
     "db:push": "dotenv -e .env.development -- drizzle-kit push --config=drizzle.config.ts",
     "db:push:prod": "dotenv -e .env.production -- drizzle-kit push --config=drizzle.config.ts"
   },
+  "engines": {
+    "node": "22.23.4"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vamos-23/IdeaPilot-backend.git"
